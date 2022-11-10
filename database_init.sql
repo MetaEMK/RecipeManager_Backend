@@ -37,5 +37,28 @@ CREATE Table recipe_ingredient (
 );
 
 CREATE Table category_recipe (
-    
-)
+    recipe_id          INTEGER NOT NULL,
+    category_id        INTEGER NOt NULL,
+    PRIMARY KEY (recipe_id, category_id),
+    FOREIGN KEY (recipe_id) REFERENCES recipe(id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES category(id) ON DELETE CASCADE
+);
+
+CREATE Table branch_recipe (
+    recipe_id          INTEGER NOT NULL,
+    branch_id          INTEGER NOt NULL,
+    PRIMARY KEY (recipe_id, branch_id),
+    FOREIGN KEY (recipe_id) REFERENCES recipe(id) ON DELETE CASCADE,
+    FOREIGN KEY (branch_id) REFERENCES branch(id) ON DELETE CASCADE
+);
+
+CREATE Table planner (
+    id          INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    day         TINYINT NOT NULL,
+    recipe_id   INTEGER NOT NULL,
+    branch_id   INTEGER NOT NULL,
+    quantity    INTEGER NOT NULL,
+
+    FOREIGN KEY (recipe_id) REFERENCES recipe(id) ON DELETE CASCADE,
+    FOREIGN KEY (branch_id) REFERENCES branch(id)
+);
