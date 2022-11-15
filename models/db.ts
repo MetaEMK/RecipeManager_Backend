@@ -1,3 +1,3 @@
-import Datastore from 'nedb';
+// import Datastore from 'nedb';
 
-export const echoStore = new Datastore({filename: './databases/echo.db', autoload: true});
+// export const echoStore = new Datastore({filename: './databases/echo.db', autoload: true});
