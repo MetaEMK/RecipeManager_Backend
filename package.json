@@ -1,7 +1,7 @@
 {
-  "name": "beispiel",
+  "name": "RecipeManager",
   "version": "0.0.1",
-  "description": "Boilerplate Backend",
+  "description": "RecipeManager Backend",
   "main": "app.js",
   "scripts": {
     "start": "tsc && node app.js",
@@ -9,7 +9,7 @@
     "dev": "nodemon"
   },
   "keywords": [],
-  "author": "Lukas Paffen",
+  "author": "Jan Benecke; Jonny Vang",
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
