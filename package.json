@@ -4,7 +4,7 @@
   "description": "RecipeManager Backend",
   "main": "app.js",
   "scripts": {
-    "start": "tsc && node app.js",
+    "start": "tsc && node ./start/setup.js",
     "tsc-watch": "tsc --watch",
     "dev": "nodemon"
   },

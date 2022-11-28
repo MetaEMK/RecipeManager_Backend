@@ -28,4 +28,4 @@ class dataBase {
 }
 let test = new dataBase();
 let t = test.get("SELECT * FROM test WHERE id = ? OR id = ?", [1 , 2]);
-console.log (await t) ;
+console.log (t) ;
