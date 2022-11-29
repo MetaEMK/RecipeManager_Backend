@@ -46,18 +46,17 @@ export class setup_data
                         Logging.log("deleting all data ...");
                         await this.deleteAll();
                         status = true;
-                    }
-                    break;
-                    status = true;
+                    } else Logging.log("Invalid input - try again");
                     break;
     
                 case "n":
                 case "no":
                 case "":
-
+                    //TODO: continue with current database
+                    status = true;
+                    break;
                 default:
-                    Logging.error("Invalid input, exiting :"+ configureDbInput + ":");
-                    exit(1);
+                    Logging.error("Invalid input, try again :"+ configureDbInput + ":");
             }
         }
     }
@@ -70,34 +69,46 @@ export class setup_data
     private async deleteDatabase() 
     {
         Logging.info("Deleting database ...");
-        if(doesFileExist(this.database_path))
+        if(this.image_path != undefined) 
         {
-            try {
-                await fs.unlink(this.database_path);
-                Logging.info("... successful");
-            }
-            catch (error)
+            let database_path: string = this.database_path as string;
+            if(await doesFileExist(database_path))
             {
-                Logging.error(`Something went wrong!\n ${error} \n\n... skipping`);
+                try {
+                    await fs.unlink(database_path);
+                    Logging.info("... successful");
+                }
+                catch (error)
+                {
+                    Logging.error(`Something went wrong!\n ${error} \n\n... skipping`);
+                }
+            } else {
+                Logging.warn("Database was not found! - skipping");
             }
         } else {
-            Logging.warn("Database was not found! - skipping");
+            Logging.warn("Database path is undefined - skipping");
         }
     }
 
     private async deleteImages()
     {
         Logging.info("Deleting all Images ...");
-        if(doesDirectoryExist(this.image_path))
+        if(this.image_path!= undefined)
         {
-            let dir = await fs.readdir(this.image_path);
-            dir = dir.filter(img => img.charAt(0) !== '.');
-            Logging.info(`deleting ${dir.length} images`);
-            for (let index = 0; index < dir.length; index++) {
-                fs.unlink(this.image_path + "/" + dir[index]);
-                
-            }
-        } else {
+            if(await doesDirectoryExist(this.image_path))
+            {
+                let dir = await fs.readdir(this.image_path);
+                dir = dir.filter(img => img.charAt(0) !== '.');
+                Logging.info(`deleting ${dir.length} images`);
+                for (let index = 0; index < dir.length; index++) {
+                    fs.unlink(this.image_path + "/" + dir[index]);
+                    
+                }
+            } else {
+                Logging.warn("Imagepath was not found! - skipping");
+            } 
+        }
+        else {
             Logging.warn("Imagepath was not found! - skipping");
         }
     }
