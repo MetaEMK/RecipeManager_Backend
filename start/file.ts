@@ -6,8 +6,9 @@ import dotenv from 'dotenv';
 export const pwdPath = process.env.PWD!;
 export const defaultpath = pwdPath + "/config/app.env";
 
-export async function checkConfigFile(){
-    if(await doesFileExist(defaultpath))
+export async function checkConfigFile()
+{
+    if (await doesFileExist(defaultpath))
     {
         dotenv.config({ path: defaultpath });
         checkIfUndefinedAndExist("NODE_PORT", process.env.NODE_PORT!);
@@ -17,12 +18,14 @@ export async function checkConfigFile(){
         checkIfUndefinedAndExist("DATABASE_FILE", process.env.DATABASE_FILE!);
         checkIfUndefinedAndExist("DATA_IMAGE_PATH", process.env.DATA_IMAGE_PATH!);
 
-        if(process.env.USE_RELATIV_PATHS!.toLocaleLowerCase() === "false") 
+        if (process.env.USE_RELATIV_PATHS!.toLocaleLowerCase() === "false") 
         {
             Logging.error("static paths are currently not supported! exiting ...");
             exit(0);
         }
-    } else {
+    } 
+    else
+    {
         Logging.error(`Configfile at ${defaultpath} was not found! exiting setup ...`);
         exit(0);
     }
@@ -30,7 +33,7 @@ export async function checkConfigFile(){
 
 function checkIfUndefinedAndExist(key: string, thing?: string)
 {
-    if(thing === undefined || thing === null) 
+    if (thing === undefined || thing === null) 
     {
         Logging.error(`Configkey ${key} was not found! Exiting...`);
         exit(0);
@@ -43,7 +46,7 @@ export async function doesFileExist(path: string): Promise<boolean>
     {
         return (await fs.stat(path)).isFile();
     }
-    catch 
+    catch
     {
         return false;
     }
@@ -55,7 +58,7 @@ export async function doesDirectoryExist(path: string): Promise<boolean>
     {
         return (await fs.stat(path)).isDirectory();
     }
-    catch 
+    catch
     {
         return false;
     }
