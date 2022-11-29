@@ -1,8 +1,11 @@
-import express from 'express';
-import cors from 'cors';
+import express from "express";
+import cors from "cors";
 import { Request, Response } from "express";
-import { AppDataSource } from './config/datasource.js';
-import { ingredientRouter } from './controllers/ingredient_controller.js';
+import { AppDataSource } from "./config/datasource.js";
+import { branchRouter } from "./controllers/branch.controller.js";
+import { ingredientRouter } from "./controllers/ingredient.controller.js";
+import { recipeRouter } from "./controllers/recipe.controller.js";
+import { scheduledItemRouter } from "./controllers/scheduled_item.controller.js";
 
 // Establish database connection
 AppDataSource
@@ -20,10 +23,13 @@ apiRouter.use(cors());
 apiRouter.use(express.json());
 
 // Routes
-apiRouter.use('/ingredients', ingredientRouter);
+apiRouter.use("/branches", branchRouter);
+apiRouter.use("/ingredients", ingredientRouter);
+apiRouter.use("/recipes", recipeRouter);
+apiRouter.use("/schedule/items", scheduledItemRouter);
 
 // Default route if not exists
 apiRouter.use((req: Request, res: Response) => {
     res.status(404);
-    res.send('Route does not exist');
+    res.send("Route does not exist");
 });

@@ -1,13 +1,13 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 
 @Entity()
-export class Ingredient {
+export class ConversionType {
     @PrimaryGeneratedColumn()
     id!: number;
 
     @Column({
         type: "nvarchar",
-        length: 100
+        length: 30
     })
     name!: string;
 }
