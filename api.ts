@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { Request, Response } from "express";
 import { AppDataSource } from './config/datasource.js';
-import { ingredientRouter } from './controllers/IngredientController.js';
+import { ingredientRouter } from './controllers/ingredient_controller.js';
 
 // Establish database connection
 AppDataSource
