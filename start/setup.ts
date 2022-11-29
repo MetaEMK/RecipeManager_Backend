@@ -4,16 +4,18 @@ import * as readline from "readline/promises";
 import { setup_data } from "./setup_data.js";
 import { exit } from "process";
 
-function delay(ms: number) {
-    return new Promise( resolve => setTimeout(resolve, ms) );
+function delay(ms: number)
+{
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 export const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
-  });
+});
 
-async function setup() {
+async function setup()
+{
     console.clear();
     Logging.info("Reading Configfile ...");
     await delay(400);
@@ -29,7 +31,7 @@ async function setup() {
     Logging.log("This process will guide you through the setup of the Recipe Manager");
     Logging.log("Lets start with the data ...");
     await delay(800);
-    
+
     await data.setup();
     Logging.log("Setup process finished");
     Logging.log("You can now start the server with the command 'npm run start'");
