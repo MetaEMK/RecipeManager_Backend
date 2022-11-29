@@ -1,0 +1,27 @@
+Fallbeispiel Rezept:
+Rezept - Haselnusskuchen
+Kategorie - Kuchen
+Branch - Konditorei
+Variante 1 - Rund
+Variante 2 - Eckig
+Variante 3 - Rund/Vegan
+Variante 4 - Eckig/Vegan
+
+Fallbeispiel Variante 1/2:
+Name: Runder Haselnusskuchen
+Basic-Size: 20cm/30x30
+Conversion-Type: Rund/Eckig
+
+Fallbeispiel Zutat für Variante 1:
+Name: Milch
+Menge: 200
+Unit: 'l'
+
+Fallbeispiel Conversion Type:
+Name: Viereck
+Size 1: 20x20
+Size 2: 30x30
+
+
+Viereck 20x20 zu Viereck 30x30:
+Multiplikator für Zutaten im Vergleich zur Base: 3.2
