@@ -22,13 +22,17 @@ class Logger
         if (this.setup) return;
         const endpoints: string[] = Object.values(LOG_ENDPOINT);
         if (!await doesDirectoryExist(this.logPath)) await fs.mkdir(this.logPath);
-        if (!await doesDirectoryExist(this.archivePath)) await fs.mkdir(this.archivePath);
+        await deleteContent(this.archivePath);
+        if(!await doesDirectoryExist(this.archivePath)) await fs.mkdir(this.archivePath);
+        await delay(200);
+        let files = await fs.readdir(this.logPath);
+        files = files.filter(file => !file.includes('archive'));
+        for (let index = 0; index < (files).length; index++) {
+            
+            await fs.copyFile(this.logPath + '/' + files[index], this.archivePath + '/' + files[index]);
+            await fs.rm(this.logPath + '/' + files[index]);
+        }
         for (const endpoint of endpoints) {
-            if(await doesFileExist(this.logPath + endpoint))
-            {
-                await fs.copyFile(this.logPath + endpoint, this.archivePath + endpoint);
-                await fs.rm(this.logPath + endpoint);
-            }
             await fs.appendFile(this.logPath + endpoint, '');
             await this.log("Created log file for " + endpoint, LOG_LEVEL.LOG_LEVEL_INFO, LOG_ENDPOINT.LOGGER);
         }
@@ -40,29 +44,39 @@ class Logger
         await this.archiveLogFile(endpoint);
         let lev = LOG_LEVEL_STRING[level];
         let mes = `${new Date().toISOString()}\t [${lev}]\t ${message}\n`;
-        console.log(`Logging ${mes} in ${endpoint}`);
-        fs.appendFile(this.logPath + endpoint, mes);
+        try {fs.appendFile(this.logPath + endpoint, mes);}
+        catch {console.log("Error while logging");}
     }
 
 
     private async archiveLogFile(endpoint: LOG_ENDPOINT): Promise<void> 
     {
-        if(await doesFileExist(this.logPath + endpoint)) return;
-        if(await getFileSize(this.logPath + endpoint) > 50000000)
+        if(!await doesFileExist(this.logPath + endpoint))return;
+        if(await getFileSize(this.logPath + endpoint) > 10000)
         {
+            let e = endpoint;
             await fs.copyFile(this.logPath + endpoint, this.logPath + endpoint + new Date().toISOString());
+            await fs.truncate(this.logPath + endpoint, 0);
+            let files = await fs.readdir(this.logPath);
+            files = files.filter(file => ("/" + file).startsWith(endpoint) == true);
+            if (files.length > 3) {
+;                await fs.rm(this.logPath + '/' + files[1]);
+            }
             await this.info("Archived log file for " + endpoint, LOG_ENDPOINT.LOGGER);
+
         }
     }
 
     public async debug(message: string, endpoint: LOG_ENDPOINT): Promise<void>
     {
-        if (this.logLevel >= LOG_LEVEL.LOG_LEVEL_DEBUG) return;
+        if (this.logLevel <= LOG_LEVEL.LOG_LEVEL_DEBUG) return;
         await this.log(message, LOG_LEVEL.LOG_LEVEL_DEBUG, endpoint);
     }
     public async info(message: string, endpoint: LOG_ENDPOINT)
     {
-        if (this.logLevel >= LOG_LEVEL.LOG_LEVEL_INFO) return;
+        if (this.logLevel < LOG_LEVEL.LOG_LEVEL_INFO) {
+            return;
+        }
         this.log(message, LOG_LEVEL.LOG_LEVEL_INFO, endpoint);
     }
     public async warn(message: string, endpoint: LOG_ENDPOINT): Promise<void>
@@ -110,4 +124,19 @@ async function doesDirectoryExist(path: string): Promise<boolean>
     {
         return false;
     }
+}
+
+export async function deleteContent(path: string): Promise<void>
+{
+    if(!await doesDirectoryExist(path)) return;
+    const files = await fs.readdir(path);
+    let tasks: Promise<void>[] = [];
+    for (const file of files) {
+        tasks.push(fs.rm(path + '/' + file));
+    }
+    await Promise.all(tasks);
+}
+function delay(ms: number)
+{
+    return new Promise(resolve => setTimeout(resolve, ms));
 }

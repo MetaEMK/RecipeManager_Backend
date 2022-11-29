@@ -39,7 +39,7 @@ export async function deleteFile(path: string): Promise<void>
     {
         await fs.rm(path);
     } else {
-        logger.debug("File " + path + " does not exist", LOG_ENDPOINT.FILE_SYSTEM);
+        //logger.debug("File " + path + " does not exist", LOG_ENDPOINT.FILE_SYSTEM);
     }
 }
 
@@ -66,6 +66,6 @@ export async function getFileSize(path: string): Promise<number>
 {
     if(!await doesFileExist(path)) return 0;
     let size: number = (await fs.stat(path)).size;
-    createLogger().then(logger => logger.debug("File " + path + " has size " + size, LOG_ENDPOINT.FILE_SYSTEM));
+    //createLogger().then(logger => logger.debug("File " + path + " has size " + size, LOG_ENDPOINT.FILE_SYSTEM));
     return size;
 }
