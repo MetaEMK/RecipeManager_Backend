@@ -1,4 +1,4 @@
-import { LOG_ENDPOINT, LOG_LEVEL, LOG_LEVEL_STRING } from './logger-enum.js';
+import { LOG_ENDPOINT, LOG_LEVEL, LOG_LEVEL_STRING } from './logger_enum.js';
 import * as fs from 'fs/promises';
 import dotenv from 'dotenv';
 import { getFileSize } from './files.js';
@@ -54,7 +54,6 @@ class Logger
         if(!await doesFileExist(this.logPath + endpoint))return;
         if(await getFileSize(this.logPath + endpoint) > 10000)
         {
-            let e = endpoint;
             await fs.copyFile(this.logPath + endpoint, this.logPath + endpoint + new Date().toISOString());
             await fs.truncate(this.logPath + endpoint, 0);
             let files = await fs.readdir(this.logPath);
@@ -69,7 +68,7 @@ class Logger
 
     public async debug(message: string, endpoint: LOG_ENDPOINT): Promise<void>
     {
-        if (this.logLevel <= LOG_LEVEL.LOG_LEVEL_DEBUG) return;
+        if (this.logLevel < LOG_LEVEL.LOG_LEVEL_DEBUG) return;
         await this.log(message, LOG_LEVEL.LOG_LEVEL_DEBUG, endpoint);
     }
     public async info(message: string, endpoint: LOG_ENDPOINT)
@@ -81,12 +80,12 @@ class Logger
     }
     public async warn(message: string, endpoint: LOG_ENDPOINT): Promise<void>
     {
-        if (this.logLevel >= LOG_LEVEL.LOG_LEVEL_WARN) return;
+        if (this.logLevel > LOG_LEVEL.LOG_LEVEL_WARN) return;
         await this.log(message, LOG_LEVEL.LOG_LEVEL_WARN, endpoint);
     }
     public async error(message: string, endpoint: LOG_ENDPOINT): Promise<void>
     {
-        if (this.logLevel >= LOG_LEVEL.LOG_LEVEL_ERROR) return;
+        if (this.logLevel > LOG_LEVEL.LOG_LEVEL_ERROR) return;
         await this.log(message, LOG_LEVEL.LOG_LEVEL_ERROR, endpoint);
     }
 }

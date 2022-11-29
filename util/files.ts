@@ -1,6 +1,6 @@
 import * as fs from 'fs/promises';
 import { createLogger } from './logger.js';
-import { LOG_ENDPOINT } from './logger-enum.js';
+import { LOG_ENDPOINT } from './logger_enum.js';
 import { Logging } from '../start/logging.js';
 
 
