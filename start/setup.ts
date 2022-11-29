@@ -30,7 +30,12 @@ async function setup() {
     Logging.log("Lets start with the data ...");
     await delay(800);
     
-    data.setup();
+    await data.setup();
+    Logging.log("Setup process finished");
+    Logging.log("You can now start the server with the command 'npm run start'");
+    Logging.log("Have fun with the Recipe Manager");
+    await rl.question("Press any button to exit");
+    exit(0);
 }
 setup();
 

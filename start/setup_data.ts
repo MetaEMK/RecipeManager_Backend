@@ -52,7 +52,7 @@ export class setup_data
                 case "n":
                 case "no":
                 case "":
-                    //TODO: continue with current database
+                    Logging.log("Continuing with current database. Please make sure that the database is valid. Currently there are no checks for the database");
                     status = true;
                     break;
                 default:
@@ -112,4 +112,5 @@ export class setup_data
             Logging.warn("Imagepath was not found! - skipping");
         }
     }
+
 }
