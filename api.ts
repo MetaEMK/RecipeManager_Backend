@@ -6,6 +6,7 @@ import { branchRouter } from "./http/controllers/branch.controller.js";
 import { ingredientRouter } from "./http/controllers/ingredient.controller.js";
 import { recipeRouter } from "./http/controllers/recipe.controller.js";
 import { scheduledItemRouter } from "./http/controllers/scheduled_item.controller.js";
+import { testRouter } from "./http/controllers/test.controller.js";
 
 // Establish database connection
 AppDataSource
@@ -23,6 +24,7 @@ apiRouter.use(cors());
 apiRouter.use(express.json());
 
 // Routes
+apiRouter.use("/test", testRouter);
 apiRouter.use("/branches", branchRouter);
 apiRouter.use("/ingredients", ingredientRouter);
 apiRouter.use("/recipes", recipeRouter);
