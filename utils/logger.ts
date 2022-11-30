@@ -50,9 +50,7 @@ class Logger
         this.logPath = process.env.LOG_PATH! ? process.env.LOG_PATH! : 'log';
         this.archivePath = this.logPath + '/archive';
 
-        
         this.create();
-        
         
         if (!doesFileExist('config/logging.env')) this.warn("Logging config file not found! Using default values!", LOG_ENDPOINT.LOGGER);
         this.info("Log Level: " + LOG_LEVEL_STRING[this.logLevel], LOG_ENDPOINT.LOGGER);
@@ -67,9 +65,7 @@ class Logger
     private create(): void
     {
         if (this.setup) return;
-
         const endpoints: string[] = Object.values(LOG_ENDPOINT);
-
 
         if (!doesDirectoryExist(this.logPath))
             fs.mkdirSync(this.logPath);
@@ -105,8 +101,14 @@ class Logger
         let lev = LOG_LEVEL_STRING[level];
         let mes = `${new Date().toISOString()}\t [${lev}]\t\t ${message}\n`;
         
-        try {fs.appendFileSync(this.logPath + endpoint, mes);}
-        catch (error) {console.log("Error while logging");}
+        try 
+        {
+            fs.appendFileSync(this.logPath + endpoint, mes);
+        }
+        catch (error) 
+        {
+            console.log("Error while logging");
+        }
     }
 
     //archives the log file if it is too big and deletes older files if there are too many
