@@ -25,6 +25,7 @@ export class ScheduledItem {
     // FOREIGN KEYS
     // Branch
     @ManyToOne(() => Branch, (branch) => branch.scheduledItems, {
+        nullable: false,
         onDelete: "CASCADE"
     })
     @JoinColumn({ 
@@ -34,6 +35,7 @@ export class ScheduledItem {
 
     // Variant
     @ManyToOne(() => Variant, (variant) => variant.scheduledItems, {
+        nullable: false,
         onDelete: "CASCADE"
     })
     @JoinColumn({
@@ -43,6 +45,7 @@ export class ScheduledItem {
     
     // Size
     @ManyToOne(() => Size, (size) => size.scheduledItems, {
+        nullable: false,
         onDelete: "CASCADE"
     })
     @JoinColumn({

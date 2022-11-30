@@ -21,6 +21,7 @@ export class Size {
     // FOREIGN KEYS
     // Conversion type
     @ManyToOne(() => ConversionType, (conversionType) => conversionType.sizes, {
+        nullable: false,
         onDelete: "CASCADE"
     })
     @JoinColumn({

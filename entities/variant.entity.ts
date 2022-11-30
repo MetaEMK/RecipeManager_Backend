@@ -25,6 +25,7 @@ export class Variant {
     // FOREIGN KEYS
     // Recipe
     @ManyToOne(() => Recipe, (recipe) => recipe.variants, {
+        nullable: false,
         onDelete: "CASCADE"
     })
     @JoinColumn({
@@ -34,6 +35,7 @@ export class Variant {
 
     // Size
     @ManyToOne(() => Size, (size) => size.variants, {
+        nullable: false,
         onDelete: "CASCADE"
     })
     @JoinColumn({
