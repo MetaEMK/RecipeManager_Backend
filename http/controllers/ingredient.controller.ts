@@ -2,7 +2,6 @@ import express from "express";
 import { Request, Response } from "express";
 import { AppDataSource } from "../../config/datasource.js";
 import { Ingredient } from "../../data/entities/ingredient.entity.js";
-import { isIngredientNameValid } from "../validators/ingredient.validator.js";
 
 export const ingredientRouter = express.Router();
 
