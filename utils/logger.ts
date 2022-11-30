@@ -42,7 +42,6 @@ class Logger
     constructor()
     {
         console.log("Creating Logger");
-        console.log("Current working directory: " + process.cwd());
         dotenv.config({ path: 'config/logging.env' });
 
         this.logLevel = process.env.LOG_LEVEL! ? parseInt(process.env.LOG_LEVEL!) : LOG_LEVEL.LOG_LEVEL_INFO;
@@ -51,13 +50,17 @@ class Logger
         this.logPath = process.env.LOG_PATH! ? process.env.LOG_PATH! : 'log';
         this.archivePath = this.logPath + '/archive';
 
-        console.log("Log Level: " + LOG_LEVEL_STRING[this.logLevel]);
-        console.log("Log Size: " + this.logsize);
-        console.log("Log Count: " + this.logcount);
-        console.log("Log Path: " + this.logPath);
-        console.log("Archive Path: " + this.archivePath);
-
+        
         this.create();
+        
+        
+        if (!doesFileExist('config/logging.env')) this.warn("Logging config file not found! Using default values!", LOG_ENDPOINT.LOGGER);
+        this.info("Log Level: " + LOG_LEVEL_STRING[this.logLevel], LOG_ENDPOINT.LOGGER);
+        this.info("Log Size: " + this.logsize, LOG_ENDPOINT.LOGGER);
+        this.info("Log Count: " + this.logcount, LOG_ENDPOINT.LOGGER);
+        this.info("Log Path: " + this.logPath, LOG_ENDPOINT.LOGGER);
+        this.info("Archive Path: " + this.archivePath, LOG_ENDPOINT.LOGGER);
+        this.info("Logger created", LOG_ENDPOINT.LOGGER);
     }
 
     //setup the logger and prepares filesystem
