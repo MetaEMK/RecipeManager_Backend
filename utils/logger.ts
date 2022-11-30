@@ -77,19 +77,24 @@ class Logger
         deleteContent(this.archivePath);
 
         if(!doesDirectoryExist(this.archivePath))
-
             fs.mkdirSync(this.archivePath);
 
+
+        //creating archive folder and copy old logs to archive
         let files = fs.readdirSync(this.logPath);
         files = files.filter(file => !file.includes('archive'));
+
         for (let index = 0; index < (files).length; index++) {
             fs.copyFileSync(this.logPath + '/' + files[index], this.archivePath + '/' + files[index]);
             fs.rmSync(this.logPath + '/' + files[index]);
         }
+
+        //creating new log files
         for (const endpoint of endpoints) {
             fs.appendFileSync(this.logPath + endpoint, '');
             this.log("Created log file for " + endpoint, LOG_LEVEL.LOG_LEVEL_INFO, LOG_ENDPOINT.LOGGER);
         }
+
         this.setup = true;
     }
 
@@ -106,16 +111,23 @@ class Logger
     //archives the log file if it is too big and deletes older files if there are too many
     private archiveLogFile(endpoint: LOG_ENDPOINT): void
     {
-        if(!doesFileExist(this.logPath + endpoint))return;
+        if(!doesFileExist(this.logPath + endpoint))
+            return;
+
         if(getFileSize(this.logPath + endpoint) > this.logsize)
         {
+            //copy file to *.log<date> and truncate file to 0 bytes
             fs.copyFileSync(this.logPath + endpoint, this.logPath + endpoint + new Date().toISOString());
             fs.truncateSync(this.logPath + endpoint, 0);
+
+            //delete old file
             let files = fs.readdirSync(this.logPath);
             files = files.filter(file => ("/" + file).startsWith(endpoint) == true);
             if (files.length-1 > this.logcount) {
 ;                fs.rmSync(this.logPath + '/' + files[1]);
             }
+
+            //log that file was archived
             this.info("Archived log file for " + endpoint, LOG_ENDPOINT.LOGGER);
         }
     }
@@ -123,24 +135,26 @@ class Logger
     //logs debug message to file specified by endpoint (depending on log level)
     public debug(message: string, endpoint: LOG_ENDPOINT): void
     {
-        if (this.logLevel > LOG_LEVEL.LOG_LEVEL_DEBUG) return;
+        if (this.logLevel > LOG_LEVEL.LOG_LEVEL_DEBUG) 
+            return;
         this.log(message, LOG_LEVEL.LOG_LEVEL_DEBUG, endpoint);
     }
 
     //logs info message to file specified by endpoint (depending on log level)
     public info(message: string, endpoint: LOG_ENDPOINT): void
     {
-        if (this.logLevel > LOG_LEVEL.LOG_LEVEL_INFO) {
+        if (this.logLevel > LOG_LEVEL.LOG_LEVEL_INFO) 
             return;
-        }
+        
         this.log(message, LOG_LEVEL.LOG_LEVEL_INFO, endpoint);
     }
 
     //logs warning message to file specified by endpoint (depends on log level)
     public warn(message: string, endpoint: LOG_ENDPOINT): void
     {
-        if (this.logLevel > LOG_LEVEL.LOG_LEVEL_WARN) return;
-         this.log(message, LOG_LEVEL.LOG_LEVEL_WARN, endpoint);
+        if (this.logLevel > LOG_LEVEL.LOG_LEVEL_WARN) 
+            return;
+        this.log(message, LOG_LEVEL.LOG_LEVEL_WARN, endpoint);
     }
 
     //logs error message to file specified by endpoint (no matter what the log level is)
@@ -189,25 +203,24 @@ function doesDirectoryExist(path: string): boolean
 }
 
 //deletes all files in directory
-export function deleteContent(path: string): void
+function deleteContent(path: string): void
 {
-    if(!doesDirectoryExist(path)) return;
+    if(!doesDirectoryExist(path)) 
+        return;
+        
     const files = fs.readdirSync(path);
+
     for (const file of files) {
         fs.rmSync(path + '/' + file);
     }
 }
 
-//sleep timer
-function delay(ms: number)
-{
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 //returns size of file in bytes
-export function getFileSize(path: string): number
+function getFileSize(path: string): number
 {
-    if(!doesFileExist(path)) return 0;
+    if(!doesFileExist(path)) 
+        return 0;
+
     let size: number = (fs.statSync(path)).size;
     return size;
 }
