@@ -16,7 +16,6 @@ export function doesFileExist(path: string): boolean
     }
     catch
     {
-        logger.debug(`File ${path} does not exist!`, LOG_ENDPOINT.FILE_SYSTEM);
         return false;
     }
 }
@@ -33,7 +32,6 @@ export function doesDirectoryExist(path: string): boolean
     }
     catch
     {
-        logger.debug(`Directory ${path} does not exist!`, LOG_ENDPOINT.FILE_SYSTEM);
         return false;
     }
 }
@@ -150,7 +148,8 @@ export async function deleteAllContentInDirectoryAsync(path: string): Promise<bo
 
     try
     {
-        const files = await fsAsync.readdir(path);
+        const files = await getAllFilesAsync(path);
+        if(!files) return false;
         let tasks = [];
         for (const file of files)
         {
@@ -168,5 +167,40 @@ export async function deleteAllContentInDirectoryAsync(path: string): Promise<bo
     {
         logger.error("Deleting all content in directory: Error: " + error, LOG_ENDPOINT.FILE_SYSTEM);
         return false;
+    }
+}
+/**
+ * 
+ * @param path Path to directory, ending (optional)
+ * @param ending fileending example: txt (without dot), if left empty, all files will be returned. Exclude Subdirectories by adding "" as ending
+ * @returns relative filepaths to all files in directory. Subdirectories are also included. Exclude Subdirectories by adding "" as ending. Returns null if directory does not exist
+ */
+export async function getAllFilesAsync(path: string, ending?: string): Promise<string[] | null>
+{
+    if(!doesDirectoryExist(path)) 
+    {
+        logger.debug("Getting all files: Directory does not exist", LOG_ENDPOINT.FILE_SYSTEM);
+        return null;
+    }
+
+    try
+    {
+        const files = await fsAsync.readdir(path);
+        logger.debug("Getting all files: " + path, LOG_ENDPOINT.FILE_SYSTEM);
+
+        if(ending === undefined)
+            return files;
+        else {
+            if(ending == "")
+                return files.filter(file => doesDirectoryExist(path + "/" + file) == false);
+            else{
+                return files.filter(file => file.endsWith('.' + ending));
+            }
+        }
+    }
+    catch (error: any)
+    {
+        logger.error("Getting all files: Error: " + error, LOG_ENDPOINT.FILE_SYSTEM);
+        return null;
     }
 }
