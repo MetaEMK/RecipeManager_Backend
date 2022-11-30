@@ -169,6 +169,7 @@ export async function deleteAllContentInDirectoryAsync(path: string): Promise<bo
         return false;
     }
 }
+
 /**
  * 
  * @param path Path to directory, ending (optional)
@@ -201,6 +202,31 @@ export async function getAllFilesAsync(path: string, ending?: string): Promise<s
     catch (error: any)
     {
         logger.error("Getting all files: Error: " + error, LOG_ENDPOINT.FILE_SYSTEM);
+        return null;
+    }
+}
+/**
+ * 
+ * @param path Path to file
+ * @returns fs.Stats object of file. Returns null if file does not exist
+ */
+export function getFileInfo(path: string): fs.Stats | null
+{
+    if(!doesFileExist(path)) 
+    {
+        logger.warn("Getting file info: File does not exist", LOG_ENDPOINT.FILE_SYSTEM);
+        return null;
+    }
+
+    try
+    {
+        const info = fs.statSync(path);
+        logger.debug("Getting file info: " + path, LOG_ENDPOINT.FILE_SYSTEM);
+        return info;
+    } 
+    catch (error: any)
+    {
+        logger.error("Getting file info: Error: " + error, LOG_ENDPOINT.FILE_SYSTEM);
         return null;
     }
 }
