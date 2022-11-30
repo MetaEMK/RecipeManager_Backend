@@ -1,3 +1,4 @@
-import { doesFileExist } from "./files.js";
+import * as file from "./files.js";
 
-console.log(doesFileExist("testfiles.ts"));
+console.log(await file.deleteAllContentInDirectoryAsync("DirectoryThatDoesNotExist"));
+console.log(await file.deleteAllContentInDirectoryAsync("DirectoryToDelete"));
