@@ -1,4 +1,3 @@
-import * as fsAsync from 'fs/promises';
 import * as fs from 'node:fs';
 import dotenv from 'dotenv';
 
@@ -31,9 +30,8 @@ export enum LOG_ENDPOINT {
 //class for logger
 class Logger
 {
-    private pwd = process.env.PWD!;
-    private logsize: number = 50000000;
-    private logcount: number = 10;
+    private logsize: number = 50000;
+    private logcount: number = 3;
 
     private setup: boolean = false;
     private logLevel: LOG_LEVEL;
@@ -44,40 +42,49 @@ class Logger
     constructor()
     {
         console.log("Creating Logger");
-
-        dotenv.config({ path: this.pwd + '/config/logging.env' });
+        console.log("Current working directory: " + process.cwd());
+        dotenv.config({ path: 'config/logging.env' });
 
         this.logLevel = process.env.LOG_LEVEL! ? parseInt(process.env.LOG_LEVEL!) : LOG_LEVEL.LOG_LEVEL_INFO;
         this.logsize = process.env.MAX_LOG_SIZE! ? parseInt(process.env.MAX_LOG_SIZE!) : 50000000;
         this.logcount = process.env.MAX_LOG_FILES! ? parseInt(process.env.MAX_LOG_FILES!) : 10;
-        this.logPath = process.env.LOG_PATH! ? this.pwd + process.env.LOG_PATH! : this.pwd + '/log';
+        this.logPath = process.env.LOG_PATH! ? process.env.LOG_PATH! : 'log';
         this.archivePath = this.logPath + '/archive';
 
-        console.log("Log Level: " + this.logLevel);
+        console.log("Log Level: " + LOG_LEVEL_STRING[this.logLevel]);
         console.log("Log Size: " + this.logsize);
         console.log("Log Count: " + this.logcount);
         console.log("Log Path: " + this.logPath);
         console.log("Archive Path: " + this.archivePath);
+
+        this.create();
     }
 
     //setup the logger and prepares filesystem
-    public async create(): Promise<void>
+    private create(): void
     {
         if (this.setup) return;
+
         const endpoints: string[] = Object.values(LOG_ENDPOINT);
-        if (!await doesDirectoryExist(this.logPath)) await fsAsync.mkdir(this.logPath);
-        await deleteContent(this.archivePath);
-        if(!await doesDirectoryExist(this.archivePath)) await fsAsync.mkdir(this.archivePath);
-        await delay(200); //delay is needed to make sure the filesystem can updated itself before we try to access it
-        let files = await fsAsync.readdir(this.logPath);
+
+
+        if (!doesDirectoryExist(this.logPath))
+            fs.mkdirSync(this.logPath);
+
+        deleteContent(this.archivePath);
+
+        if(!doesDirectoryExist(this.archivePath))
+
+            fs.mkdirSync(this.archivePath);
+
+        let files = fs.readdirSync(this.logPath);
         files = files.filter(file => !file.includes('archive'));
         for (let index = 0; index < (files).length; index++) {
-            
-            await fsAsync.copyFile(this.logPath + '/' + files[index], this.archivePath + '/' + files[index]);
-            await fsAsync.rm(this.logPath + '/' + files[index]);
+            fs.copyFileSync(this.logPath + '/' + files[index], this.archivePath + '/' + files[index]);
+            fs.rmSync(this.logPath + '/' + files[index]);
         }
         for (const endpoint of endpoints) {
-            await fsAsync.appendFile(this.logPath + endpoint, '');
+            fs.appendFileSync(this.logPath + endpoint, '');
             this.log("Created log file for " + endpoint, LOG_LEVEL.LOG_LEVEL_INFO, LOG_ENDPOINT.LOGGER);
         }
         this.setup = true;
@@ -141,16 +148,12 @@ class Logger
 }
 
 //creates logger and sets it up
-const logger = async () => {
-    let l = new Logger();
-    await l.create();
-    return l;
-}
+const logger = new Logger();
 
 //exports logger
-export async function createLogger(): Promise<Logger>
+export function createLogger(): Logger
 {
-    return await logger();
+    return logger;
 }
 
 
@@ -183,15 +186,13 @@ function doesDirectoryExist(path: string): boolean
 }
 
 //deletes all files in directory
-export async function deleteContent(path: string): Promise<void>
+export function deleteContent(path: string): void
 {
-    if(!await doesDirectoryExist(path)) return;
-    const files = await fsAsync.readdir(path);
-    let tasks: Promise<void>[] = [];
+    if(!doesDirectoryExist(path)) return;
+    const files = fs.readdirSync(path);
     for (const file of files) {
-        tasks.push(fsAsync.rm(path + '/' + file));
+        fs.rmSync(path + '/' + file);
     }
-    await Promise.all(tasks);
 }
 
 //sleep timer
@@ -205,6 +206,5 @@ export function getFileSize(path: string): number
 {
     if(!doesFileExist(path)) return 0;
     let size: number = (fs.statSync(path)).size;
-    //createLogger().then(logger => logger.debug("File " + path + " has size " + size, LOG_ENDPOINT.FILE_SYSTEM));
     return size;
 }
