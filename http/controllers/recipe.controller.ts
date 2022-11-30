@@ -1,8 +1,8 @@
 import express from "express";
 import { Request, Response } from "express";
-import { AppDataSource } from "../config/datasource.js";
-import { Branch } from "../entities/branch.entity.js";
-import { Recipe } from "../entities/recipe.entity.js";
+import { AppDataSource } from "../../config/datasource.js";
+import { Branch } from "../../data/entities/branch.entity.js";
+import { Recipe } from "../../data/entities/recipe.entity.js";
 
 export const recipeRouter = express.Router();
 
