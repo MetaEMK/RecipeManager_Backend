@@ -7,6 +7,6 @@ export const AppDataSource = new DataSource({
     logging: true,
     synchronize: true,
     entities: [
-        "entities/*.js"
+        "dist/entities/*.js"
     ]
 });
