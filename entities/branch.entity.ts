@@ -4,15 +4,25 @@ import { ScheduledItem } from "./scheduled_item.entity.js";
 
 @Entity()
 export class Branch {
+    // ATTRIBUTES
+    // ID
     @PrimaryGeneratedColumn()
     id!: number;
 
+    // Name
     @Column({
         type: "nvarchar",
         length: 100
     })
     name!: string;
 
+    // FOREIGN KEY REFERENCES
+    // ScheduleItems
+    @OneToMany(() => ScheduledItem, (scheduledItem) => scheduledItem.branch)
+    scheduledItems!: Relation<ScheduledItem>[];
+
+    // JUNCTION TABLES
+    // Branches_Recipes
     @ManyToMany(() => Recipe, (recipe) => recipe.branches)
     @JoinTable({
         name: "branches_recipes",
@@ -24,7 +34,4 @@ export class Branch {
         }
     })
     recipes!: Relation<Recipe>[];
-
-    @OneToMany(() => ScheduledItem, (scheduledItem) => scheduledItem.branch)
-    scheduledItems!: Relation<ScheduledItem>[];
 }

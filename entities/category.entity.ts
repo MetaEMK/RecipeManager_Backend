@@ -1,13 +1,31 @@
-import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, Relation, ManyToMany, JoinTable } from "typeorm";
+import { Recipe } from "./recipe.entity.js";
 
 @Entity()
 export class Category {
+    // ATTRIBUTES
+    // ID
     @PrimaryGeneratedColumn()
     id!: number;
 
+    // Name
     @Column({
         type: "nvarchar",
         length: 100
     })
     name!: string;
+
+    // JUNCTION TABLES
+    // Categories_Recipes
+    @ManyToMany(() => Recipe, (recipe) => recipe.categories)
+    @JoinTable({
+        name: "categories_recipes",
+        joinColumn: {
+            name: "category_id"
+        },
+        inverseJoinColumn: {
+            name: "recipe_id"
+        }
+    })
+    recipes!: Relation<Recipe>[];
 }
