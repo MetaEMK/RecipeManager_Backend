@@ -14,6 +14,7 @@ class Logger
     private logPath: string = './log';
     private archivePath = this.logPath + '/archive';
 
+    //creates logger and sets up some basic stuff (reads config)
     constructor()
     {
         console.log("Creating Logger");
@@ -33,6 +34,7 @@ class Logger
         console.log("Archive Path: " + this.archivePath);
     }
 
+    //setup the logger and prepares filesystem
     public async create(): Promise<void>
     {
         if (this.setup) return;
@@ -40,7 +42,7 @@ class Logger
         if (!await doesDirectoryExist(this.logPath)) await fsAsync.mkdir(this.logPath);
         await deleteContent(this.archivePath);
         if(!await doesDirectoryExist(this.archivePath)) await fsAsync.mkdir(this.archivePath);
-        await delay(200);
+        await delay(200); //delay is needed to make sure the filesystem can updated itself before we try to access it
         let files = await fsAsync.readdir(this.logPath);
         files = files.filter(file => !file.includes('archive'));
         for (let index = 0; index < (files).length; index++) {
@@ -55,6 +57,7 @@ class Logger
         this.setup = true;
     }
 
+    //logs message to file specified by endpoint
     private log(message: string, level: LOG_LEVEL,endpoint: LOG_ENDPOINT): void
     {
         this.archiveLogFile(endpoint);
@@ -64,7 +67,7 @@ class Logger
         catch (error) {console.log("Error while logging");}
     }
 
-
+    //archives the log file if it is too big and deletes older files if there are too many
     private archiveLogFile(endpoint: LOG_ENDPOINT): void
     {
         if(!doesFileExist(this.logPath + endpoint))return;
@@ -81,11 +84,14 @@ class Logger
         }
     }
 
+    //logs debug message to file specified by endpoint (depending on log level)
     public debug(message: string, endpoint: LOG_ENDPOINT): void
     {
         if (this.logLevel > LOG_LEVEL.LOG_LEVEL_DEBUG) return;
         this.log(message, LOG_LEVEL.LOG_LEVEL_DEBUG, endpoint);
     }
+
+    //logs info message to file specified by endpoint (depending on log level)
     public info(message: string, endpoint: LOG_ENDPOINT): void
     {
         if (this.logLevel > LOG_LEVEL.LOG_LEVEL_INFO) {
@@ -93,28 +99,38 @@ class Logger
         }
         this.log(message, LOG_LEVEL.LOG_LEVEL_INFO, endpoint);
     }
+
+    //logs warning message to file specified by endpoint (depends on log level)
     public warn(message: string, endpoint: LOG_ENDPOINT): void
     {
         if (this.logLevel > LOG_LEVEL.LOG_LEVEL_WARN) return;
          this.log(message, LOG_LEVEL.LOG_LEVEL_WARN, endpoint);
     }
+
+    //logs error message to file specified by endpoint (no matter what the log level is)
     public error(message: string, endpoint: LOG_ENDPOINT): void
     {
         this.log(message, LOG_LEVEL.LOG_LEVEL_ERROR, endpoint);
     }
 }
+
+//creates logger and sets it up
 const logger = async () => {
     let l = new Logger();
     await l.create();
     return l;
 }
+
+//exports logger
 export async function createLogger(): Promise<Logger>
 {
     return await logger();
 }
 
 
+//Helper functions for file handling
 
+//checks if file exists
 function doesFileExist(path: string): boolean
 {
     try 
@@ -127,6 +143,7 @@ function doesFileExist(path: string): boolean
     }
 }
 
+//checks if directory exists
 function doesDirectoryExist(path: string): boolean
 {
     try 
@@ -139,6 +156,7 @@ function doesDirectoryExist(path: string): boolean
     }
 }
 
+//deletes all files in directory
 export async function deleteContent(path: string): Promise<void>
 {
     if(!await doesDirectoryExist(path)) return;
@@ -149,10 +167,14 @@ export async function deleteContent(path: string): Promise<void>
     }
     await Promise.all(tasks);
 }
+
+//sleep timer
 function delay(ms: number)
 {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+//returns size of file in bytes
 export function getFileSize(path: string): number
 {
     if(!doesFileExist(path)) return 0;
