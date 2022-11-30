@@ -21,6 +21,7 @@ branchRouter.get("/", async function (req: Request, res: Response) {
 // Create a branch
 branchRouter.post("/", async function (req: Request, res: Response) {
     const branch = new Branch();
+    
     branch.name = req.body.name;
 
     await AppDataSource
