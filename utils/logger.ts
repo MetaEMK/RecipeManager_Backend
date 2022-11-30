@@ -104,6 +104,7 @@ class Logger
         this.archiveLogFile(endpoint);
         let lev = LOG_LEVEL_STRING[level];
         let mes = `${new Date().toISOString()}\t [${lev}]\t\t ${message}\n`;
+        
         try {fs.appendFileSync(this.logPath + endpoint, mes);}
         catch (error) {console.log("Error while logging");}
     }
@@ -123,6 +124,7 @@ class Logger
             //delete old file
             let files = fs.readdirSync(this.logPath);
             files = files.filter(file => ("/" + file).startsWith(endpoint) == true);
+
             if (files.length-1 > this.logcount) {
 ;                fs.rmSync(this.logPath + '/' + files[1]);
             }
@@ -137,6 +139,7 @@ class Logger
     {
         if (this.logLevel > LOG_LEVEL.LOG_LEVEL_DEBUG) 
             return;
+
         this.log(message, LOG_LEVEL.LOG_LEVEL_DEBUG, endpoint);
     }
 
@@ -154,6 +157,7 @@ class Logger
     {
         if (this.logLevel > LOG_LEVEL.LOG_LEVEL_WARN) 
             return;
+
         this.log(message, LOG_LEVEL.LOG_LEVEL_WARN, endpoint);
     }
 
@@ -207,7 +211,7 @@ function deleteContent(path: string): void
 {
     if(!doesDirectoryExist(path)) 
         return;
-        
+
     const files = fs.readdirSync(path);
 
     for (const file of files) {
