@@ -1,8 +1,8 @@
 import express from "express";
 import { Request, Response } from "express";
-import { AppDataSource } from "../config/datasource.js";
-import { Branch } from "../entities/branch.entity.js";
-import { ScheduledItem } from "../entities/scheduled_item.entity.js";
+import { AppDataSource } from "../../config/datasource.js";
+import { Branch } from "../../data/entities/branch.entity.js";
+import { ScheduledItem } from "../../data/entities/scheduled_item.entity.js";
 
 export const scheduledItemRouter = express.Router();
 

@@ -1,7 +1,7 @@
 import express from "express";
 import { Request, Response } from "express";
-import { AppDataSource } from "../config/datasource.js";
-import { Ingredient } from "../entities/ingredient.entity.js";
+import { AppDataSource } from "../../config/datasource.js";
+import { Ingredient } from "../../data/entities/ingredient.entity.js";
 
 export const ingredientRouter = express.Router();
 

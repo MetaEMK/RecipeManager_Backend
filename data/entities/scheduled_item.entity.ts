@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, Relation, ManyToOne, JoinColumn } from "typeorm";
-import { Days } from "../enums/days.enum.js";
+import { Days } from "../../enums/days.enum.js";
 import { Branch } from "./branch.entity.js";
 import { Size } from "./size.entity.js";
 import { Variant } from "./variant.entity.js";
@@ -25,6 +25,7 @@ export class ScheduledItem {
     // FOREIGN KEYS
     // Branch
     @ManyToOne(() => Branch, (branch) => branch.scheduledItems, {
+        nullable: false,
         onDelete: "CASCADE"
     })
     @JoinColumn({ 
@@ -34,6 +35,7 @@ export class ScheduledItem {
 
     // Variant
     @ManyToOne(() => Variant, (variant) => variant.scheduledItems, {
+        nullable: false,
         onDelete: "CASCADE"
     })
     @JoinColumn({
@@ -43,6 +45,7 @@ export class ScheduledItem {
     
     // Size
     @ManyToOne(() => Size, (size) => size.scheduledItems, {
+        nullable: false,
         onDelete: "CASCADE"
     })
     @JoinColumn({

@@ -18,6 +18,7 @@ export class Conversion {
     // FOREIGN KEYS
     // Conversion type
     @ManyToOne(() => ConversionType, (conversionType) => conversionType.conversions, {
+        nullable: false,
         onDelete: "CASCADE"
     })
     @JoinColumn({
@@ -27,6 +28,7 @@ export class Conversion {
 
     // From size
     @ManyToOne(() => Size, (size) => size.fromConversions, {
+        nullable: false,
         onDelete: "CASCADE"
     })
     @JoinColumn({
@@ -36,6 +38,7 @@ export class Conversion {
 
     // To size
     @ManyToOne(() => Size, (size) => size.toConversions, {
+        nullable: false,
         onDelete: "CASCADE"
     })
     @JoinColumn({

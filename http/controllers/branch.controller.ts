@@ -1,7 +1,7 @@
 import express from "express";
 import { Request, Response } from "express";
-import { AppDataSource } from "../config/datasource.js";
-import { Branch } from "../entities/branch.entity.js";
+import { AppDataSource } from "../../config/datasource.js";
+import { Branch } from "../../data/entities/branch.entity.js";
 
 export const branchRouter = express.Router();
 
