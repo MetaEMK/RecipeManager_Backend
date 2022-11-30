@@ -11,9 +11,10 @@ export class ValidationError
 
 export enum GenerelValidationErrorCodes {
     //ID
-    ID_INVALID_UNIQUE = "ID_INVALID_UNIQUE",
+    ID_MISSING = "ID_MISSING",
     ID_INVALID = "ID_INVALID",
-    
+    ID_INVALID_UNIQUE = "ID_INVALID_UNIQUE",
+
     //NAME
     NAME_MISSING = "NAME_MISSING",
     NAME_INVALID = "INVALID_NAME",
