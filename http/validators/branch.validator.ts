@@ -9,7 +9,7 @@ export class BranchValidator extends Validator
         let val = new ValidatorNameUtilities();
         if(!val.isValidAlpha("BranchValidator", name))
         {
-            this.errors.concat(val.getErrors());
+            this.errors = this.errors.concat(val.getErrors());
             return false;
         }
 

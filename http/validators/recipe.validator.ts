@@ -16,7 +16,7 @@ export class RecipeValidator extends Validator
 
         if(!val.isValidAlpha("RecipeValidator", name))
         {
-            this.errors.concat(val.getErrors());
+            this.errors = this.errors.concat(val.getErrors());
             return false;
         }
 
@@ -30,7 +30,7 @@ export class RecipeValidator extends Validator
 
         if(!val.isValidDescription("RecipeValidator", description))
         {
-            this.errors.concat(val.getErrors());
+            this.errors = this.errors.concat(val.getErrors());
             return false;
         }
 

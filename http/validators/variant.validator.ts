@@ -10,7 +10,7 @@ export class VariantValidator extends Validator
         const val = new ValidatorNameUtilities();
         if(!val.isValidAlpha("VariantValidator", name))
         {
-            this.errors.concat(val.getErrors());
+            this.errors = this.errors.concat(val.getErrors());
             return false;
         }
 
@@ -23,7 +23,7 @@ export class VariantValidator extends Validator
         const val = new ValidatorDescriptionUtilities();
         if(!val.isValidDescription("VariantValidator", description))
         {
-            this.errors.concat(val.getErrors());
+            this.errors = this.errors.concat(val.getErrors());
             return false;
         }
 
@@ -36,7 +36,7 @@ export class VariantValidator extends Validator
         let val = new ValidatorIdUtilities();
         if(!val.isValidId("VariantValidator", id))
         {
-            this.errors.concat(val.getErrors());
+            this.errors = this.errors.concat(val.getErrors());
             return false;
         }
 

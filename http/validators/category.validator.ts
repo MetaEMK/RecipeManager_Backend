@@ -9,7 +9,7 @@ export class CategoryValidator extends Validator
 
         if(!val.isValidAlpha("CategoryValidator", name))
         {
-            this.errors.concat(val.getErrors());
+            this.errors = this.errors.concat(val.getErrors());
             return false;
         }
 

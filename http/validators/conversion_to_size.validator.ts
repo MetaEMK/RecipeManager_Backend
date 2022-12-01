@@ -11,7 +11,7 @@ export class ConversionToSizeValidator extends Validator
         let val = new ValidatorIdUtilities();
         if(!val.isValidId("ConversionToSizeValidator" ,id))
         {
-            this.logError("ConversionToSizeValidator", "Invalid id", id);
+            this.errors = this.errors.concat(val.getErrors());
             return false;
         }
 

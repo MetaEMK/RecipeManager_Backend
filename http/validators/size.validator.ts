@@ -14,7 +14,7 @@ export class SizeValidator extends Validator
         
         if(!val.isValidAlphanummeric("SizeValidator", name))
         {
-            this.errors.concat(val.getErrors());
+            this.errors = this.errors.concat(val.getErrors());
             return false;
         }
 
@@ -27,7 +27,7 @@ export class SizeValidator extends Validator
         let val = new ValidatorIdUtilities();
         if(!val.isValidId("SizeValidator", id))
         {
-            this.errors.concat(val.getErrors());
+            this.errors = this.errors.concat(val.getErrors());
             return false;
         }
         

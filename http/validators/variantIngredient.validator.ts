@@ -10,7 +10,7 @@ export class VariantIngredientValidator extends Validator
         let val = new ValidatorIdUtilities();
         if(!val.isValidId("VariantIngredientValidator" ,id))
         {
-            this.errors.concat(val.getErrors());
+            this.errors = this.errors.concat(val.getErrors());
             return false;
         }
 
@@ -23,7 +23,7 @@ export class VariantIngredientValidator extends Validator
         let val = new ValidatorIdUtilities();
         if(!val.isValidId("VariantIngredientValidator" ,id))
         {
-            this.errors.concat(val.getErrors());
+            this.errors = this.errors.concat(val.getErrors());
             return false;
         }
 
@@ -36,7 +36,7 @@ export class VariantIngredientValidator extends Validator
         const val = new ValidatorQuanitiyUtilities();
         if(!val.isQuantityValid("VariantIngredientValidator", quantity))
         {
-            this.errors.concat(val.getErrors());
+            this.errors = this.errors.concat(val.getErrors());
             return false;
         }
 

@@ -12,7 +12,7 @@ export class ScheduleItemsValidator extends Validator
         let val = new ValidatorIdUtilities();
         if(!val.isValidId("ScheduleItemsValidator" ,id))
         {
-            this.errors.concat(val.getErrors());
+            this.errors = this.errors.concat(val.getErrors());
             return false;
         }
 
