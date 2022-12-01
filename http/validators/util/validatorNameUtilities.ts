@@ -1,24 +1,13 @@
 import val from "validator";
 import { GeneralValidationErrorCodes } from "../../../enums/GeneralValidationErrors.enum";
 import { createLogger, LOG_ENDPOINT } from "../../../utils/logger";
+import { Validator, ValidatorUtilities } from "../MainValidator";
 import { ValidationError } from "../validationError";
 
 const logger = createLogger();
 
-export class ValidatorNameUtilities
+export class ValidatorNameUtilities extends ValidatorUtilities
 {
-    private errors: ValidationError[] = [];
-    
-    public getErrors(): ValidationError[] 
-    { 
-        return this.errors; 
-    }
-
-    private logError(validator: string, message: string, obj?: string): void
-    {
-        logger.info(validator + ": Validation failed: " + message + ":\t\'" + obj + "\'", LOG_ENDPOINT.MAIN);
-    }
-
     public isValidName(validator: string, name?: any, min_max?: object): boolean
     {
         if(!name)
