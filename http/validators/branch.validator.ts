@@ -1,18 +1,20 @@
 import { Validator } from "./MainValidator.js";
 import { ValidatorNameUtilities } from "./util/validatorNameUtilities.js";
 
-export class IngredientValidator extends Validator
+export class BranchValidator extends Validator
 {
-    public isValidIngredientName(name?: any): boolean
+    
+    public isValidBranchName(name?: any): boolean
     {
         let val = new ValidatorNameUtilities();
-        if(!val.isValidAlpha("IngredientValidator", name))
+        if(!val.isValidAlpha("BranchValidator", name))
         {
             this.errors.concat(val.getErrors());
             return false;
         }
 
-        this.logSuccess("IngredientValidator", "Ingredient is valid", name);
+        this.logSuccess("BranchValidator", "Branch name is valid", name);
         return true;
     }
+
 }
