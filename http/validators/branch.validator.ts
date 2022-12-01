@@ -1,66 +1,22 @@
-import validator from "validator";
 import { createLogger, LOG_ENDPOINT } from "../../utils/logger.js";
-import { GeneralValidationErrorCodes } from "../../enums/GeneralValidationErrors.enum.js";
-import { ValidationError } from "./validationError.js";
+import { Validator } from "./MainValidator.js";
+import { ValidatorNameUtilities } from "./util/validatorNameUtilities.js";
 
 const logger = createLogger();
 
-export class BranchValidator
+export class BranchValidator extends Validator
 {
-    private errors: ValidationError[] = [];
-
-    public getErrors(): ValidationError[]
-    { 
-        return this.errors; 
-    }
-
-    private logError(message: string, obj: string): void
-    {
-        logger.info("BranchValidator: Validation failed: " + message + ":\t\'" + obj + "\'", LOG_ENDPOINT.MAIN);
-    }
-
-    private logSuccess(message: string, obj: string): void
-    {
-        logger.debug("BranchValidator: Validation succeeded: " + message + ":\t\'" + obj + "\'", LOG_ENDPOINT.MAIN);
-    }
-
+    
     public isValidBranchName(name?: any): boolean
     {
-
-        if(!name)
+        let val = new ValidatorNameUtilities();
+        if(!val.isValidAlpha("BranchValidator", name))
         {
-            let err = new ValidationError(GeneralValidationErrorCodes.NAME_MISSING);
-            this.logError(err.toString(), name);
-            this.errors.push(err);
+            this.errors.concat(val.getErrors());
             return false;
         }
 
-        if(! (typeof name === "string"))
-        {
-            let err = new ValidationError(GeneralValidationErrorCodes.NAME_INVALID);
-            this.logError(err.toString(), name);
-            this.errors.push(err);
-            return false;
-        }
-        let nameString = name as string;
-
-        if(!validator.isLength(nameString, {min: 1, max: 100}))
-        {
-            let err = new ValidationError(GeneralValidationErrorCodes.NAME_INVALID_LENGTH);
-            this.logError(err.toString(), nameString);
-            this.errors.push(err);
-            return false;
-        }
-        
-        if(!validator.isAlpha(nameString))
-        {
-            let error = new ValidationError(GeneralValidationErrorCodes.NAME_INVALID);
-            this.logError(error.toString(), nameString);
-            this.errors.push(error);
-            return false;
-        }
-
-        this.logSuccess("Branch name is valid", nameString);
+        this.logSuccess("Branch name is valid", name);
         return true;
     }
 

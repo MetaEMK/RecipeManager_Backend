@@ -1,5 +1,5 @@
-import { createLogger, LOG_ENDPOINT } from "../../utils/logger";
-import { ValidationError } from "./validationError";
+import { createLogger, LOG_ENDPOINT } from "../../utils/logger.js";
+import { ValidationError } from "./validationError.js";
 
 const logger = createLogger();
 export abstract class Validator
@@ -10,12 +10,14 @@ export abstract class Validator
     { 
         return this.errors; 
     }
-}
 
-export abstract class ValidatorUtilities extends Validator
-{
     protected logError(validator: string, message: string, obj?: string): void
     {
         logger.info(validator + ": Validation failed: " + message + ":\t\'" + obj + "\'", LOG_ENDPOINT.MAIN);
     }
+
+    protected logSuccess(message: string, obj: string): void
+    {
+        logger.debug("CategoryValidator: Validation succeeded: " + message + ":\t\'" + obj + "\'", LOG_ENDPOINT.MAIN);
+    }  
 }

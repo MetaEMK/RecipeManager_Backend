@@ -1,6 +1,5 @@
 import { GeneralValidationErrorCodes } from "../../enums/GeneralValidationErrors.enum.js";
 
-
 const allKeys = Object.keys(GeneralValidationErrorCodes)
 const allValues = Object.values(GeneralValidationErrorCodes);
 

@@ -1,12 +1,9 @@
 import val from "validator";
-import { GeneralValidationErrorCodes } from "../../../enums/GeneralValidationErrors.enum";
-import { createLogger, LOG_ENDPOINT } from "../../../utils/logger";
-import { Validator, ValidatorUtilities } from "../MainValidator";
-import { ValidationError } from "../validationError";
+import { GeneralValidationErrorCodes } from "../../../enums/GeneralValidationErrors.enum.js";
+import { Validator } from "../MainValidator.js";
+import { ValidationError } from "../validationError.js";
 
-const logger = createLogger();
-
-export class ValidatorNameUtilities extends ValidatorUtilities
+export class ValidatorNameUtilities extends Validator
 {
     public isValidName(validator: string, name?: any, min_max?: object): boolean
     {

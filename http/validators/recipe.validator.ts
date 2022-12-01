@@ -2,83 +2,39 @@ import validator from "validator";
 import { createLogger, LOG_ENDPOINT } from "../../utils/logger.js";
 import { GeneralValidationErrorCodes } from "../../enums/GeneralValidationErrors.enum.js";
 import { ValidationError } from "./validationError.js";
+import { Validator } from "./MainValidator.js";
+import { ValidatorNameUtilities } from "./util/validatorNameUtilities.js";
+import { ValidatorDescriptionUtilities } from "./util/validatorDescriptionUtilities.js";
 
 const logger = createLogger();
 
-export class RecipeValidator
+export class RecipeValidator extends Validator
 {
-    private errors: ValidationError[] = [];
-
-    public getErrors(): ValidationError[]
-    { 
-        return this.errors; 
-    }
-
-    private logError(message: string, obj?: string): void
-    {
-        obj = obj ? obj : "";
-        logger.info("RecipeValidator: Validation failed: " + message + ":\t\'" + obj + "\'", LOG_ENDPOINT.MAIN);
-    }
-
-    private logSuccess(message: string, obj?: string): void
-    {
-        obj = obj ? obj : "";
-        logger.debug("RecipeValidator: Validation succeeded: " + message + ":\t\'" + obj + "\'", LOG_ENDPOINT.MAIN);
-    }
-
     public isValidRecipeName(name?: any): boolean
     {
+        let val = new ValidatorNameUtilities();
 
-        if(!name)
+        if(!val.isValidAlpha("RecipeValidator", name))
         {
-            let err = new ValidationError(GeneralValidationErrorCodes.NAME_MISSING);
-            this.logError(err.toString(), name);
-            this.errors.push(err);
-            return false;
-        }
-        
-        if(! (typeof name === "string"))
-        {
-            let err = new ValidationError(GeneralValidationErrorCodes.NAME_INVALID);
-            this.logError(err.toString(), name);
-            this.errors.push(err);
-            return false;
-        }
-        let nameString = name as string;
-
-        if(!validator.isLength(nameString, {min: 1, max: 100}))
-        {
-            let err = new ValidationError(GeneralValidationErrorCodes.NAME_INVALID_LENGTH);
-            this.logError(err.toString(), nameString);
-            this.errors.push(err);
-            return false;
-        }
-        
-        if(!validator.isAlpha(nameString))
-        {
-            let error = new ValidationError(GeneralValidationErrorCodes.NAME_INVALID);
-            this.logError(error.toString(), nameString);
-            this.errors.push(error);
+            this.errors.concat(val.getErrors());
             return false;
         }
 
-        this.logSuccess("Recipe name is valid", nameString);
+        this.logSuccess("Recipe name is valid", name);
         return true;
     }
 
     public isValidRecipeDescription(description?: any): boolean
     {
-        if(!description)
+        let val = new ValidatorDescriptionUtilities();
+
+        if(!val.isValidDescription("RecipeValidator", description))
         {
+            this.errors.concat(val.getErrors());
             return false;
         }
-        if(! (typeof description === "string"))
-        {
-            let err = new ValidationError(GeneralValidationErrorCodes.DESCRIPTION_INVALID);
-            this.logError(err.toString(), description);
-            this.errors.push(err);
-            return false;
-        }
+
+        this.logSuccess("Recipe description is valid", description);
         return true;
     }
 
@@ -141,7 +97,7 @@ export class RecipeValidator
         }
 
 
-        this.logSuccess("Category IDs are valid");
+        this.logSuccess("RecipeValidator","Category IDs are valid");
         return true;
     }
 
@@ -204,7 +160,7 @@ export class RecipeValidator
         }
 
 
-        this.logSuccess("Branch IDs are valid");
+        this.logSuccess("RecipeValidator","Branch IDs are valid");
         return true;
     }
 }
