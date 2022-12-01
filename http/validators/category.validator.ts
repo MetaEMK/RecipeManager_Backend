@@ -1,18 +1,19 @@
 import { Validator } from "./MainValidator.js";
 import { ValidatorNameUtilities } from "./util/validatorNameUtilities.js";
 
-export class IngredientValidator extends Validator
+export class CategoryValidator extends Validator
 {
-    public isValidIngredientName(name?: any): boolean
+    public isValidCategoryName(name?: any): boolean
     {
         let val = new ValidatorNameUtilities();
-        if(!val.isValidAlpha("IngredientValidator", name))
+
+        if(!val.isValidAlpha("CategoryValidator", name))
         {
             this.errors.concat(val.getErrors());
             return false;
         }
 
-        this.logSuccess("IngredientValidator", "Ingredient is valid", name);
+        this.logSuccess("CategoryValidator", "Category name is valid", name);
         return true;
     }
 }
