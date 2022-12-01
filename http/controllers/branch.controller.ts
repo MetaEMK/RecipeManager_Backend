@@ -137,6 +137,7 @@ branchRouter.patch("/:id", async function (req: Request, res: Response) {
     }
 });
 
+// TODO - Check if branch still owns recipes => DONT DELETE BRANCH
 // Delete a branch
 branchRouter.delete("/:id", async function (req: Request, res: Response) {
     const id = Number(req.params.id);
