@@ -4,7 +4,7 @@ import { DataSource } from "typeorm";
 export const AppDataSource = new DataSource({
     type: "sqlite",
     database: "./data/ReMa.db",
-    logging: false,
+    logging: true,
     synchronize: true,
     entities: [
         "dist/data/entities/*.js"

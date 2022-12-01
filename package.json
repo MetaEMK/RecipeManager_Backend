@@ -12,14 +12,12 @@
   "author": "Jan Benecke; Jonny Vang",
   "license": "ISC",
   "dependencies": {
-    "@types/validator": "^13.7.10",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "reflect-metadata": "^0.1.13",
     "sqlite3": "^5.1.2",
-    "typeorm": "^0.3.10",
-    "validator": "^13.7.0"
+    "typeorm": "^0.3.10"
   },
   "type": "module",
   "devDependencies": {
