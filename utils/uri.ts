@@ -1,7 +1,9 @@
-export function decodeURISpaces(uriComponent: string): string
+export function decodeURISpaces(uriComponent: string|undefined): string|undefined
 {
-    uriComponent = decodeURIComponent(uriComponent);
-    uriComponent = uriComponent.replaceAll("+", " ");
+    if (uriComponent) {
+        uriComponent = uriComponent.replaceAll("%20", " ");
+        uriComponent = uriComponent.replaceAll("+", " ");
+    }
 
     return uriComponent;
 }
