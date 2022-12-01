@@ -12,7 +12,7 @@ export class IngredientValidator extends Validator
             return false;
         }
 
-        this.logSuccess("Ingredient is valid", name);
+        this.logSuccess("IngredientValidator", "Ingredient is valid", name);
         return true;
     }
 }

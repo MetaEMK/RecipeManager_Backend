@@ -16,8 +16,8 @@ export abstract class Validator
         logger.info(validator + ": Validation failed: " + message + ":\t\'" + obj + "\'", LOG_ENDPOINT.MAIN);
     }
 
-    protected logSuccess(message: string, obj: string): void
+    protected logSuccess(validator: string, message: string, obj?: string): void
     {
-        logger.debug("CategoryValidator: Validation succeeded: " + message + ":\t\'" + obj + "\'", LOG_ENDPOINT.MAIN);
+        logger.debug(validator + "CategoryValidator: Validation succeeded: " + message + ":\t\'" + obj + "\'", LOG_ENDPOINT.MAIN);
     }  
 }

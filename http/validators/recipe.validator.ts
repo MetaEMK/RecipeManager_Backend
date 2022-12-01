@@ -20,7 +20,7 @@ export class RecipeValidator extends Validator
             return false;
         }
 
-        this.logSuccess("Recipe name is valid", name);
+        this.logSuccess("RecipeValidator", "Recipe name is valid", name);
         return true;
     }
 
@@ -34,7 +34,7 @@ export class RecipeValidator extends Validator
             return false;
         }
 
-        this.logSuccess("Recipe description is valid", description);
+        this.logSuccess("RecipeValidator", "Recipe description is valid", description);
         return true;
     }
 
@@ -97,7 +97,7 @@ export class RecipeValidator extends Validator
         }
 
 
-        this.logSuccess("RecipeValidator","Category IDs are valid");
+        this.logSuccess("RecipeValidator", "Category IDs are valid");
         return true;
     }
 

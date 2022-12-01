@@ -13,7 +13,7 @@ export class CategoryValidator extends Validator
             return false;
         }
 
-        this.logSuccess("Category name is valid", name);
+        this.logSuccess("CategoryValidator", "Category name is valid", name);
         return true;
     }
 }
