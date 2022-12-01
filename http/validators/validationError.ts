@@ -1,4 +1,4 @@
-import { GeneralValidationErrorCodes } from "./GeneralValidationErrors.js";
+import { GeneralValidationErrorCodes } from "../../enums/GeneralValidationErrors.enum.js";
 
 
 const allKeys = Object.keys(GeneralValidationErrorCodes)
