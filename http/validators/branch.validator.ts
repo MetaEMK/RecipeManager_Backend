@@ -4,7 +4,6 @@ import { ValidatorStructualUtilities } from "./util/validatorStructualUtilities.
 
 export class BranchValidator extends Validator
 {
-    
     public isValidBranchName(name?: any): boolean
     {
         let val = new ValidatorNameUtilities();
