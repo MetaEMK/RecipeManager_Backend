@@ -31,5 +31,5 @@ apiRouter.use("/schedule/items", scheduledItemRouter);
 // Default route if not exists
 apiRouter.use((req: Request, res: Response) => {
     res.status(404);
-    res.send("Route does not exist");
+    res.send();
 });
