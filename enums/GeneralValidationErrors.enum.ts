@@ -8,6 +8,9 @@ export enum GeneralValidationErrorCodes {
     NAME_INVALID = "Name must be a string",
     NAME_INVALID_LENGTH = "INVALID_NAME_LENGTH",
 
+    //QUANTITY
+    QUANTITY_MISSING = "Quantity is missing",
+    QUANTITY_INVALID = "Quantity is invalid",
 
     //DESCRIPTION
     DESCRIPTION_MISSING = "Description is missing",

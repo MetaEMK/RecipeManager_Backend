@@ -16,5 +16,4 @@ export class ConversionTypeValidator extends Validator
         this.logSuccess("ConversionTypeValidator", "name is valid", name);
         return true;
     }
-
 }

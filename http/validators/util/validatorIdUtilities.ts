@@ -4,7 +4,7 @@ import { ValidationError } from "../validationError.js";
 
 export class ValidatorIdUtilities extends Validator
 {
-    public isValidId(validator: string, id?: any): boolean
+    isValidId(validator: string, id?: any): boolean
     {
         if(!id)
         {
@@ -32,5 +32,15 @@ export class ValidatorIdUtilities extends Validator
         }
 
         return true;
+    }
+
+    convertToNumber(validator: string, number: any): number|null
+    {
+        if(! (typeof number === "number"))
+        {
+            this.logError(validator, "Could not parse " + number + "to type number");
+            return null;
+        }
+        return number as number;
     }
 }
