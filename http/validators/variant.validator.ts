@@ -1,15 +1,9 @@
-import validator from "validator";
-import { createLogger, LOG_ENDPOINT } from "../../utils/logger.js";
-import { GeneralValidationErrorCodes } from "../../enums/GeneralValidationErrors.enum.js";
-import { ValidationError } from "./validationError.js";
 import { ValidatorNameUtilities } from "./util/validatorNameUtilities.js";
 import { ValidatorDescriptionUtilities } from "./util/validatorDescriptionUtilities.js";
 import { Validator } from "./MainValidator.js";
-import { SizeValidator } from "./size.validator.js";
 import { ValidatorIdUtilities } from "./util/validatorIdUtilities.js";
 
-const logger = createLogger()
-export class CategoryValidator extends Validator
+export class VariantValidator extends Validator
 {
     public isValidVariantName(name?: any): boolean
     {
@@ -20,7 +14,7 @@ export class CategoryValidator extends Validator
             return false;
         }
 
-        this.logSuccess("Variant name is valid", name);
+        this.logSuccess("VariantValidator", "Variant name is valid", name);
         return true;
     }
 
@@ -33,7 +27,7 @@ export class CategoryValidator extends Validator
             return false;
         }
 
-        this.logSuccess("Variant description is valid", description);
+        this.logSuccess("VariantValidator", "Variant description is valid", description);
         return true;
     }
 
@@ -46,7 +40,7 @@ export class CategoryValidator extends Validator
             return false;
         }
 
-        this.logSuccess("recipe_id is valid", id);
+        this.logSuccess("VariantValidator", "recipe_id is valid", id);
         return true;
     }
 }

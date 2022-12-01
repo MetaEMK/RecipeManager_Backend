@@ -18,7 +18,7 @@ export class SizeValidator extends Validator
             return false;
         }
 
-        this.logSuccess("Size name is valid", name);
+        this.logSuccess("SizeValidator", "Size name is valid", name);
         return true;
     }
 
@@ -31,30 +31,7 @@ export class SizeValidator extends Validator
             return false;
         }
         
-        this.logSuccess("Conversion Type ID is valid", id.toString());
+        this.logSuccess("SizeValidator", "Conversion Type ID is valid", id.toString());
         return true;
     }
-}
-
-export function checkSizeValidator(displayError: boolean)
-{
-    console.log("Checking SizeValidator");
-    let val = new SizeValidator();
-
-    if(val.isValidSizeName() == true) return false;
-    if(val.isValidSizeName("1") == false) return false;
-    if(val.isValidSizeName("") == true) return false;
-    if(val.isValidSizeName({name: "name", test: "test"}) == true) return false;
-
-    if(val.isValidConversionTypeId() == true) return false;
-    if(val.isValidConversionTypeId("1") == true) return false;
-    if(val.isValidConversionTypeId(-1) == true) return false;
-    if(val.isValidConversionTypeId(1) == false) return false;
-
-    let err = val.getErrors();
-    if(displayError) err.forEach(e => console.log(e.toString()));
-
-    console.log("SizeValidator passed");
-
-    return true;
 }

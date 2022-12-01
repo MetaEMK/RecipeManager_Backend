@@ -9,7 +9,7 @@ export class ConversionTypeValidator extends Validator
         let val = new ValidatorIdUtilities();
         if(!val.isValidId("ConversionTypeValidator" ,name))
         {
-            this.logError("Invalid name", name);
+            this.errors.concat(val.getErrors());
             return false;
         }
 

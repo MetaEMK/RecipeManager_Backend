@@ -11,7 +11,7 @@ export class ConversionToSizeValidator extends Validator
         let val = new ValidatorIdUtilities();
         if(!val.isValidId("ConversionToSizeValidator" ,id))
         {
-            this.logError("Invalid id", id);
+            this.logError("ConversionToSizeValidator", "Invalid id", id);
             return false;
         }
 
@@ -24,7 +24,7 @@ export class ConversionToSizeValidator extends Validator
         let val = new ValidatorIdUtilities();
         if(!val.isValidId("ConversionToSizeValidator" ,id))
         {
-            this.logError("Invalid id", id);
+            this.logError("ConversionToSizeValidator", "Invalid id", id);
             return false;
         }
 
@@ -47,7 +47,7 @@ export class ConversionToSizeValidator extends Validator
         if (!num)
         {
             let err = new ValidationError(GeneralValidationErrorCodes.MULTIPLICATOR_INVALID);
-            this.logError(err.toString(), multiplicator);
+            this.logError("ConversionToSizeValidator", err.toString(), multiplicator);
             this.errors.push(err);
             return false;
         }
@@ -55,7 +55,7 @@ export class ConversionToSizeValidator extends Validator
         if (num < 0)
         {
             let err = new ValidationError(GeneralValidationErrorCodes.MULTIPLICATOR_INVALID);
-            this.logError(err.toString(), multiplicator);
+            this.logError("ConversionToSizeValidator", err.toString(), multiplicator);
             this.errors.push(err);
             return false;
         }

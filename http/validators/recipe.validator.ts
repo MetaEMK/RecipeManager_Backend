@@ -43,7 +43,7 @@ export class RecipeValidator extends Validator
         if(!categoryIds)
         {
             let err = new ValidationError(GeneralValidationErrorCodes.CATEGORY_IDS_MISSING);
-            this.logError(err.toString(), categoryIds);
+            this.logError("RecipeValidator", err.toString(), categoryIds);
             this.errors.push(err);
             return false;
         }
@@ -51,11 +51,9 @@ export class RecipeValidator extends Validator
         if(! (categoryIds instanceof Array))
         {
             let err = new ValidationError(GeneralValidationErrorCodes.CATEGORY_IDS_INVALID);
-            this.logError(err.toString(), categoryIds);
+            this.logError("RecipeValidator", err.toString(), categoryIds);
             this.errors.push(err);
             return false;
-
-            
         }
         let cat_ids: any[] = [];
         try {
@@ -92,7 +90,7 @@ export class RecipeValidator extends Validator
         }
         if(!status)
         {
-            this.logError("At least one category ID is invalid", "");
+            this.logError("RecipeValidator", "At least one category ID is invalid", "");
             return false;
         }
 
@@ -101,20 +99,20 @@ export class RecipeValidator extends Validator
         return true;
     }
 
-    public isValidBranchIds(categoryIds?: any): boolean
+    public isValidBranchIds(branchIds?: any): boolean
     {
-        if(!categoryIds)
+        if(!branchIds)
         {
             let err = new ValidationError(GeneralValidationErrorCodes.BRANCH_IDS_MISSING);
-            this.logError(err.toString(), categoryIds);
+            this.logError("RecipeValidator", err.toString(), branchIds);
             this.errors.push(err);
             return false;
         }
 
-        if(! (categoryIds instanceof Array))
+        if(! (branchIds instanceof Array))
         {
             let err = new ValidationError(GeneralValidationErrorCodes.BRANCH_IDS_INVALID);
-            this.logError(err.toString(), categoryIds);
+            this.logError("RecipeValidator", err.toString(), branchIds);
             this.errors.push(err);
             return false;
 
@@ -122,7 +120,7 @@ export class RecipeValidator extends Validator
         }
         let cat_ids: any[] = [];
         try {
-            cat_ids = categoryIds as any[];
+            cat_ids = branchIds as any[];
         } catch (error) {
             let err = new ValidationError(GeneralValidationErrorCodes.BRANCH_IDS_INVALID, "Could not convert to number[]: " + error);;
             this.errors.push(err);
@@ -140,12 +138,14 @@ export class RecipeValidator extends Validator
                 this.errors.push(err);
                 status = false;
             }
+
             if(cat_id < 0) 
             {
                 let err = new ValidationError(GeneralValidationErrorCodes.BRANCH_ID_INVALID, "Branch id is negative");
                 this.errors.push(err);
                 status = false;
             }
+
             if(cat_ids.filter((id) => id.id === cat_id).length > 1)
             {
                 let err = new ValidationError(GeneralValidationErrorCodes.BRANCH_ID_NOT_UNIQUE);
@@ -155,7 +155,7 @@ export class RecipeValidator extends Validator
         }
         if(!status)
         {
-            this.logError("At least one branch ID is invalid", "");
+            this.logError("RecipeValidator", "At least one branch ID is invalid", "");
             return false;
         }
 

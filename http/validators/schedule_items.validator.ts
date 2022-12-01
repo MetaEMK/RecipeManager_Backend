@@ -12,7 +12,7 @@ export class ScheduleItemsValidator extends Validator
         let val = new ValidatorIdUtilities();
         if(!val.isValidId("ScheduleItemsValidator" ,id))
         {
-            this.logError("Invalid id", id);
+            this.errors.concat(val.getErrors());
             return false;
         }
 
@@ -35,7 +35,7 @@ export class ScheduleItemsValidator extends Validator
         if(!num)
         {
             let err = new ValidationError(GeneralValidationErrorCodes.VARIANT_ID_INVALID);
-            this.logError(err.toString(), id);
+            this.logError("ScheduleItemsValidator", err.toString(), id);
             this.errors.push(err);
             return false;
         }
@@ -43,7 +43,7 @@ export class ScheduleItemsValidator extends Validator
         if(num < 0)
         {
             let err = new ValidationError(GeneralValidationErrorCodes.VARIANT_ID_INVALID);
-            this.logError(err.toString(), id);
+            this.logError("ScheduleItemsValidator", err.toString(), id);
             this.errors.push(err);
             return false;
         }
@@ -57,7 +57,7 @@ export class ScheduleItemsValidator extends Validator
         if(!id) 
         {
             let err = new ValidationError(GeneralValidationErrorCodes.BRANCH_ID_MISSING);
-            this.logError(err.toString(), id);
+            this.logError("ScheduleItemsValidator", err.toString(), id);
             this.errors.push(err);
             return false;
         }
@@ -67,7 +67,7 @@ export class ScheduleItemsValidator extends Validator
         if(!num)
         {
             let err = new ValidationError(GeneralValidationErrorCodes.BRANCH_ID_INVALID);
-            this.logError(err.toString(), id);
+            this.logError("ScheduleItemsValidator", err.toString(), id);
             this.errors.push(err);
             return false;
         }
@@ -89,7 +89,7 @@ export class ScheduleItemsValidator extends Validator
         if(!item)
         {
             let err = new ValidationError(GeneralValidationErrorCodes.DAY_MISSING);
-            this.logError(err.toString(), item);
+            this.logError("ScheduleItemsValidator", err.toString(), item);
             this.errors.push(err);
             return false;
         }
@@ -101,7 +101,7 @@ export class ScheduleItemsValidator extends Validator
         if(!day)
         {
             let err = new ValidationError(GeneralValidationErrorCodes.DAY_INVALID);
-            this.logError(err.toString(), item);
+            this.logError("ScheduleItemsValidator", err.toString(), item);
             this.errors.push(err);
             return false;
         }
@@ -109,7 +109,7 @@ export class ScheduleItemsValidator extends Validator
         if(day < 1 || day > 7)
         {
             let err = new ValidationError(GeneralValidationErrorCodes.DAY_INVALID);
-            this.logError(err.toString(), item);
+            this.logError("ScheduleItemsValidator", err.toString(), item);
             this.errors.push(err);
             return false;
         }

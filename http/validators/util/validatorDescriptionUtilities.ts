@@ -1,4 +1,3 @@
-import val from "validator";
 import { GeneralValidationErrorCodes } from "../../../enums/GeneralValidationErrors.enum";
 import { Validator } from "../MainValidator";
 import { ValidationError } from "../validationError";
