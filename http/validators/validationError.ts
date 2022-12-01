@@ -1,29 +1,19 @@
+import { GeneralValidationErrorCodes } from "./GeneralValidationErrors.js";
+
+
+const allKeys = Object.keys(GeneralValidationErrorCodes)
+const allValues = Object.values(GeneralValidationErrorCodes);
+
 export class ValidationError 
 {
     public code: string;
     public message: string;
 
-    constructor(code: string, message: string) {
-        this.code = code;
-        this.message = message;
+    constructor(code: GeneralValidationErrorCodes, message?: string) 
+    {
+        this.code = allKeys[allValues.indexOf(code)];
+        if(message) this.message = message;
+        else this.message = code;
     }
-}
-
-export enum GenerelValidationErrorCodes {
-    //ID
-    ID_MISSING = "ID_MISSING",
-    ID_INVALID = "ID_INVALID",
-    ID_INVALID_UNIQUE = "ID_INVALID_UNIQUE",
-
-    //NAME
-    NAME_MISSING = "NAME_MISSING",
-    NAME_INVALID = "INVALID_NAME",
-    NAME_INVALID_LENGTH = "INVALID_NAME_LENGTH",
-    NAME_INVALID_UNIQUE = "INVALID_NAME_UNIQUE",
-
-    //Category
-    CATEGORY_DOES_NOT_EXIST = "CATEGORY_DOES_NOT_EXIST",
-
-    //Branch
-    BRANCH_DOES_NOT_EXIST = "BRANCH_DOES_NOT_EXIST"
+    public toString(): string { return this.code + ": " + this.message; }
 }
