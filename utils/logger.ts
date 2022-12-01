@@ -99,7 +99,7 @@ class Logger
     {
         this.archiveLogFile(endpoint);
         let lev = LOG_LEVEL_STRING[level];
-        let mes = `${new Date().toISOString()}\t [${lev}]\t\t ${message}\n`;
+        let mes = `${new Date().toISOString()}\t ${lev}\t\t${message}\n`;
         
         try 
         {

@@ -5,8 +5,13 @@ export enum GeneralValidationErrorCodes {
 
     //NAME
     NAME_MISSING = "NAME_MISSING",
-    NAME_INVALID = "INVALID_NAME",
+    NAME_INVALID = "Name must be a string",
     NAME_INVALID_LENGTH = "INVALID_NAME_LENGTH",
+
+
+    //DESCRIPTION
+    DESCRIPTION_MISSING = "Description is missing",
+    DESCRIPTION_INVALID = "Description must be a string",
 
     //CONVERSION TYPE ID
     CONVERSION_TYPE_ID_MISSING = "Conversion Type ID is missing",
