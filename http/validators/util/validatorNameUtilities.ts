@@ -1,7 +1,7 @@
 import val from "validator";
-import { GeneralValidationErrorCodes } from "../../enums/GeneralValidationErrors.enum";
-import { createLogger, LOG_ENDPOINT } from "../../utils/logger";
-import { ValidationError } from "./validationError";
+import { GeneralValidationErrorCodes } from "../../../enums/GeneralValidationErrors.enum";
+import { createLogger, LOG_ENDPOINT } from "../../../utils/logger";
+import { ValidationError } from "../validationError";
 
 const logger = createLogger();
 
