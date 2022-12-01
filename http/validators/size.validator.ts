@@ -1,7 +1,7 @@
 import validator from "validator";
 import { Size } from "../../data/entities/size.entity";
-import { ValidationError, GenerelValidationErrorCodes } from "./validationError";
-import { ValidationResult } from "./validationResult.js";
+import { GeneralValidationErrorCodes } from "./GeneralValidationErrors.js";
+import { ValidationError } from "./validationError";
 export class SizeValidator
 {
     private errors: ValidationError[] = [];
@@ -11,8 +11,15 @@ export class SizeValidator
     {
         if(!name) return false;
         if(!name.typeof(String)) return false;
-        if(name.length > 100) return false;
+        if(name.length < 100) return false;
         if(validator.isAlphanumeric(name)) return true;
+        return true;
+    }
+
+    public isValidConversionTypeId(id?: any): boolean
+    {
+        if(!id) return false;
+        if(!id.typeof(Number)) return false;
         return true;
     }
 }
