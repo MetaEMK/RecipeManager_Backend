@@ -1,8 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column, Relation, OneToMany, ManyToMany, JoinTable } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, Relation, OneToMany, ManyToMany, JoinTable, Unique } from "typeorm";
 import { Recipe } from "./recipe.entity.js";
 import { ScheduledItem } from "./scheduled_item.entity.js";
 
 @Entity()
+@Unique(["name"])
 export class Branch {
     // ATTRIBUTES
     // ID
