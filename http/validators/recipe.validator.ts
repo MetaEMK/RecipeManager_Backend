@@ -1,10 +1,8 @@
-import validator from "validator";
 import { createLogger, LOG_ENDPOINT } from "../../utils/logger.js";
-import { GeneralValidationErrorCodes } from "../../enums/GeneralValidationErrors.enum.js";
-import { ValidationError } from "./validationError.js";
 import { Validator } from "./MainValidator.js";
 import { ValidatorNameUtilities } from "./util/validatorNameUtilities.js";
 import { ValidatorDescriptionUtilities } from "./util/validatorDescriptionUtilities.js";
+import { ValidatorStructualUtilities } from "./util/validatorStructualUtilities.js";
 
 const logger = createLogger();
 
@@ -38,129 +36,43 @@ export class RecipeValidator extends Validator
         return true;
     }
 
-    public isValidCategoryIds(categoryIds?: any): boolean
+    /**
+     * @description Validates if the given body has an array called add
+     * @param body body of the request
+     * @returns true if the body is valid, false otherwise
+     */
+    public isValidCreationRelationIds(body?: any): boolean
     {
-        if(!categoryIds)
+        if(!body) return false;
+
+        let val = new ValidatorStructualUtilities();
+        if(!val.isValidNumberArray("RecipeValidator", body.add))
         {
-            let err = new ValidationError(GeneralValidationErrorCodes.CATEGORY_IDS_MISSING);
-            this.logError("RecipeValidator", err.toString(), categoryIds);
-            this.errors.push(err);
+            this.errors = this.errors.concat(val.getErrors());
             return false;
         }
 
-        if(! (categoryIds instanceof Array))
-        {
-            let err = new ValidationError(GeneralValidationErrorCodes.CATEGORY_IDS_INVALID);
-            this.logError("RecipeValidator", err.toString(), categoryIds);
-            this.errors.push(err);
-            return false;
-        }
-        let cat_ids: any[] = [];
-        try {
-            cat_ids = categoryIds as any[];
-        } catch (error) {
-            let err = new ValidationError(GeneralValidationErrorCodes.CATEGORY_IDS_INVALID, "Could not convert to number[]: " + error);;
-            this.errors.push(err);
-            return false;
-        }
-
-        let status = true;
-        for(let i = 0; i < cat_ids.length; i++)
-        {
-            let cat_obj: any = cat_ids[i];
-            let cat_id = cat_obj?.id;
-            if(!cat_id || typeof cat_id !== "number")
-            {
-                let err = new ValidationError(GeneralValidationErrorCodes.CATEGORY_ID_INVALID, cat_id);
-                this.errors.push(err);
-                status = false;
-            }
-            if(cat_id < 0) 
-            {
-                let err = new ValidationError(GeneralValidationErrorCodes.CATEGORY_ID_INVALID, "Category id is negative");
-                this.errors.push(err);
-                status = false;
-            }
-            if(cat_ids.filter((id) => id.id === cat_id).length > 1)
-            {
-                let err = new ValidationError(GeneralValidationErrorCodes.CATEGORY_ID_NOT_UNIQUE);
-                this.errors.push(err);
-                status = false;
-            }
-        }
-        if(!status)
-        {
-            this.logError("RecipeValidator", "At least one category ID is invalid", "");
-            return false;
-        }
-
-
-        this.logSuccess("RecipeValidator", "Category IDs are valid");
-        return true;
+        this.logSuccess("RecipeValidator", "Relation IDs are valid", body);
+        return true
     }
 
-    public isValidBranchIds(branchIds?: any): boolean
+    public isValidRelationIDs(body?: any): boolean
     {
-        if(!branchIds)
+        if(!body) return false;
+
+        let val = new ValidatorStructualUtilities();
+        if(!val.isValidNumberArray("RecipeValidator", body.add))
         {
-            let err = new ValidationError(GeneralValidationErrorCodes.BRANCH_IDS_MISSING);
-            this.logError("RecipeValidator", err.toString(), branchIds);
-            this.errors.push(err);
+            this.errors = this.errors.concat(val.getErrors());
+            return false;
+        }
+        if(!val.isValidNumberArray("RecipeValidator", body.rmv))
+        {
+            this.errors = this.errors.concat(val.getErrors());
             return false;
         }
 
-        if(! (branchIds instanceof Array))
-        {
-            let err = new ValidationError(GeneralValidationErrorCodes.BRANCH_IDS_INVALID);
-            this.logError("RecipeValidator", err.toString(), branchIds);
-            this.errors.push(err);
-            return false;
-
-            
-        }
-        let cat_ids: any[] = [];
-        try {
-            cat_ids = branchIds as any[];
-        } catch (error) {
-            let err = new ValidationError(GeneralValidationErrorCodes.BRANCH_IDS_INVALID, "Could not convert to number[]: " + error);;
-            this.errors.push(err);
-            return false;
-        }
-
-        let status = true;
-        for(let i = 0; i < cat_ids.length; i++)
-        {
-            let cat_obj: any = cat_ids[i];
-            let cat_id = cat_obj?.id;
-            if(!cat_id || typeof cat_id !== "number")
-            {
-                let err = new ValidationError(GeneralValidationErrorCodes.BRANCH_ID_INVALID, cat_id);
-                this.errors.push(err);
-                status = false;
-            }
-
-            if(cat_id < 0) 
-            {
-                let err = new ValidationError(GeneralValidationErrorCodes.BRANCH_ID_INVALID, "Branch id is negative");
-                this.errors.push(err);
-                status = false;
-            }
-
-            if(cat_ids.filter((id) => id.id === cat_id).length > 1)
-            {
-                let err = new ValidationError(GeneralValidationErrorCodes.BRANCH_ID_NOT_UNIQUE);
-                this.errors.push(err);
-                status = false;
-            }
-        }
-        if(!status)
-        {
-            this.logError("RecipeValidator", "At least one branch ID is invalid", "");
-            return false;
-        }
-
-
-        this.logSuccess("RecipeValidator","Branch IDs are valid");
+        this.logSuccess("RecipeValidator", "Relation IDs are valid", body);
         return true;
     }
 }

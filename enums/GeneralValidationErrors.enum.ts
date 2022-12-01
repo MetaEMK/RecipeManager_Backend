@@ -3,6 +3,9 @@ export enum GeneralValidationErrorCodes {
     ID_MISSING = "The ID is missing",
     ID_INVALID = "The ID is invalid",
 
+    //STRUCTURE
+    ARRAY_INVALID = "The array is invalid",
+
     //NAME
     NAME_MISSING = "NAME_MISSING",
     NAME_INVALID = "Name must be a string",
