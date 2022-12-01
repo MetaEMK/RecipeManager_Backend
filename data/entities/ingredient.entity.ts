@@ -1,7 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, Relation, OneToMany } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, Relation, OneToMany, Unique } from "typeorm";
 import { VariantIngredient } from "./variant_ingredient.entity.js";
 
 @Entity()
+@Unique(["name"])
 export class Ingredient {
     // ATTRIBUTES
     // ID
