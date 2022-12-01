@@ -34,11 +34,11 @@ recipeRouter.post("/", async function (req: Request, res: Response) {
             .getRepository(Recipe)
             .save(recipe);
 
-        await AppDataSource
-            .createQueryBuilder()
-            .relation(Branch, "recipes")
-            .of(branch)
-            .add(recipe);
+        // await AppDataSource
+        //     .createQueryBuilder()
+        //     .relation(Branch, "recipes")
+        //     .of(branch)
+        //     .add(recipe);
 
         res.json(recipe);
     } else {
@@ -50,6 +50,12 @@ recipeRouter.post("/", async function (req: Request, res: Response) {
             }
         })
     }
+});
+
+// (Paritally) Update a recipe
+recipeRouter.patch("/:id", async function(req: Request, res: Response) {
+    const test = req.body.test;
+    console.log(typeof(test));
 });
 
 // Delete a recipe
