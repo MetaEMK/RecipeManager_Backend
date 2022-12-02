@@ -12,7 +12,7 @@ export class CategoryValidator extends Validator
     {
         let val = new ValidatorNameUtilities();
 
-        if(!val.isValidAlpha("CategoryValidator", nameToValidate))
+        if(!val.isValidAlpha("CategoryValidator", nameToValidate, {min: 1, max: 100}))
         {
             this.errors = this.errors.concat(val.getErrors());
             return false;

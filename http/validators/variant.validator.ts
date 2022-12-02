@@ -5,6 +5,20 @@ import { ValidatorIdUtilities } from "./util/validatorIdUtilities.js";
 
 export class VariantValidator extends Validator
 {
+
+    public isValidVariantId(idToValidate?: any): boolean
+    {
+        let val = new ValidatorIdUtilities();
+        if(!val.isValidId("VariantValidator", idToValidate))
+        {
+            this.errors = this.errors.concat(val.getErrors());
+            return false;
+        }
+
+        this.logSuccess("VariantValidator", "Variant ID is valid", idToValidate.toString());
+        return true;
+    }
+
     /**
      * 
      * @param nameToValidate name to validate. can be null or undefined. If you pass null or undefined or an Object, the method will return false
@@ -13,7 +27,7 @@ export class VariantValidator extends Validator
     public isValidVariantName(nameToValidate?: any): boolean
     {
         const val = new ValidatorNameUtilities();
-        if(!val.isValidAlpha("VariantValidator", nameToValidate))
+        if(!val.isValidAlpha("VariantValidator", nameToValidate, {min: 1, max: 255}))
         {
             this.errors = this.errors.concat(val.getErrors());
             return false;
@@ -56,6 +70,24 @@ export class VariantValidator extends Validator
         }
 
         this.logSuccess("VariantValidator", "recipe_id is valid", idToValidate);
+        return true;
+    }
+
+    /**
+     * 
+     * @param idToValidate id to validate. can be null or undefined. If you pass null or undefined or an Object, the method will return false
+     * @returns true if the id is valid for a variant id and false otherwise
+     */
+    public isValidSizeId(idToValidate?: any): boolean
+    {
+        let val = new ValidatorIdUtilities();
+        if(!val.isValidId("VariantValidator", idToValidate))
+        {
+            this.errors = this.errors.concat(val.getErrors());
+            return false;
+        }
+
+        this.logSuccess("VariantValidator", "size_id is valid", idToValidate);
         return true;
     }
 }

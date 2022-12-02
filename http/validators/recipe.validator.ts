@@ -13,7 +13,7 @@ export class RecipeValidator extends Validator
     {
         let val = new ValidatorNameUtilities();
 
-        if(!val.isValidAlpha("RecipeValidator", nameToValidate))
+        if(!val.isValidAlpha("RecipeValidator", nameToValidate, {min: 1, max: 255}))
         {
             this.errors = this.errors.concat(val.getErrors());
             return false;
@@ -59,4 +59,6 @@ export class RecipeValidator extends Validator
         this.logSuccess("RecipeValidator", "id_array is valid", idsToValidate);
         return true
     }
+
+    //TODO: ImagePath is missing!
 }

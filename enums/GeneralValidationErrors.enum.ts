@@ -15,6 +15,18 @@ export enum GeneralValidationErrorCodes {
     QUANTITY_MISSING = "Quantity is missing",
     QUANTITY_INVALID = "Quantity is invalid",
 
+    //UNIT
+    UNIT_MISSING = "Unit is missing",
+    UNIT_INVALID = "Unit is invalid",
+
+    //SECTION_ID
+    SECTION_ID_MISSING = "Section ID is missing",
+    SECTION_ID_INVALID = "Section ID is invalid",
+
+    //ORDER_NO
+    ORDER_NO_MISSING = "Order number is missing",
+    ORDER_NO_INVALID = "Order number is invalid",
+
     //MULTIPLICATOR
     MULTIPLICATOR_MISSING = "Multiplicator is missing",
     MULTIPLICATOR_INVALID = "Multiplicator is invalid",

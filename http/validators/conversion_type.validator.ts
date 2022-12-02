@@ -1,5 +1,5 @@
 import { Validator } from "./MainValidator";
-import { ValidatorIdUtilities } from "./util/validatorIdUtilities";
+import { ValidatorNameUtilities } from "./util/validatorNameUtilities";
 
 export class ConversionTypeValidator extends Validator
 {
@@ -10,8 +10,8 @@ export class ConversionTypeValidator extends Validator
      */
     public isValidName(nameToValidate?: any): boolean
     {
-        let val = new ValidatorIdUtilities();
-        if(!val.isValidId("ConversionTypeValidator" ,nameToValidate))
+        let val = new ValidatorNameUtilities();
+        if(!val.isValidAlpha("ConversionTypeValidator" ,nameToValidate, {min: 1, max: 30}))
         {
             this.errors = this.errors.concat(val.getErrors());
             return false;

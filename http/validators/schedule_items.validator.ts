@@ -1,6 +1,7 @@
 import { GeneralValidationErrorCodes } from "../../enums/GeneralValidationErrors.enum";
 import { Validator } from "./MainValidator";
 import { ValidatorIdUtilities } from "./util/validatorIdUtilities";
+import { ValidatorQuanitiyUtilities } from "./util/validatorQuantityUtilities";
 import { ValidationError } from "./validationError";
 
 
@@ -137,6 +138,32 @@ export class ScheduleItemsValidator extends Validator
         }
 
         this.logSuccess("ScheduleItemsValidator", "day is valid", dayToValidate);
+        return true;
+    }
+
+    /**
+     * 
+     * @param quantityToValidate quantity to validate. can be null or undefined. If you pass null or undefined or an Object, the method will return false
+     * @returns true if the quantity is valid for a schedule item quantity and false otherwise
+     */
+    public isValidQuantity(quantityToValidate: any): boolean
+    {
+        if(!quantityToValidate)
+        {
+            let err = new ValidationError(GeneralValidationErrorCodes.QUANTITY_MISSING);
+            this.logError("ScheduleItemsValidator", err.toString(), quantityToValidate);
+            this.errors.push(err);
+            return false;
+        }
+
+        let val = new ValidatorQuanitiyUtilities();
+        if(!val.isQuantityValid(quantityToValidate))
+        {
+            this.errors = this.errors.concat(val.getErrors());
+            return false;
+        }
+
+        this.logSuccess("ScheduleItemsValidator", "quantity is valid", quantityToValidate);
         return true;
     }
 }
