@@ -5,42 +5,57 @@ import { ValidatorQuanitiyUtilities } from "./util/validatorQuantityUtilities.js
 
 export class VariantIngredientValidator extends Validator
 {
-    public idValidIngredientId(id?: any): boolean
+    /**
+     * 
+     * @param idToValidate id to validate. can be null or undefined. If you pass null or undefined or an Object, the method will return false
+     * @returns true if the id is valid for a variant ingredient id and false otherwise
+     */
+    public idValidIngredientId(idToValidate?: any): boolean
     {
         let val = new ValidatorIdUtilities();
-        if(!val.isValidId("VariantIngredientValidator" ,id))
+        if(!val.isValidId("VariantIngredientValidator" ,idToValidate))
         {
             this.errors = this.errors.concat(val.getErrors());
             return false;
         }
 
-        this.logSuccess("VariantIngredientValidator", "ingredient_id is valid", id.toString());
+        this.logSuccess("VariantIngredientValidator", "ingredient_id is valid", idToValidate.toString());
         return true;
     }
 
-    public isValidRecipeId(id?: any): boolean
+    /**
+     * 
+     * @param idToValidate id to validate. can be null or undefined. If you pass null or undefined or an Object, the method will return false
+     * @returns true if the id is valid for a variant ingredient id and false otherwise
+     */
+    public isValidRecipeId(idToValidate?: any): boolean
     {
         let val = new ValidatorIdUtilities();
-        if(!val.isValidId("VariantIngredientValidator" ,id))
+        if(!val.isValidId("VariantIngredientValidator" ,idToValidate))
         {
             this.errors = this.errors.concat(val.getErrors());
             return false;
         }
 
-        this.logSuccess("VariantIngredientValidator", "recipe_id is valid", id);
+        this.logSuccess("VariantIngredientValidator", "recipe_id is valid", idToValidate);
         return true;
     }
 
-    public isValidQuantity(quantity?: any): boolean
+    /**
+     * 
+     * @param quantityToValidate quantity to validate. can be null or undefined. If you pass null or undefined or an Object, the method will return false
+     * @returns true if the quantity is valid for a variant ingredient quantity and false otherwise
+     */
+    public isValidQuantity(quantityToValidate?: any): boolean
     {
         const val = new ValidatorQuanitiyUtilities();
-        if(!val.isQuantityValid("VariantIngredientValidator", quantity))
+        if(!val.isQuantityValid("VariantIngredientValidator", quantityToValidate))
         {
             this.errors = this.errors.concat(val.getErrors());
             return false;
         }
 
-        this.logSuccess("VariantIngredientValidator", "quantity is valid", quantity);
+        this.logSuccess("VariantIngredientValidator", "quantity is valid", quantityToValidate);
         return true;
     }
 

@@ -5,42 +5,57 @@ import { ValidatorIdUtilities } from "./util/validatorIdUtilities.js";
 
 export class VariantValidator extends Validator
 {
-    public isValidVariantName(name?: any): boolean
+    /**
+     * 
+     * @param nameToValidate name to validate. can be null or undefined. If you pass null or undefined or an Object, the method will return false
+     * @returns true if the name is valid for a variant name and false otherwise
+     */
+    public isValidVariantName(nameToValidate?: any): boolean
     {
         const val = new ValidatorNameUtilities();
-        if(!val.isValidAlpha("VariantValidator", name))
+        if(!val.isValidAlpha("VariantValidator", nameToValidate))
         {
             this.errors = this.errors.concat(val.getErrors());
             return false;
         }
 
-        this.logSuccess("VariantValidator", "Variant name is valid", name);
+        this.logSuccess("VariantValidator", "Variant name is valid", nameToValidate);
         return true;
     }
 
-    public isValidVariantDescription(description?: any): boolean
+    /**
+     * 
+     * @param descriptionToValidate description to validate. can be null or undefined. If you pass null or undefined or an Object, the method will return false
+     * @returns true if the description is valid for a variant description and false otherwise
+     */
+    public isValidVariantDescription(descriptionToValidate?: any): boolean
     {
         const val = new ValidatorDescriptionUtilities();
-        if(!val.isValidDescription("VariantValidator", description))
+        if(!val.isValidDescription("VariantValidator", descriptionToValidate))
         {
             this.errors = this.errors.concat(val.getErrors());
             return false;
         }
 
-        this.logSuccess("VariantValidator", "Variant description is valid", description);
+        this.logSuccess("VariantValidator", "Variant description is valid", descriptionToValidate);
         return true;
     }
 
-    public isValidRecipeId(id?: any): boolean
+    /**
+     * 
+     * @param idToValidate id to validate. can be null or undefined. If you pass null or undefined or an Object, the method will return false
+     * @returns true if the id is valid for a variant id and false otherwise
+     */
+    public isValidRecipeId(idToValidate?: any): boolean
     {
         let val = new ValidatorIdUtilities();
-        if(!val.isValidId("VariantValidator", id))
+        if(!val.isValidId("VariantValidator", idToValidate))
         {
             this.errors = this.errors.concat(val.getErrors());
             return false;
         }
 
-        this.logSuccess("VariantValidator", "recipe_id is valid", id);
+        this.logSuccess("VariantValidator", "recipe_id is valid", idToValidate);
         return true;
     }
 }

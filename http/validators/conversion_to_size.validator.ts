@@ -6,6 +6,11 @@ import { ValidationError } from "./validationError.js";
 
 export class ConversionToSizeValidator extends Validator
 {
+    /**
+     * 
+     * @param id id to validate. can be null or undefined. If you pass null or undefined or an Object, the method will return false
+     * @returns true if the id is valid for a conversion to size id and false otherwise
+     */
     public isValidSizeId(id?: any): boolean
     { 
         let val = new ValidatorIdUtilities();
@@ -19,6 +24,11 @@ export class ConversionToSizeValidator extends Validator
         return true;
     }
 
+    /**
+     * 
+     * @param id id to validate. can be null or undefined. If you pass null or undefined or an Object, the method will return false
+     * @returns true if the id is valid for a conversion to size id and false otherwise
+     */
     public isValidConversionId(id?: any): boolean
     {
         let val = new ValidatorIdUtilities();
@@ -32,22 +42,26 @@ export class ConversionToSizeValidator extends Validator
         return true;
     }
 
-    public isValidMulitplicator(multiplicator?: any): boolean
+    /**
+     * @param multiplicatorToValidate multiplicator to validate. can be null or undefined. If you pass null or undefined or an Object, the method will return false
+     * @returns true if the multiplicator is valid for a conversion to size multiplicator and false otherwise
+     */
+    public isValidMulitplicator(multiplicatorToValidate?: any): boolean
     {
-        if (!multiplicator)
+        if (!multiplicatorToValidate)
         {
             let err = new ValidationError(GeneralValidationErrorCodes.MULTIPLICATOR_MISSING);
-            this.logError(err.toString(), multiplicator);
+            this.logError(err.toString(), multiplicatorToValidate);
             this.errors.push(err);
             return false;
         }
 
         let val = new ValidatorIdUtilities();
-        let num = val.convertToNumber("ConversionToSizeValidator", multiplicator);
+        let num = val.convertToNumber("ConversionToSizeValidator", multiplicatorToValidate);
         if (!num)
         {
             let err = new ValidationError(GeneralValidationErrorCodes.MULTIPLICATOR_INVALID);
-            this.logError("ConversionToSizeValidator", err.toString(), multiplicator);
+            this.logError("ConversionToSizeValidator", err.toString(), multiplicatorToValidate);
             this.errors.push(err);
             return false;
         }
@@ -55,12 +69,12 @@ export class ConversionToSizeValidator extends Validator
         if (num < 0)
         {
             let err = new ValidationError(GeneralValidationErrorCodes.MULTIPLICATOR_INVALID);
-            this.logError("ConversionToSizeValidator", err.toString(), multiplicator);
+            this.logError("ConversionToSizeValidator", err.toString(), multiplicatorToValidate);
             this.errors.push(err);
             return false;
         }
 
-        this.logSuccess("ConversionToSizeValidator", "multiplicator is valid", multiplicator);
+        this.logSuccess("ConversionToSizeValidator", "multiplicator is valid", multiplicatorToValidate);
         return true;
     }
 }

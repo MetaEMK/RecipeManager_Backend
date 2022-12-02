@@ -7,35 +7,46 @@ import { ValidationError } from "./validationError";
 
 export class ScheduleItemsValidator extends Validator
 {
-    public isValidScheduleId(id?: any): boolean
+
+    /**
+     * 
+     * @param idToValidate id to validate. can be null or undefined. If you pass null or undefined or an Object, the method will return false
+     * @returns true if the id is valid for a schedule item id and false otherwise
+     */
+    public isValidScheduleId(idToValidate?: any): boolean
     {
         let val = new ValidatorIdUtilities();
-        if(!val.isValidId("ScheduleItemsValidator" ,id))
+        if(!val.isValidId("ScheduleItemsValidator" ,idToValidate))
         {
             this.errors = this.errors.concat(val.getErrors());
             return false;
         }
 
-        this.logSuccess("ScheduleItemsValidator", "schedule_id is valid", id.toString());
+        this.logSuccess("ScheduleItemsValidator", "schedule_id is valid", idToValidate.toString());
         return true;
     }
 
-    public isValidVariantId(id?: any): boolean
+    /**
+     * 
+     * @param idToValidate id to validate. can be null or undefined. If you pass null or undefined or an Object, the method will return false
+     * @returns true if the id is valid for a schedule item id and false otherwise
+     */
+    public isValidVariantId(idToValidate?: any): boolean
     {
-        if(!id) 
+        if(!idToValidate) 
         {
             let err = new ValidationError(GeneralValidationErrorCodes.VARIANT_ID_MISSING);
-            this.logError(err.toString(), id);
+            this.logError(err.toString(), idToValidate);
             this.errors.push(err);
             return false;
         }
         let val = new ValidatorIdUtilities();
-        let num = val.convertToNumber("ScheduleItemsValidator", id);
+        let num = val.convertToNumber("ScheduleItemsValidator", idToValidate);
 
         if(!num)
         {
             let err = new ValidationError(GeneralValidationErrorCodes.VARIANT_ID_INVALID);
-            this.logError("ScheduleItemsValidator", err.toString(), id);
+            this.logError("ScheduleItemsValidator", err.toString(), idToValidate);
             this.errors.push(err);
             return false;
         }
@@ -43,31 +54,36 @@ export class ScheduleItemsValidator extends Validator
         if(num < 0)
         {
             let err = new ValidationError(GeneralValidationErrorCodes.VARIANT_ID_INVALID);
-            this.logError("ScheduleItemsValidator", err.toString(), id);
+            this.logError("ScheduleItemsValidator", err.toString(), idToValidate);
             this.errors.push(err);
             return false;
         }
 
-        this.logSuccess("ScheduleItemsValidator", "variant_id is valid", id);
+        this.logSuccess("ScheduleItemsValidator", "variant_id is valid", idToValidate);
         return true;
     }
 
-    public isValidBranchId(id?: any): boolean
+    /**
+     * 
+     * @param idToValidate id to validate. can be null or undefined. If you pass null or undefined or an Object, the method will return false
+     * @returns true if the id is valid for a schedule item id and false otherwise
+    */
+    public isValidBranchId(idToValidate?: any): boolean
     {
-        if(!id) 
+        if(!idToValidate) 
         {
             let err = new ValidationError(GeneralValidationErrorCodes.BRANCH_ID_MISSING);
-            this.logError("ScheduleItemsValidator", err.toString(), id);
+            this.logError("ScheduleItemsValidator", err.toString(), idToValidate);
             this.errors.push(err);
             return false;
         }
         let val = new ValidatorIdUtilities();
-        let num = val.convertToNumber("ScheduleItemsValidator", id);
+        let num = val.convertToNumber("ScheduleItemsValidator", idToValidate);
 
         if(!num)
         {
             let err = new ValidationError(GeneralValidationErrorCodes.BRANCH_ID_INVALID);
-            this.logError("ScheduleItemsValidator", err.toString(), id);
+            this.logError("ScheduleItemsValidator", err.toString(), idToValidate);
             this.errors.push(err);
             return false;
         }
@@ -75,33 +91,39 @@ export class ScheduleItemsValidator extends Validator
         if(num < 0)
         {
             let err = new ValidationError(GeneralValidationErrorCodes.BRANCH_ID_INVALID);
-            this.logError(err.toString(), id);
+            this.logError(err.toString(), idToValidate);
             this.errors.push(err);
             return false;
         }
 
-        this.logSuccess("ScheduleItemsValidator", "branch_id is valid", id);
+        this.logSuccess("ScheduleItemsValidator", "branch_id is valid", idToValidate);
         return true;
     }
 
-    public isValidDay(item: any): boolean
+
+    /**
+     * 
+     * @param dayToValidate day to validate. can be null or undefined. If you pass null or undefined or an Object, the method will return false
+     * @returns 
+     */
+    public isValidDay(dayToValidate: any): boolean
     {
-        if(!item)
+        if(!dayToValidate)
         {
             let err = new ValidationError(GeneralValidationErrorCodes.DAY_MISSING);
-            this.logError("ScheduleItemsValidator", err.toString(), item);
+            this.logError("ScheduleItemsValidator", err.toString(), dayToValidate);
             this.errors.push(err);
             return false;
         }
 
         let val = new ValidatorIdUtilities();
 
-        let day = val.convertToNumber("ScheduleItemsValidator", item);
+        let day = val.convertToNumber("ScheduleItemsValidator", dayToValidate);
 
         if(!day)
         {
             let err = new ValidationError(GeneralValidationErrorCodes.DAY_INVALID);
-            this.logError("ScheduleItemsValidator", err.toString(), item);
+            this.logError("ScheduleItemsValidator", err.toString(), dayToValidate);
             this.errors.push(err);
             return false;
         }
@@ -109,12 +131,12 @@ export class ScheduleItemsValidator extends Validator
         if(day < 1 || day > 7)
         {
             let err = new ValidationError(GeneralValidationErrorCodes.DAY_INVALID);
-            this.logError("ScheduleItemsValidator", err.toString(), item);
+            this.logError("ScheduleItemsValidator", err.toString(), dayToValidate);
             this.errors.push(err);
             return false;
         }
 
-        this.logSuccess("ScheduleItemsValidator", "day is valid", item);
+        this.logSuccess("ScheduleItemsValidator", "day is valid", dayToValidate);
         return true;
     }
 }

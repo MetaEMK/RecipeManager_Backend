@@ -3,16 +3,21 @@ import { ValidatorNameUtilities } from "./util/validatorNameUtilities.js";
 
 export class IngredientValidator extends Validator
 {
-    public isValidIngredientName(name?: any): boolean
+    /**
+     * 
+     * @param nameToValidate name to validate. can be null or undefined. If you pass null or undefined or an Object, the method will return false
+     * @returns true if the name is valid for an ingredient name and false otherwise
+     */
+    public isValidIngredientName(nameToValidate?: any): boolean
     {
         let val = new ValidatorNameUtilities();
-        if(!val.isValidAlpha("IngredientValidator", name))
+        if(!val.isValidAlpha("IngredientValidator", nameToValidate))
         {
             this.errors = this.errors.concat(val.getErrors());
             return false;
         }
 
-        this.logSuccess("IngredientValidator", "Ingredient is valid", name);
+        this.logSuccess("IngredientValidator", "Ingredient is valid", nameToValidate);
         return true;
     }
 }
