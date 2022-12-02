@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, Relation, ManyToOne, JoinColumn } from "typeorm";
-import { Days } from "../../enums/days.enum.js";
+import { Days } from "../../enums/Days.enum.js";
 import { Branch } from "./branch.entity.js";
 import { Size } from "./size.entity.js";
 import { Variant } from "./variant.entity.js";
