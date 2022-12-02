@@ -6,6 +6,8 @@ import { branchRouter } from "./http/controllers/branch.controller.js";
 import { ingredientRouter } from "./http/controllers/ingredient.controller.js";
 import { recipeRouter } from "./http/controllers/recipe.controller.js";
 import { scheduledItemRouter } from "./http/controllers/scheduled_item.controller.js";
+import { setJsonHeader } from "./http/middleware/headers.middleware.js";
+import { jsonErrorHandler } from "./http/middleware/json.middleware.js";
 
 // Establish database connection
 AppDataSource
@@ -21,6 +23,8 @@ AppDataSource
 export const apiRouter = express.Router();
 apiRouter.use(cors());
 apiRouter.use(express.json());
+apiRouter.use(setJsonHeader);
+apiRouter.use(jsonErrorHandler);
 
 // Routes
 apiRouter.use("/branches", branchRouter);
