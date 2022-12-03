@@ -3,6 +3,10 @@ import { GeneralValidationErrorCodes } from "../../../enums/GeneralValidationErr
 import { Validator } from "../MainValidator.js";
 import { ValidationError } from "../validationError.js";
 
+
+const alphanumericWithSpaceRegex = /^[a-zA-Z0-9 ]+$/;
+const alphaWithSpaceRegex = /^[a-zA-Z ]+$/;
+
 export class ValidatorNameUtilities extends Validator
 {
     public isValidName(validator: string, name?: any, min_max?: object): boolean
@@ -39,7 +43,7 @@ export class ValidatorNameUtilities extends Validator
         if(!this.isValidName(validator, text, min_max)) return false;
         let nameString = text as string;
 
-        if(!val.isAlpha(nameString))
+        if(alphaWithSpaceRegex.test(nameString) == false)
         {
             let error = new ValidationError(GeneralValidationErrorCodes.NAME_INVALID);
             this.logError(validator, error.toString(), nameString);
@@ -53,7 +57,7 @@ export class ValidatorNameUtilities extends Validator
         if(!this.isValidName(validator, text, min_max)) return false;
         let nameString = text as string;
 
-        if(!val.isAlphanumeric(nameString))
+        if(alphanumericWithSpaceRegex.test(nameString) == false)
         {
             let error = new ValidationError(GeneralValidationErrorCodes.NAME_INVALID);
             this.logError(validator, error.toString(), nameString);
