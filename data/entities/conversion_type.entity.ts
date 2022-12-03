@@ -1,8 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column, Relation, OneToMany } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, Relation, OneToMany, Unique } from "typeorm";
 import { Conversion } from "./conversion.entity.js";
 import { Size } from "./size.entity.js";
 
 @Entity()
+@Unique(["name"])
 export class ConversionType {
     // ATTRIBUTES
     // ID

@@ -16,4 +16,12 @@ ingredientRouter.get("/", async function (req: Request, res: Response) {
 
 // Create an ingredient
 ingredientRouter.post("/", async function (req: Request, res: Response) {
+    const ingredient = new Ingredient();
+    ingredient.name = req.body.name;
+
+    await AppDataSource
+        .getRepository(Ingredient)
+        .save(ingredient);
+        
+    res.json(ingredient);
 });

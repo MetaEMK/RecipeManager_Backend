@@ -1,9 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, Relation, ManyToMany, OneToMany } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, Relation, ManyToMany, OneToMany, Unique } from "typeorm";
 import { Branch } from "./branch.entity.js";
 import { Category } from "./category.entity.js";
 import { Variant } from "./variant.entity.js";
 
 @Entity()
+@Unique(["name"])
 export class Recipe {
     // ATTRIBUTES
     // ID

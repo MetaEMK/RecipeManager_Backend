@@ -1,7 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, Relation, ManyToMany, JoinTable } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, Relation, ManyToMany, JoinTable, Unique } from "typeorm";
 import { Recipe } from "./recipe.entity.js";
 
 @Entity()
+@Unique(["name"])
 export class Category {
     // ATTRIBUTES
     // ID
