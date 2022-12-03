@@ -1,6 +1,6 @@
 import express from "express";
 import { Request, Response } from "express";
-import { decodeURISpaces } from "../../utils/uri.js";
+import { decodeURISpaces } from "../../utils/controller.util.js";
 import { AppDataSource } from "../../config/datasource.js";
 import { Branch } from "../../data/entities/branch.entity.js";
 
