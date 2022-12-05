@@ -2,7 +2,7 @@ import * as fs from 'node:fs';
 import dotenv from 'dotenv';
 
 //enum is used to determine what log level to use
-enum LOG_LEVEL
+export enum LOG_LEVEL
 {
     LOG_LEVEL_DEBUG = 0,
     LOG_LEVEL_INFO = 1,
@@ -128,7 +128,7 @@ class Logger
             files = files.filter(file => ("/" + file).startsWith(endpoint) == true);
 
             if (files.length-1 > this.logcount) {
-;                fs.rmSync(this.logPath + '/' + files[1]);
+                fs.rmSync(this.logPath + '/' + files[1]);
             }
 
             //log that file was archived
