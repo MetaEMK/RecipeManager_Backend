@@ -1,7 +1,6 @@
 import express from "express";
 import { Request, Response } from "express";
 import { AppDataSource } from "../../config/datasource.js";
-import { Branch } from "../../data/entities/branch.entity.js";
 import { ScheduledItem } from "../../data/entities/scheduled_item.entity.js";
 
 export const scheduledItemRouter = express.Router();
@@ -17,29 +16,18 @@ scheduledItemRouter.get("/", async function (req: Request, res: Response) {
 
 // Create a scheduled item
 scheduledItemRouter.post("/", async function (req: Request, res: Response) {
-    const branch = await AppDataSource
-        .getRepository(Branch)
-        .findOneBy({
-            id: req.body.branch_id
-        });
-    
-    if(branch) {
-        const scheduledItem = new ScheduledItem();
-        scheduledItem.day = req.body.day;
-        scheduledItem.branch = branch;
-    
-        await AppDataSource
-            .getRepository(ScheduledItem)
-            .save(scheduledItem);
-            
-        res.json(scheduledItem);
-    } else {
-        res.status(400);
-        res.json({
-            error: {
-                code: 9999,
-                message: "Branch doesn't exist"
-            }
-        })
-    }
+    const scheduledItem = new ScheduledItem();
+    scheduledItem.day = req.body.day;
+
+    await AppDataSource
+        .getRepository(ScheduledItem)
+        .save(scheduledItem);
+        
+    res.json(scheduledItem);
+});
+
+// Delete a recipe
+scheduledItemRouter.delete("/:id",async function(req: Request, res: Response) {
+    const results = await AppDataSource.getRepository(ScheduledItem).delete(req.params.id);
+    res.json(results);
 });

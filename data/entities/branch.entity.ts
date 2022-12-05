@@ -17,6 +17,13 @@ export class Branch {
     })
     name!: string;
 
+    // Slug
+    @Column({
+        type: "nvarchar",
+        length: 100
+    })
+    slug!: string;
+
     // FOREIGN KEY REFERENCES
     // ScheduleItems
     @OneToMany(() => ScheduledItem, (scheduledItem) => scheduledItem.branch)
@@ -51,28 +58,5 @@ export class Branch {
         }
 
         return where;
-    }
-
-    /**
-     * Returns an object which determines which Branch relations should be loaded. 
-     * 
-     * @param recipes Set true to load recipe relation.
-     * @param scheduledItems Set true to load scheduledItems relation.
-     * @returns Object with set relations.
-     */
-    public static getRelationsToBeLoaded(recipes: string|boolean|undefined, scheduledItems: string|boolean|undefined): Object 
-    {
-        const relations = {
-            recipes: false,
-            scheduledItems: false
-        }
-        
-        if(recipes === "true" || recipes === true)
-            relations.recipes = true;
-        
-        if(scheduledItems === "true" || scheduledItems === true)
-            relations.scheduledItems = true;
-
-        return relations;
     }
 }

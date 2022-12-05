@@ -25,3 +25,9 @@ ingredientRouter.post("/", async function (req: Request, res: Response) {
         
     res.json(ingredient);
 });
+
+// Delete an ingredient
+ingredientRouter.delete("/:id", async function (req: Request, res: Response) {
+    const results = await AppDataSource.getRepository(Ingredient).delete(req.params.id);
+    res.json(results);
+});
