@@ -219,23 +219,23 @@ branchRouter.patch("/:id", async function (req: Request, res: Response) {
                                 .createQueryBuilder()
                                 .relation(Branch, "recipes")
                                 .of(branch)
-                                .add(reqRecipesAdd);
+                                .add(validatedRecipesAdd);
                             await transactionalEntityManager
                                 .createQueryBuilder()
                                 .relation(Branch, "recipes")
                                 .of(branch)
-                                .remove(reqRecipesRmv);
+                                .remove(validatedRecipesRmv);
 
                             await transactionalEntityManager
                                 .createQueryBuilder()
                                 .relation(Branch, "scheduledItems")
                                 .of(branch)
-                                .add(reqScheduledItemsAdd);
+                                .add(validatedScheduledItemsAdd);
                             await transactionalEntityManager
                                 .createQueryBuilder()
                                 .relation(Branch, "scheduledItems")
                                 .of(branch)
-                                .remove(reqScheduledItemsRmv);    
+                                .remove(validatedScheduledItemsRmv);    
                     });
                 }
             }
