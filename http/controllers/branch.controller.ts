@@ -179,19 +179,19 @@ branchRouter.patch("/:id", async function (req: Request, res: Response) {
             validatedName = reqName;
 
     if(reqRecipesAdd)
-        if(validator.isValidRecipeIDs(reqRecipesAdd))
+        if(validator.isValidIdArray(reqRecipesAdd))
             validatedRecipesAdd = reqRecipesAdd;
     
     if(reqRecipesRmv)
-        if(validator.isValidRecipeIDs(reqRecipesRmv))
+        if(validator.isValidIdArray(reqRecipesRmv))
             validatedRecipesRmv = reqRecipesRmv;
         
     if(reqScheduledItemsAdd)
-        if(validator.isValidRecipeIDs(reqScheduledItemsAdd))
+        if(validator.isValidIdArray(reqScheduledItemsAdd))
             validatedScheduledItemsAdd = reqScheduledItemsAdd;
 
     if(reqScheduledItemsRmv)
-        if(validator.isValidRecipeIDs(reqScheduledItemsRmv))
+        if(validator.isValidIdArray(reqScheduledItemsRmv))
             validatedScheduledItemsRmv = reqScheduledItemsRmv;
 
     // ORM query

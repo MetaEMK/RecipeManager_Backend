@@ -10,9 +10,7 @@ export class ValidatorStructualUtilities extends Validator
     public isValidNumberArray(validator: string, body: any)
     {
         if(!body)
-        {
             return false;
-        }
     
         let array: any[] = [];
         try 
@@ -22,13 +20,13 @@ export class ValidatorStructualUtilities extends Validator
                 array = body as any[];
 
                 array.forEach(element => {
-                if(typeof(element) !== "number")
-                    {
-                        let err = new ValidationError(GeneralValidationErrorCodes.ARRAY_INVALID);
-                        this.errors.push(err);
-                        this.logError(validator, err.toString());
-                        return false;
-                    }
+                    if(typeof(element) !== "number")
+                        {
+                            let err = new ValidationError(GeneralValidationErrorCodes.ARRAY_INVALID, "Array contains non-number element:" + element);
+                            this.errors.push(err);
+                            this.logError(validator, err.toString(), element);
+                            return false;
+                        }
                 });
             }
             else

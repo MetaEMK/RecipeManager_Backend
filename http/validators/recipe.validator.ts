@@ -1,78 +1,64 @@
-import { createLogger, LOG_ENDPOINT } from "../../utils/logger.js";
 import { Validator } from "./MainValidator.js";
 import { ValidatorNameUtilities } from "./util/validatorNameUtilities.js";
 import { ValidatorDescriptionUtilities } from "./util/validatorDescriptionUtilities.js";
 import { ValidatorStructualUtilities } from "./util/validatorStructualUtilities.js";
 
-const logger = createLogger();
-
 export class RecipeValidator extends Validator
 {
-    public isValidRecipeName(name?: any): boolean
+    /**
+     * @param nameToValidate name to validate. can be null or undefined. If you pass null or undefined or an Object, the method will return false
+     * @returns 
+     */
+    public isValidRecipeName(nameToValidate?: any): boolean
     {
         let val = new ValidatorNameUtilities();
 
-        if(!val.isValidAlpha("RecipeValidator", name))
+        if(!val.isValidAlpha("RecipeValidator", nameToValidate, {min: 1, max: 255}))
         {
             this.errors = this.errors.concat(val.getErrors());
             return false;
         }
 
-        this.logSuccess("RecipeValidator", "Recipe name is valid", name);
-        return true;
-    }
-
-    public isValidRecipeDescription(description?: any): boolean
-    {
-        let val = new ValidatorDescriptionUtilities();
-
-        if(!val.isValidDescription("RecipeValidator", description))
-        {
-            this.errors = this.errors.concat(val.getErrors());
-            return false;
-        }
-
-        this.logSuccess("RecipeValidator", "Recipe description is valid", description);
+        this.logSuccess("RecipeValidator", "Recipe name is valid", nameToValidate);
         return true;
     }
 
     /**
-     * @description Validates if the given body has an array called add
-     * @param body body of the request
-     * @returns true if the body is valid, false otherwise
+     * 
+     * @param descriptionToValidate description to validate. can be null or undefined. If you pass null or undefined or an Object, the method will return false
+     * @returns true if the description is valid for a recipe description and false otherwise
      */
-    public isValidCreationRelationIds(body?: any): boolean
+    public isValidRecipeDescription(descriptionToValidate?: any): boolean
     {
-        if(!body) return false;
+        let val = new ValidatorDescriptionUtilities();
 
-        let val = new ValidatorStructualUtilities();
-        if(!val.isValidNumberArray("RecipeValidator", body.add))
+        if(!val.isValidDescription("RecipeValidator", descriptionToValidate))
         {
             this.errors = this.errors.concat(val.getErrors());
             return false;
         }
 
-        this.logSuccess("RecipeValidator", "Relation IDs are valid", body);
+        this.logSuccess("RecipeValidator", "Recipe description is valid", descriptionToValidate);
+        return true;
+    }
+
+    /**
+     * 
+     * @param idsToValidate an array of numbers. If you pass null or undefined or any other Object than number[], the method will return false
+     * @returns true if the ids are valid for a category id and false otherwise. It will also return true if the array is empty
+     */
+    public isValidIdArray(idsToValidate: any): boolean
+    {
+        let val = new ValidatorStructualUtilities();
+        if(!val.isValidNumberArray("RecipeValidator", idsToValidate))
+        {
+            this.errors = this.errors.concat(val.getErrors());
+            return false;
+        }
+
+        this.logSuccess("RecipeValidator", "id_array is valid", idsToValidate);
         return true
     }
 
-    public isValidRelationIDs(body?: any): boolean
-    {
-        if(!body) return false;
-
-        let val = new ValidatorStructualUtilities();
-        if(!val.isValidNumberArray("RecipeValidator", body.add))
-        {
-            this.errors = this.errors.concat(val.getErrors());
-            return false;
-        }
-        if(!val.isValidNumberArray("RecipeValidator", body.rmv))
-        {
-            this.errors = this.errors.concat(val.getErrors());
-            return false;
-        }
-
-        this.logSuccess("RecipeValidator", "Relation IDs are valid", body);
-        return true;
-    }
+    //TODO: ImagePath is missing!
 }

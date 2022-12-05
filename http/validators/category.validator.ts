@@ -4,37 +4,39 @@ import { ValidatorStructualUtilities } from "./util/validatorStructualUtilities.
 
 export class CategoryValidator extends Validator
 {
-    public isValidCategoryName(name?: any): boolean
+    /**
+     * @param nameToValidate name to validate. can be null or undefined. If you pass null or undefined or an Object, the method will return false
+     * @returns true if the name is valid for a category name and false otherwise
+     */
+    public isValidCategoryName(nameToValidate?: any): boolean
     {
         let val = new ValidatorNameUtilities();
 
-        if(!val.isValidAlpha("CategoryValidator", name))
+        if(!val.isValidAlpha("CategoryValidator", nameToValidate, {min: 1, max: 100}))
         {
             this.errors = this.errors.concat(val.getErrors());
             return false;
         }
 
-        this.logSuccess("CategoryValidator", "Category name is valid", name);
+        this.logSuccess("CategoryValidator", "Category name is valid", nameToValidate);
         return true;
     }
 
-    public isValidRecipeIDs(body?: any): boolean
+    /**
+     * 
+     * @param idsToValidate an array of numbers. If you pass null or undefined or any other Object than number[], the method will return false
+     * @returns true if the ids are valid for a category id and false otherwise. It will also return true if the array is empty
+     */
+    public isValidIdArray(idsToValidate: any): boolean
     {
-        if(!body) return false;
-
         let val = new ValidatorStructualUtilities();
-        if(!val.isValidNumberArray("CategoryValidator", body.add))
-        {
-            this.errors = this.errors.concat(val.getErrors());
-            return false;
-        }
-        if(!val.isValidNumberArray("CategoryValidator", body.rmv))
+        if(!val.isValidNumberArray("CategoryValidator", idsToValidate))
         {
             this.errors = this.errors.concat(val.getErrors());
             return false;
         }
 
-        this.logSuccess("CategoryValidator", "Recipe IDs are valid", body);
-        return true;
+        this.logSuccess("CategoryValidator", "id_array is valid", idsToValidate);
+        return true
     }
 }
