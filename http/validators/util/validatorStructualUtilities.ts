@@ -7,7 +7,7 @@ export class ValidatorStructualUtilities extends Validator
 {
     
     // "add": [1,2,3,4,5],
-    public isValidNumberArray(validator: string, body: any)
+    public isValidNumberArray(validator: string, body: any): boolean
     {
         if(!body)
             return false;
@@ -43,5 +43,7 @@ export class ValidatorStructualUtilities extends Validator
             this.logError(validator, err.toString(), "Error in parsing array: " + error);
             return false;
         }
+
+        return true;
     }
 }
