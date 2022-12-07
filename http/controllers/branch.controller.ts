@@ -40,7 +40,9 @@ branchRouter.get("/", async function (req: Request, res: Response) {
                 where: filter
             });
 
-        res.json(branches);
+        res.json({
+            data: branches
+        });
     } catch(err) {
         const errRes = new SQLiteErrorResponse(err); 
         errRes.log();
@@ -94,7 +96,9 @@ branchRouter.get("/:id", async function (req: Request, res: Response) {
         }
 
         if(branch) {
-            res.json(branch);
+            res.json({
+                data: branch
+            });
         } else {
             res.status(404);
             res.send();
@@ -141,7 +145,9 @@ branchRouter.post("/", async function (req: Request, res: Response) {
 
             logger.info("Branch " + branch.id + " created.", LOG_ENDPOINT.DATABASE);
 
-            res.json(branch);
+            res.json({
+                data: branch
+            });
         } catch(err) {
             const errRes = new SQLiteErrorResponse(err); 
             errRes.log();
@@ -243,7 +249,9 @@ branchRouter.patch("/:id", async function (req: Request, res: Response) {
             }
     
             if(branch) {
-                res.json(branch);
+                res.json({
+                    data: branch
+                });
             } else {
                 res.status(404);
                 res.send();
@@ -263,7 +271,6 @@ branchRouter.patch("/:id", async function (req: Request, res: Response) {
     }
 });
 
-// TODO CHECK IF BRANCH STILL HAS RECIPES
 /**
  * Delete a branch.
  */
