@@ -13,3 +13,21 @@ export function decodeURISpaces(uriComponent: string|undefined): string|undefine
 
     return uriComponent;
 }
+
+/**
+ * Generates a slug for the given name.
+ * Removes replaces spaces and german umlauts.
+ * 
+ * @param name Name which should be turned into a slug 
+ * @returns A slug conform string
+ */
+export function generateSlug(name: string): string
+{
+    return name
+        .toLowerCase()
+        .replaceAll(" ", "_")
+        .replaceAll("\u00fc", "ue")
+        .replaceAll("\u00e4", "ae")
+        .replaceAll("\u00f6", "oe")
+        .replaceAll("\u00df", "ss");
+}

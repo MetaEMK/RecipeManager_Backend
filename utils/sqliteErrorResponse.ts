@@ -7,58 +7,57 @@ import { createLogger, LOG_ENDPOINT, LOG_LEVEL } from "./logger.js";
 export class SQLiteErrorResponse 
 {
     // Logging
-    private caught: boolean = false;
-    private initialError: unknown;
-    private logger: any;
-    private level: LOG_LEVEL = LOG_LEVEL.LOG_LEVEL_ERROR;
+    private _caught: boolean = false;
+    private _initialError: unknown;
+    private _logger: any;
+    private _level: LOG_LEVEL = LOG_LEVEL.LOG_LEVEL_ERROR;
 
     // HTTP response status code
-    private statusCode: number = 500;
+    private _statusCode: number = 500;
 
     // Error parameters
-    private code: any = 9000;
-    private type: any = "UNCAUGHT_EXCEPTION";
-    private message: string = "An uncaught exception occurred.";
-    private details: string = "An uncaught exception occurred.";
-    private parameters: any[]|undefined = [];
+    private _code: any = "UNCAUGHT_EXCEPTION";
+    private _type: any = "UNCAUGHT_EXCEPTION_ERROR";
+    private _message: string = "An uncaught exception occurred.";
 
     constructor (err: unknown, message?: string)
     {
-        this.initialError = err;
-        this.logger = createLogger();
+        this._initialError = err;
+        this._logger = createLogger();
 
-        if(this.initialError instanceof QueryFailedError) {
-            this.caught = true;
-            this.setErrorWeight(this.initialError.driverError.code, this.initialError.message);
+        if(this._initialError instanceof QueryFailedError) {
+            this._caught = true;
+            this.setErrorWeight(this._initialError.driverError.code, this._initialError.message);
 
-            this.code = this.initialError.driverError.errno;
-            this.message = message ?? this.initialError.message;
-            this.details = this.initialError.message;
-            this.parameters = this.initialError.parameters;
+            this._type = "SQLITE_ERROR";
+            this._message = message ?? this._initialError.message;
+        } else {
+            this._message = message ?? this._message;
         }
     }
 
     /**
-     * Sets error weight based on error type.
-     * Error weight includes error log level, error http status code and error type.
+     * Sets error weight based on error code.
+     * Error weight includes error log level, error http status code and error code.
      * 
-     * @param type SQLite driverError code 
+     * @param code SQLite driverError code 
      * @param message SQLite error message
      */
-    private setErrorWeight(type: any, message: string ): void {
-        switch(type) {
+    private setErrorWeight(code: any, message: string ): void {
+        switch(code) {
             case "SQLITE_CONSTRAINT":
                 const start = message.indexOf(": ") + 2;
                 const end = message.indexOf(" ", start);
         
-                this.level = LOG_LEVEL.LOG_LEVEL_WARN;
-                this.statusCode = 409;
-                this.type = "SQLITE_CONSTRAINT_" + message.substring(start, end) + "_KEY";
+                this._level = LOG_LEVEL.LOG_LEVEL_WARN;
+                this._statusCode = 409;
+                this._code = "SQLITE_CONSTRAINT_" + message.substring(start, end) + "_KEY";
 
                 break;
             default:
-                this.type = type;
-                this.level = LOG_LEVEL.LOG_LEVEL_ERROR;
+                this._level = LOG_LEVEL.LOG_LEVEL_ERROR;
+                this._statusCode = 500;
+                this._code = code;
 
                 break;
         }
@@ -69,9 +68,9 @@ export class SQLiteErrorResponse
      * 
      * @returns HTTP response status code
      */
-    public getStatusCode(): number
+    public get statusCode(): number
     {
-        return this.statusCode;
+        return this._statusCode;
     }
 
     /**
@@ -82,15 +81,10 @@ export class SQLiteErrorResponse
     public toResponseObject(): object 
     {
         return {
-            success: false,
             error: {
-                code: this.code,
-                type: this.type,
-                message: this.message,
-                info: {
-                    details: this.details,
-                    parameters: this.parameters
-                }
+                code: this._code,
+                type: this._type,
+                message: this._message
             }
         }
     }
@@ -102,7 +96,7 @@ export class SQLiteErrorResponse
      */
     public toString(): string
     {
-        return "Code: " + this.code + " - " + this.type + ": " + this.message + " | Details: " + this.details + ", Parameters: " + this.parameters;
+        return "Code: " + this._code + " - " + this._type + ": " + this._message;
     }
 
     /**
@@ -112,22 +106,22 @@ export class SQLiteErrorResponse
     {
         // Determines message based on if the exception is known
         let message = this.toString();
-        if(this.caught) {
-            message = this.initialError as any;
+        if(this._caught) {
+            message = this._initialError as any;
         }
 
-        switch(this.level) {
+        switch(this._level) {
             case LOG_LEVEL.LOG_LEVEL_DEBUG:
-                this.logger.debug(message, LOG_ENDPOINT.DATABASE);
+                this._logger.debug(message, LOG_ENDPOINT.DATABASE);
                 break;
             case LOG_LEVEL.LOG_LEVEL_INFO:
-                this.logger.info(message, LOG_ENDPOINT.DATABASE);
+                this._logger.info(message, LOG_ENDPOINT.DATABASE);
                 break;
             case LOG_LEVEL.LOG_LEVEL_WARN:
-                this.logger.warn(message, LOG_ENDPOINT.DATABASE);
+                this._logger.warn(message, LOG_ENDPOINT.DATABASE);
                 break;
             default:
-                this.logger.error(message, LOG_ENDPOINT.DATABASE);
+                this._logger.error(message, LOG_ENDPOINT.DATABASE);
                 break;       
         }
     }

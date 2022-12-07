@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, Relation, OneToMany, Unique, Like, FindOperator, CreateDateColumn, UpdateDateColumn, ManyToMany, JoinTable } from "typeorm";
+import { Category } from "./category.entity.js";
 import { Recipe } from "./recipe.entity.js";
 import { ScheduledItem } from "./scheduled_item.entity.js";
 
@@ -25,25 +26,31 @@ export class Branch {
     slug!: string;
 
     /**
-     * Foreign key references
+     * Non database attributes.
+     * Needed to add additonal data to the entity for response purposes.
      */
-    @OneToMany(() => ScheduledItem, (scheduledItem) => scheduledItem.branch)
-    scheduledItems!: Relation<ScheduledItem>[];
+    recipe_categories?: Category[];
 
     /**
      * Junction tables
      */
-    @ManyToMany(() => Recipe, (recipe) => recipe.branches)
-    @JoinTable({
-        name: "branches_recipes",
-        joinColumn: {
-            name: "branch_id"
-        },
-        inverseJoinColumn: {
-            name: "recipe_id"
-        }
-    })
-    recipes!: Relation<Recipe>[];
+     @ManyToMany(() => Recipe, (recipe) => recipe.branches)
+     @JoinTable({
+         name: "branches_recipes",
+         joinColumn: {
+             name: "branch_id"
+         },
+         inverseJoinColumn: {
+             name: "recipe_id"
+         }
+     })
+     recipes!: Relation<Recipe>[];    
+
+    /**
+     * Foreign key references
+     */
+    @OneToMany(() => ScheduledItem, (scheduledItem) => scheduledItem.branch)
+    scheduledItems!: Relation<ScheduledItem>[];
 
     /**
      * Timestamps
