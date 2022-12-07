@@ -8,7 +8,7 @@ dotenv.config({ path: "./config/app.env"});
 
 const app = express();
 
-app.use("/api", apiRouter);
+app.use("/api/v1", apiRouter);
 
 app.use(express.static(process.env.FRONTEND_DIST_PATH!));
 app.use((req: Request, res: Response) => {
