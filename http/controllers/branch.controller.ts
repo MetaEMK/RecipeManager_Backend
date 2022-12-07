@@ -157,8 +157,6 @@ branchRouter.post("/", async function (req: Request, res: Response) {
     }
 });
 
-// TODO REFRESH UPDATED ENTITY
-// TODO LOOK AT RELATION LOADING
 /**
  * (Partially) Update a branch.
  */
@@ -168,8 +166,6 @@ branchRouter.patch("/:id", async function (req: Request, res: Response) {
     const reqName: string = req.body?.name;
     const reqRecipesAdd: Array<number> = req.body?.recipe_ids?.add;
     const reqRecipesRmv: Array<number> = req.body?.recipe_ids?.rmv;
-    const reqScheduledItemsAdd: Array<number> = req.body?.scheduled_item_ids?.add;
-    const reqScheduledItemsRmv: Array<number> = req.body?.scheduled_item_ids?.rmv;
 
     // Branch instance
     let branch: Branch|null = null;
@@ -181,8 +177,6 @@ branchRouter.patch("/:id", async function (req: Request, res: Response) {
     let validatedName: string|undefined = undefined;
     let validatedRecipesAdd: Array<number> = [];
     let validatedRecipesRmv: Array<number> = [];
-    let validatedScheduledItemsAdd: Array<number> = [];
-    let validatedScheduledItemsRmv: Array<number> = [];
 
     // Validation
     if(reqName) {
@@ -202,18 +196,6 @@ branchRouter.patch("/:id", async function (req: Request, res: Response) {
             validatedRecipesRmv = reqRecipesRmv;
         }
     }
-        
-    if(reqScheduledItemsAdd) {
-        if(validator.isValidIdArray(reqScheduledItemsAdd)) {
-            validatedScheduledItemsAdd = reqScheduledItemsAdd;
-        }
-    }
-
-    if(reqScheduledItemsRmv) {
-        if(validator.isValidIdArray(reqScheduledItemsRmv)) {
-            validatedScheduledItemsRmv = reqScheduledItemsRmv;
-        } 
-    }
 
     // ORM query
     if(validator.getErrors().length === 0) {
@@ -222,17 +204,12 @@ branchRouter.patch("/:id", async function (req: Request, res: Response) {
                 branch = await AppDataSource.getRepository(Branch).findOne({
                     where: {
                         id: reqId
-                    },
-                    relations: {
-                        recipes: {
-                            categories: true
-                        },
-                        scheduledItems: true
                     }
                 });
     
                 if(branch) {
                     await AppDataSource.transaction(async (transactionalEntityManager) => {
+                        // Update attributes
                         if(validatedName) {
                             branch!.name = validatedName;
                             branch!.slug = generateSlug(validatedName);
@@ -240,27 +217,25 @@ branchRouter.patch("/:id", async function (req: Request, res: Response) {
                             await transactionalEntityManager.save(branch!);
                         }
 
+                        // Updated many-to-many relations
                         await transactionalEntityManager
                             .createQueryBuilder()
                             .relation(Branch, "recipes")
                             .of(branch)
-                            .add(validatedRecipesAdd);
-                        await transactionalEntityManager
-                            .createQueryBuilder()
-                            .relation(Branch, "recipes")
-                            .of(branch)
-                            .remove(validatedRecipesRmv);
+                            .addAndRemove(validatedRecipesAdd, validatedRecipesRmv);
 
-                        await transactionalEntityManager
-                            .createQueryBuilder()
-                            .relation(Branch, "scheduledItems")
-                            .of(branch)
-                            .add(validatedScheduledItemsAdd);
-                        await transactionalEntityManager
-                            .createQueryBuilder()
-                            .relation(Branch, "scheduledItems")
-                            .of(branch)
-                            .remove(validatedScheduledItemsRmv);
+                        // Refresh entity
+                        branch = await AppDataSource.getRepository(Branch).findOne({
+                            where: {
+                                id: reqId
+                            },
+                            relations: {
+                                recipes: {
+                                    categories: true
+                                },
+                                scheduledItems: true
+                            }
+                        });
 
                         logger.info("Branch " + branch!.id + " updated.", LOG_ENDPOINT.DATABASE);
                     });
