@@ -4,8 +4,8 @@ import { Validator } from "../MainValidator.js";
 import { ValidationError } from "../validationError.js";
 
 
-const alphanumericWithSpaceRegex = /^[a-zA-Z0-9 ]+$/;
-const alphaWithSpaceRegex = /^[a-zA-Z ]+$/;
+const alphanumericWithSpaceRegex = /^[a-zA-ZäöüÄÖÜß0-9 ]+$/;
+const alphaWithSpaceRegex = /^[a-zA-ZäöüÄÖÜß ]+$/;
 
 export class ValidatorNameUtilities extends Validator
 {
