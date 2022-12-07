@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, Relation, ManyToMany, OneToMany, Unique } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, Relation, OneToMany, Unique, CreateDateColumn, UpdateDateColumn, ManyToMany } from "typeorm";
 import { Branch } from "./branch.entity.js";
 import { Category } from "./category.entity.js";
 import { Variant } from "./variant.entity.js";
@@ -6,43 +6,47 @@ import { Variant } from "./variant.entity.js";
 @Entity()
 @Unique(["name"])
 export class Recipe {
-    // ATTRIBUTES
-    // ID
+    /**
+     * Attributes
+     */
     @PrimaryGeneratedColumn()
     id!: number;
 
-    // Name
     @Column()
     name!: string;
 
-    // Description
     @Column({
         type: "text",
         nullable: true
     })
     description!: string
 
-    // Image URL
     @Column({
         nullable: true
     })
     image_path!: string
 
-    // FOREIGN KEY REFERENCES
-    // Variants
+    /**
+     * Foreign key references
+     */
     @OneToMany(() => Variant, (variant) => variant.recipe)
     variants!: Relation<Variant>[];
 
-    // JUNCTION TABLE REFERENCES
-    // Branches_Recipes
-    @ManyToMany(() => Branch, (branch) => branch.recipes, {
-        onDelete: "CASCADE"
-    })
+    /**
+     * Junction table references
+     */
+    @ManyToMany(() => Branch, (branch) => branch.recipes)
     branches!: Relation<Branch>[];
 
-    // Categories_Recipes
-    @ManyToMany(() => Category, (category) => category.recipes, {
-        onDelete: "CASCADE"
-    })
+    @ManyToMany(() => Category, (category) => category.recipes)
     categories!: Relation<Category>[];
+
+    /**
+     * Timestamps
+     */
+    @CreateDateColumn()
+    created_at!: Date;
+
+    @UpdateDateColumn()
+    updated_at!: Date;
 }

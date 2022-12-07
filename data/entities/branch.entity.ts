@@ -1,36 +1,38 @@
-import { Entity, PrimaryGeneratedColumn, Column, Relation, OneToMany, ManyToMany, JoinTable, Unique, Like, FindOperator } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, Relation, OneToMany, Unique, Like, FindOperator, CreateDateColumn, UpdateDateColumn, ManyToMany, JoinTable } from "typeorm";
 import { Recipe } from "./recipe.entity.js";
 import { ScheduledItem } from "./scheduled_item.entity.js";
 
 @Entity()
 @Unique(["name"])
+@Unique(["slug"])
 export class Branch {
-    // ATTRIBUTES
-    // ID
+    /**
+     * Attributes
+     */
     @PrimaryGeneratedColumn()
     id!: number;
 
-    // Name
     @Column({
         type: "nvarchar",
         length: 100
     })
     name!: string;
 
-    // Slug
     @Column({
         type: "nvarchar",
         length: 100
     })
     slug!: string;
 
-    // FOREIGN KEY REFERENCES
-    // ScheduleItems
+    /**
+     * Foreign key references
+     */
     @OneToMany(() => ScheduledItem, (scheduledItem) => scheduledItem.branch)
     scheduledItems!: Relation<ScheduledItem>[];
 
-    // JUNCTION TABLES
-    // Branches_Recipes
+    /**
+     * Junction tables
+     */
     @ManyToMany(() => Recipe, (recipe) => recipe.branches)
     @JoinTable({
         name: "branches_recipes",
@@ -44,10 +46,19 @@ export class Branch {
     recipes!: Relation<Recipe>[];
 
     /**
-     * Returns an object with Branch filter criteria. 
+     * Timestamps
+     */
+    @CreateDateColumn()
+    created_at!: Date;
+
+    @UpdateDateColumn()
+    updated_at!: Date;
+
+    /**
+     * Returns an object with Branch filter criteria.
      * 
-     * @param name Searches entries with a similiar name attribute.
-     * @returns Object with specified where statements.
+     * @param name Searches entries with a similiar name attribute
+     * @returns Object with specified where statements
      */
     public static getFilter(name: string|undefined): Object 
     {

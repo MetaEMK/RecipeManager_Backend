@@ -1,40 +1,38 @@
-import { Entity, PrimaryGeneratedColumn, Column, Relation, ManyToOne, JoinColumn } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, Relation, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn, Unique } from "typeorm";
 import { Ingredient } from "./ingredient.entity.js";
 import { Variant } from "./variant.entity.js";
 
 @Entity()
 export class VariantIngredient {
-    // ATTRIBUTES
-    // ID
+    /**
+     * Attributes
+     */
     @PrimaryGeneratedColumn()
     id!: number;
 
-    // Quantity
     @Column()
     quantity!: number;
 
-    // Unit
     @Column({
         type: "nvarchar",
         length: 10
     })
     unit!: string;
 
-    // Section
     @Column({
         type: "tinyint"
     })
     section!: number;
 
-    // Order number
     @Column({
         name: "order_number",
         type: "smallint"
     })
     orderNumber!: number;
 
-    // FOREIGN KEYS
-    // Ingredient
+    /**
+     * Foreign keys
+     */
     @ManyToOne(() => Ingredient, (ingredient) => ingredient.variantIngredients, {
         nullable: false,
         onDelete: "CASCADE"
@@ -44,7 +42,6 @@ export class VariantIngredient {
     })
     ingredient!: Relation<Ingredient>;
 
-    // Variant
     @ManyToOne(() => Variant, (variant) => variant.variantIngredients, {
         nullable: false,
         onDelete: "CASCADE"
@@ -53,4 +50,13 @@ export class VariantIngredient {
         name: "variant_id"
     })
     variant!: Relation<Variant>;
+
+    /**
+     * Timestamps
+     */
+    @CreateDateColumn()
+    created_at!: Date;
+
+    @UpdateDateColumn()
+    updated_at!: Date;
 }

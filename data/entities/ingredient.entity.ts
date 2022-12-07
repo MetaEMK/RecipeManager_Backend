@@ -1,23 +1,33 @@
-import { Entity, PrimaryGeneratedColumn, Column, Relation, OneToMany, Unique } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, Relation, OneToMany, Unique, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { VariantIngredient } from "./variant_ingredient.entity.js";
 
 @Entity()
 @Unique(["name"])
 export class Ingredient {
-    // ATTRIBUTES
-    // ID
+    /**
+     * Attributes
+     */
     @PrimaryGeneratedColumn()
     id!: number;
 
-    // Name
     @Column({
         type: "nvarchar",
         length: 100
     })
     name!: string;
 
-    // FOREIGN KEY REFERENCES
-    // Variant ingredients
+    /**
+     * Foreign key references
+     */
     @OneToMany(() => VariantIngredient, (variantIngredient) => variantIngredient.ingredient)
     variantIngredients!: Relation<VariantIngredient>[];
+
+    /** 
+     * Timestamps
+     */
+    @CreateDateColumn()
+    created_at!: Date;
+
+    @UpdateDateColumn()
+    updated_at!: Date;
 }

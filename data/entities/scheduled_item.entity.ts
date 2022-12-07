@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, Relation, ManyToOne, JoinColumn } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, Relation, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn, Unique } from "typeorm";
 import { Days } from "../../enums/Days.enum.js";
 import { Branch } from "./branch.entity.js";
 import { Size } from "./size.entity.js";
@@ -6,34 +6,33 @@ import { Variant } from "./variant.entity.js";
 
 @Entity()
 export class ScheduledItem {
-    // ATTRIBUTES
-    // ID
+    /**
+     * Attributes
+     */
     @PrimaryGeneratedColumn()
     id!: number;
 
-    // Day
     @Column({
         enum: Days,
         type: "tinyint"
     })
     day!: Days;
 
-    // Quantity
     @Column()
     quantity!: number;
 
-    // FOREIGN KEYS
-    // Branch
+    /**
+     * Foreign keys
+     */
     @ManyToOne(() => Branch, (branch) => branch.scheduledItems, {
         nullable: false,
         onDelete: "CASCADE"
     })
     @JoinColumn({ 
-        name: "branch_id" 
+        name: "branch_id"
     })
     branch!: Relation<Branch>;
 
-    // Variant
     @ManyToOne(() => Variant, (variant) => variant.scheduledItems, {
         nullable: false,
         onDelete: "CASCADE"
@@ -43,7 +42,6 @@ export class ScheduledItem {
     })
     variant!: Relation<Variant>;
     
-    // Size
     @ManyToOne(() => Size, (size) => size.scheduledItems, {
         nullable: false,
         onDelete: "CASCADE"
@@ -52,4 +50,13 @@ export class ScheduledItem {
         name: "size_id"
     })
     size!: Relation<Size>;
+
+    /**
+     * Timestamps
+     */
+    @CreateDateColumn()
+    created_at!: Date;
+
+    @UpdateDateColumn()
+    updated_at!: Date;
 }

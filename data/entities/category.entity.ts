@@ -1,23 +1,24 @@
-import { Entity, PrimaryGeneratedColumn, Column, Relation, ManyToMany, JoinTable, Unique } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, Relation, Unique, CreateDateColumn, UpdateDateColumn, ManyToMany, JoinTable } from "typeorm";
 import { Recipe } from "./recipe.entity.js";
 
 @Entity()
 @Unique(["name"])
 export class Category {
-    // ATTRIBUTES
-    // ID
+    /**
+     * Attributes
+     */
     @PrimaryGeneratedColumn()
     id!: number;
 
-    // Name
     @Column({
         type: "nvarchar",
         length: 100
     })
     name!: string;
 
-    // JUNCTION TABLES
-    // Categories_Recipes
+    /**
+     * Junction tables
+     */
     @ManyToMany(() => Recipe, (recipe) => recipe.categories)
     @JoinTable({
         name: "categories_recipes",
@@ -29,4 +30,13 @@ export class Category {
         }
     })
     recipes!: Relation<Recipe>[];
+
+    /**
+     * Timestamps
+     */
+    @CreateDateColumn()
+    created_at!: Date;
+
+    @UpdateDateColumn()
+    updated_at!: Date;
 }
