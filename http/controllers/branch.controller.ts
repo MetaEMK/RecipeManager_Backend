@@ -85,7 +85,7 @@ branchRouter.get("/:id", async function (req: Request, res: Response) {
                 });
             
             if(branch) {
-                branch.recipe_categories = await AppDataSource
+                branch.recipeCategories = await AppDataSource
                     .getRepository(Category)
                     .createQueryBuilder("category")
                     .innerJoin("category.recipes", "recipe")

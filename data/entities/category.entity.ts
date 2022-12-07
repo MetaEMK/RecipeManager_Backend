@@ -4,9 +4,6 @@ import { Recipe } from "./recipe.entity.js";
 @Entity()
 @Unique(["name"])
 export class Category {
-    /**
-     * Attributes
-     */
     @PrimaryGeneratedColumn()
     id!: number;
 
@@ -16,9 +13,6 @@ export class Category {
     })
     name!: string;
 
-    /**
-     * Junction tables
-     */
     @ManyToMany(() => Recipe, (recipe) => recipe.categories)
     @JoinTable({
         name: "categories_recipes",
@@ -31,12 +25,13 @@ export class Category {
     })
     recipes!: Relation<Recipe>[];
 
-    /**
-     * Timestamps
-     */
-    @CreateDateColumn()
-    created_at!: Date;
+    @CreateDateColumn({
+        name: "created_at"
+    })
+    createdAt!: Date;
 
-    @UpdateDateColumn()
-    updated_at!: Date;
+    @UpdateDateColumn({
+        name: "updated_at"
+    })
+    updatedAt!: Date;
 }

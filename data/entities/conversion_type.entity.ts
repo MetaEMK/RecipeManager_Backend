@@ -5,9 +5,6 @@ import { Size } from "./size.entity.js";
 @Entity()
 @Unique(["name"])
 export class ConversionType {
-    /**
-     * Attributes
-     */
     @PrimaryGeneratedColumn()
     id!: number;
 
@@ -17,21 +14,19 @@ export class ConversionType {
     })
     name!: string;
 
-    /**
-     * Foreign key references
-     */
     @OneToMany(() => Conversion, (conversion) => conversion.conversionType)
     conversions!: Relation<Conversion>[];
     
     @OneToMany(() => Size, (size) => size.conversionType)
     sizes!: Relation<Size>[];
 
-    /**
-     * Timestamps
-     */
-    @CreateDateColumn()
-    created_at!: Date;
+    @CreateDateColumn({
+        name: "created_at"
+    })
+    createdAt!: Date;
 
-    @UpdateDateColumn()
-    updated_at!: Date;
+    @UpdateDateColumn({
+        name: "updated_at"
+    })
+    updatedAt!: Date;
 }

@@ -6,9 +6,6 @@ import { Variant } from "./variant.entity.js";
 
 @Entity()
 export class Size {
-    /**
-     * Attributes
-     */
     @PrimaryGeneratedColumn()
     id!: number;
 
@@ -18,9 +15,6 @@ export class Size {
     })
     name!: string;
 
-    /**
-     * Foreign keys
-     */
     @ManyToOne(() => ConversionType, (conversionType) => conversionType.sizes, {
         nullable: false,
         onDelete: "CASCADE"
@@ -29,15 +23,12 @@ export class Size {
         name: "conversion_type_id"
     })
     conversionType!: Relation<ConversionType>;
-
-    /**
-     * Foreign key references
-     */
+ 
     @OneToMany(() => Conversion, (conversion) => conversion.fromSize)
     fromConversions!: Relation<Conversion>[];
 
     @OneToMany(() => Conversion, (conversion) => conversion.toSize)
-    toConversions!: Relation<Conversion>[];
+    toConversions!: Relation<Conversion>[];    
 
     @OneToMany(() => ScheduledItem, (scheduledItem) => scheduledItem.size)
     scheduledItems!: Relation<ScheduledItem>[];
@@ -45,12 +36,13 @@ export class Size {
     @OneToMany(() => Variant, (variant) => variant.size)
     variants!: Relation<Variant>[];
 
-    /**
-     * Timestamps
-     */
-    @CreateDateColumn()
-    created_at!: Date;
+    @CreateDateColumn({
+        name: "created_at"
+    })
+    createdAt!: Date;
 
-    @UpdateDateColumn()
-    updated_at!: Date;
+    @UpdateDateColumn({
+        name: "updated_at"
+    })
+    updatedAt!: Date;
 }

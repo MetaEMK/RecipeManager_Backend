@@ -6,7 +6,6 @@ import { VariantIngredient } from "./variant_ingredient.entity.js";
 
 @Entity()
 export class Variant {
-    /** Attributes */
     @PrimaryGeneratedColumn()
     id!: number;
 
@@ -19,9 +18,6 @@ export class Variant {
     })
     description!: string
 
-    /**
-     * Foreign keys
-     */
     @ManyToOne(() => Recipe, (recipe) => recipe.variants, {
         nullable: false,
         onDelete: "CASCADE"
@@ -40,21 +36,19 @@ export class Variant {
     })
     size!: Relation<Size>;
 
-    /**
-     * Foreign key references
-     */
     @OneToMany(() => ScheduledItem, (scheduledItem) => scheduledItem.variant)
     scheduledItems!: Relation<ScheduledItem>[];
 
     @OneToMany(() => VariantIngredient, (variantIngredient) => variantIngredient.variant)
     variantIngredients!: Relation<VariantIngredient>[];
 
-    /**
-     * Timestamps
-     */
-    @CreateDateColumn()
-    created_at!: Date;
+    @CreateDateColumn({
+        name: "created_at"
+    })
+    createdAt!: Date;
 
-    @UpdateDateColumn()
-    updated_at!: Date;
+    @UpdateDateColumn({
+        name: "updated_at"
+    })
+    updatedAt!: Date;
 }

@@ -6,9 +6,6 @@ import { Variant } from "./variant.entity.js";
 
 @Entity()
 export class ScheduledItem {
-    /**
-     * Attributes
-     */
     @PrimaryGeneratedColumn()
     id!: number;
 
@@ -18,12 +15,6 @@ export class ScheduledItem {
     })
     day!: Days;
 
-    @Column()
-    quantity!: number;
-
-    /**
-     * Foreign keys
-     */
     @ManyToOne(() => Branch, (branch) => branch.scheduledItems, {
         nullable: false,
         onDelete: "CASCADE"
@@ -51,12 +42,16 @@ export class ScheduledItem {
     })
     size!: Relation<Size>;
 
-    /**
-     * Timestamps
-     */
-    @CreateDateColumn()
-    created_at!: Date;
+    @Column()
+    quantity!: number;
 
-    @UpdateDateColumn()
-    updated_at!: Date;
+    @CreateDateColumn({
+        name: "created_at"
+    })
+    createdAt!: Date;
+
+    @UpdateDateColumn({
+        name: "updated_at"
+    })
+    updatedAt!: Date;
 }

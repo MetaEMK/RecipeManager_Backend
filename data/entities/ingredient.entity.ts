@@ -4,9 +4,6 @@ import { VariantIngredient } from "./variant_ingredient.entity.js";
 @Entity()
 @Unique(["name"])
 export class Ingredient {
-    /**
-     * Attributes
-     */
     @PrimaryGeneratedColumn()
     id!: number;
 
@@ -16,18 +13,16 @@ export class Ingredient {
     })
     name!: string;
 
-    /**
-     * Foreign key references
-     */
     @OneToMany(() => VariantIngredient, (variantIngredient) => variantIngredient.ingredient)
     variantIngredients!: Relation<VariantIngredient>[];
 
-    /** 
-     * Timestamps
-     */
-    @CreateDateColumn()
-    created_at!: Date;
+    @CreateDateColumn({
+        name: "created_at"
+    })
+    createdAt!: Date;
 
-    @UpdateDateColumn()
-    updated_at!: Date;
+    @UpdateDateColumn({
+        name: "updated_at"
+    })
+    updatedAt!: Date;
 }

@@ -6,9 +6,6 @@ import { Variant } from "./variant.entity.js";
 @Entity()
 @Unique(["name"])
 export class Recipe {
-    /**
-     * Attributes
-     */
     @PrimaryGeneratedColumn()
     id!: number;
 
@@ -22,31 +19,27 @@ export class Recipe {
     description!: string
 
     @Column({
+        name: "image_path",
         nullable: true
     })
-    image_path!: string
+    imagePath!: string
 
-    /**
-     * Foreign key references
-     */
-    @OneToMany(() => Variant, (variant) => variant.recipe)
-    variants!: Relation<Variant>[];
-
-    /**
-     * Junction table references
-     */
     @ManyToMany(() => Branch, (branch) => branch.recipes)
     branches!: Relation<Branch>[];
 
     @ManyToMany(() => Category, (category) => category.recipes)
     categories!: Relation<Category>[];
 
-    /**
-     * Timestamps
-     */
-    @CreateDateColumn()
-    created_at!: Date;
+    @OneToMany(() => Variant, (variant) => variant.recipe)
+    variants!: Relation<Variant>[];
 
-    @UpdateDateColumn()
-    updated_at!: Date;
+    @CreateDateColumn({
+        name: "created_at"
+    })
+    createdAt!: Date;
+
+    @UpdateDateColumn({
+        name: "updated_at"
+    })
+    updatedAt!: Date;
 }

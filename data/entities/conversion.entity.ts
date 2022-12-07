@@ -4,20 +4,9 @@ import { Size } from "./size.entity.js";
 
 @Entity()
 export class Conversion {
-    /**
-     * Attributes
-     */
     @PrimaryGeneratedColumn()
     id!: number;
 
-    @Column({
-        type: "double"
-    })
-    multiplicator!: number;
-
-    /**
-     * Foreign keys
-     */
     @ManyToOne(() => ConversionType, (conversionType) => conversionType.conversions, {
         nullable: false,
         onDelete: "CASCADE"
@@ -45,12 +34,18 @@ export class Conversion {
     })
     toSize!: Relation<Size>;
 
-    /**
-     * Timestamps
-     */
-    @CreateDateColumn()
-    created_at!: Date;
+    @Column({
+        type: "double"
+    })
+    multiplicator!: number;
 
-    @UpdateDateColumn()
-    updated_at!: Date;
+    @CreateDateColumn({
+        name: "created_at"
+    })
+    createdAt!: Date;
+
+    @UpdateDateColumn({
+        name: "updated_at"
+    })
+    updatedAt!: Date;
 }

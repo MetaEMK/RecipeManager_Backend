@@ -4,11 +4,17 @@ import { Variant } from "./variant.entity.js";
 
 @Entity()
 export class VariantIngredient {
-    /**
-     * Attributes
-     */
     @PrimaryGeneratedColumn()
     id!: number;
+
+    @ManyToOne(() => Ingredient, (ingredient) => ingredient.variantIngredients, {
+        nullable: false,
+        onDelete: "CASCADE"
+    })
+    @JoinColumn({
+        name: "ingredient_id"
+    })
+    ingredient!: Relation<Ingredient>;
 
     @Column()
     quantity!: number;
@@ -25,22 +31,10 @@ export class VariantIngredient {
     section!: number;
 
     @Column({
-        name: "order_number",
+        name: "order",
         type: "smallint"
     })
-    orderNumber!: number;
-
-    /**
-     * Foreign keys
-     */
-    @ManyToOne(() => Ingredient, (ingredient) => ingredient.variantIngredients, {
-        nullable: false,
-        onDelete: "CASCADE"
-    })
-    @JoinColumn({
-        name: "ingredient_id"
-    })
-    ingredient!: Relation<Ingredient>;
+    order!: number;
 
     @ManyToOne(() => Variant, (variant) => variant.variantIngredients, {
         nullable: false,
@@ -51,12 +45,13 @@ export class VariantIngredient {
     })
     variant!: Relation<Variant>;
 
-    /**
-     * Timestamps
-     */
-    @CreateDateColumn()
-    created_at!: Date;
+    @CreateDateColumn({
+        name: "created_at"
+    })
+    createdAt!: Date;
 
-    @UpdateDateColumn()
-    updated_at!: Date;
+    @UpdateDateColumn({
+        name: "updated_at"
+    })
+    updatedAt!: Date;
 }

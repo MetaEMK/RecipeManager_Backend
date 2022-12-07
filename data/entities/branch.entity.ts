@@ -7,9 +7,6 @@ import { ScheduledItem } from "./scheduled_item.entity.js";
 @Unique(["name"])
 @Unique(["slug"])
 export class Branch {
-    /**
-     * Attributes
-     */
     @PrimaryGeneratedColumn()
     id!: number;
 
@@ -26,40 +23,35 @@ export class Branch {
     slug!: string;
 
     /**
-     * Non database attributes.
+     * Non database attribute.
      * Needed to add additonal data to the entity for response purposes.
      */
-    recipe_categories?: Category[];
+    recipeCategories?: Category[];
 
-    /**
-     * Junction tables
-     */
-     @ManyToMany(() => Recipe, (recipe) => recipe.branches)
-     @JoinTable({
-         name: "branches_recipes",
-         joinColumn: {
-             name: "branch_id"
-         },
-         inverseJoinColumn: {
-             name: "recipe_id"
-         }
-     })
-     recipes!: Relation<Recipe>[];    
+    @ManyToMany(() => Recipe, (recipe) => recipe.branches)
+    @JoinTable({
+        name: "branches_recipes",
+        joinColumn: {
+            name: "branch_id"
+        },
+        inverseJoinColumn: {
+            name: "recipe_id"
+        }
+    })
+    recipes!: Relation<Recipe>[];    
 
-    /**
-     * Foreign key references
-     */
     @OneToMany(() => ScheduledItem, (scheduledItem) => scheduledItem.branch)
     scheduledItems!: Relation<ScheduledItem>[];
 
-    /**
-     * Timestamps
-     */
-    @CreateDateColumn()
-    created_at!: Date;
+    @CreateDateColumn({
+        name: "created_at"
+    })
+    createdAt!: Date;
 
-    @UpdateDateColumn()
-    updated_at!: Date;
+    @UpdateDateColumn({
+        name: "updated_at"
+    })
+    updatedAt!: Date;
 
     /**
      * Returns an object with Branch filter criteria.
