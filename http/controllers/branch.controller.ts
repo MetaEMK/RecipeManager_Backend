@@ -138,13 +138,12 @@ branchRouter.post("/", async function (req: Request, res: Response) {
                 .getRepository(Branch)
                 .save(branch);
             
+            logger.info("Branch " + branch.id + " created.", LOG_ENDPOINT.DATABASE);
+
             res.status(201)
             res.set({
                 "Location": req.protocol + "://" + req.get("host") + req.originalUrl + "/" + branch.id
             });
-
-            logger.info("Branch " + branch.id + " created.", LOG_ENDPOINT.DATABASE);
-
             res.json({
                 data: branch
             });
