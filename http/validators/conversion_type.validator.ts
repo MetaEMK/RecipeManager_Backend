@@ -1,5 +1,5 @@
-import { Validator } from "./MainValidator";
-import { ValidatorNameUtilities } from "./util/validatorNameUtilities";
+import { Validator } from "./MainValidator.js";
+import { ValidatorNameUtilities } from "./util/validatorNameUtilities.js";
 
 export class ConversionTypeValidator extends Validator
 {

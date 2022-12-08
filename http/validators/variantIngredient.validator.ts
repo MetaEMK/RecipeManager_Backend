@@ -1,8 +1,8 @@
 import { GeneralValidationErrorCodes } from "../../enums/GeneralValidationErrors.enum.js";
 import { Validator } from "./MainValidator.js";
 import { ValidatorIdUtilities } from "./util/validatorIdUtilities.js";
-import { ValidatorQuanitiyUtilities } from "./util/validatorQuantityUtilities.js";import { ValidationError } from "./validationError.js";
-;
+import { ValidatorQuanitiyUtilities } from "./util/validatorQuantityUtilities.js";
+import { ValidationError } from "./validationError.js";
 
 
 export class VariantIngredientValidator extends Validator

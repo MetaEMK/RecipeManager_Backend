@@ -1,8 +1,8 @@
-import { GeneralValidationErrorCodes } from "../../enums/GeneralValidationErrors.enum";
-import { Validator } from "./MainValidator";
-import { ValidatorIdUtilities } from "./util/validatorIdUtilities";
-import { ValidatorQuanitiyUtilities } from "./util/validatorQuantityUtilities";
-import { ValidationError } from "./validationError";
+import { GeneralValidationErrorCodes } from "../../enums/GeneralValidationErrors.enum.js";
+import { Validator } from "./MainValidator.js";
+import { ValidatorIdUtilities } from "./util/validatorIdUtilities.js";
+import { ValidatorQuanitiyUtilities } from "./util/validatorQuantityUtilities.js";
+import { ValidationError } from "./validationError.js";
 
 
 
