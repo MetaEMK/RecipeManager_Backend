@@ -1,11 +1,21 @@
 import express from "express";
 import { Request, Response } from "express";
 import { AppDataSource } from "../../config/datasource.js";
+import { createLogger } from "../../utils/logger.js";
+import { decodeURISpaces, generateSlug } from "../../utils/controller.util.js";
+import { SQLiteErrorResponse } from "../../utils/sqliteErrorResponse.js";
 import { Recipe } from "../../data/entities/recipe.entity.js";
+import { RecipeValidator } from "../validators/recipe.validator.js";
 
+// Router instance
 export const recipeRouter = express.Router();
 
-// Get all recipes
+// Logger instance
+const logger = createLogger();
+
+/**
+ * Get all recipes.
+ */
 recipeRouter.get("/", async function (req: Request, res: Response) {
     const recipes = await AppDataSource
         .getRepository(Recipe)
@@ -14,7 +24,16 @@ recipeRouter.get("/", async function (req: Request, res: Response) {
     res.json(recipes);
 });
 
-// Create a recipe
+/**
+ * Get a specific recipe.
+ */
+recipeRouter.get("/:id", async function (req: Request, res: Response) {
+
+});
+
+/**
+ * Create a recipe.
+ */
 recipeRouter.post("/", async function (req: Request, res: Response) {
     const recipe = new Recipe();
     recipe.name = req.body.name;
@@ -26,7 +45,16 @@ recipeRouter.post("/", async function (req: Request, res: Response) {
     res.json(recipe);
 });
 
-// Delete a recipe
+/**
+ * (Partially) Update a recipe.
+ */
+recipeRouter.patch("/:id", async function (req: Request, res: Response) {
+
+});
+
+/**
+ * Delete a recipe.
+ */
 recipeRouter.delete("/:id", async function (req: Request, res: Response) {
     const results = await AppDataSource.getRepository(Recipe).delete(req.params.id);
     res.json(results);

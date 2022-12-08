@@ -1,11 +1,11 @@
 import express from "express";
 import { Request, Response } from "express";
 import { AppDataSource } from "../../config/datasource.js";
+import { createLogger, LOG_ENDPOINT } from "../../utils/logger.js";
+import { decodeURISpaces, generateSlug } from "../../utils/controller.util.js";
+import { SQLiteErrorResponse } from "../../utils/sqliteErrorResponse.js";
 import { Branch } from "../../data/entities/branch.entity.js";
 import { Category } from "../../data/entities/category.entity.js";
-import { decodeURISpaces, generateSlug } from "../../utils/controller.util.js";
-import { createLogger, LOG_ENDPOINT } from "../../utils/logger.js";
-import { SQLiteErrorResponse } from "../../utils/sqliteErrorResponse.js";
 import { BranchValidator } from "../validators/branch.validator.js";
 
 // Router instance
