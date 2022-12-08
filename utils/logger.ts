@@ -30,12 +30,13 @@ export enum LOG_ENDPOINT {
 //class for logger
 class Logger
 {
+    private log_archive_counter = 0;
     private logsize: number = 50000;
     private logcount: number = 3;
 
     private setup: boolean = false;
     private logLevel: LOG_LEVEL;
-    private logPath: string = './log';
+    private logPath: string = 'log';
     private archivePath = this.logPath + '/archive';
 
     //creates logger and sets up some basic stuff (reads config)
@@ -120,9 +121,17 @@ class Logger
         if(getFileSize(this.logPath + endpoint) > this.logsize)
         {
             //copy file to *.log<date> and truncate file to 0 bytes
-            fs.copyFileSync(this.logPath + endpoint, this.logPath + endpoint + new Date().toISOString());
-            fs.truncateSync(this.logPath + endpoint, 0);
-
+            try {
+                this.log_archive_counter++;
+                fs.copyFileSync(this.logPath + endpoint, this.logPath + endpoint + this.log_archive_counter);
+            } catch (error) {
+                console.log("Error while archiving log file for " + endpoint);
+            }
+            try {
+                fs.truncateSync(this.logPath + endpoint, 0);
+            } catch (error) {
+                console.log("Error while truncating log file for " + endpoint);
+            }
             //delete old file
             let files = fs.readdirSync(this.logPath);
             files = files.filter(file => ("/" + file).startsWith(endpoint) == true);
