@@ -8,8 +8,7 @@ export class VariantIngredient {
     id!: number;
 
     @ManyToOne(() => Ingredient, (ingredient) => ingredient.variantIngredients, {
-        nullable: false,
-        onDelete: "CASCADE"
+        nullable: false
     })
     @JoinColumn({
         name: "ingredient_id"

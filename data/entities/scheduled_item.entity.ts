@@ -34,8 +34,7 @@ export class ScheduledItem {
     variant!: Relation<Variant>;
     
     @ManyToOne(() => Size, (size) => size.scheduledItems, {
-        nullable: false,
-        onDelete: "CASCADE"
+        nullable: false
     })
     @JoinColumn({
         name: "size_id"

@@ -28,8 +28,7 @@ export class Variant {
     recipe!: Relation<Recipe>;
 
     @ManyToOne(() => Size, (size) => size.variants, {
-        nullable: false,
-        onDelete: "CASCADE"
+        nullable: false
     })
     @JoinColumn({
         name: "size_id"
