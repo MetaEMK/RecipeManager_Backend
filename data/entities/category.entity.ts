@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, Relation, Unique, CreateDateColumn, UpdateDateColumn, ManyToMany, JoinTable } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, Relation, Unique, Like, CreateDateColumn, UpdateDateColumn, ManyToMany, JoinTable, FindOperator } from "typeorm";
 import { Recipe } from "./recipe.entity.js";
 
 @Entity()
@@ -34,4 +34,21 @@ export class Category {
         name: "updated_at"
     })
     updatedAt!: Date;
+
+    /**
+     * Returns an object with Category filter criteria.
+     * 
+     * @param name Searches entries with a similiar name attribute
+     * @returns Object with specified where statements
+     */
+    public static getFilter(name: string|undefined): Object
+    {
+        const where: Record<string, FindOperator<string>> = {};
+
+        if(name) {
+            where.name = Like(`%${ name }%`);
+        }
+
+        return where;
+    }
 }
