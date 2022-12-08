@@ -184,23 +184,17 @@ branchRouter.patch("/:id", async function (req: Request, res: Response) {
     let validatedRecipesRmv: Array<number> = [];
 
     // Validation
-    if(reqName) {
-        if(validator.isValidBranchName(reqName)) {
+    if(reqName)
+        if(validator.isValidBranchName(reqName))
             validatedName = reqName;
-        }
-    }
 
-    if(reqRecipesAdd) {
-        if(validator.isValidIdArray(reqRecipesAdd)) {
+    if(reqRecipesAdd)
+        if(validator.isValidIdArray(reqRecipesAdd))
             validatedRecipesAdd = reqRecipesAdd;
-        }
-    }
     
-    if(reqRecipesRmv) {
-        if(validator.isValidIdArray(reqRecipesRmv)) {
+    if(reqRecipesRmv)
+        if(validator.isValidIdArray(reqRecipesRmv))
             validatedRecipesRmv = reqRecipesRmv;
-        }
-    }
 
     // ORM query
     if(validator.getErrors().length === 0) {
@@ -232,7 +226,7 @@ branchRouter.patch("/:id", async function (req: Request, res: Response) {
                             .addAndRemove(validatedRecipesAdd, validatedRecipesRmv);
 
                         // Refresh entity
-                        branch = await AppDataSource
+                        branch = await transactionalEntityManager
                             .getRepository(Branch)
                             .findOne({
                                 where: {
@@ -290,9 +284,10 @@ branchRouter.delete("/:id", async function (req: Request, res: Response) {
     // ORM query
     try {
         if(reqId) {
-            branch = await repository.findOneBy({
-                id: reqId
-            });
+            branch = await repository
+                .findOneBy({
+                    id: reqId
+                });
         }
 
         if(branch) {
