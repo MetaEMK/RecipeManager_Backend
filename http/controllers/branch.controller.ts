@@ -232,17 +232,19 @@ branchRouter.patch("/:id", async function (req: Request, res: Response) {
                             .addAndRemove(validatedRecipesAdd, validatedRecipesRmv);
 
                         // Refresh entity
-                        branch = await AppDataSource.getRepository(Branch).findOne({
-                            where: {
-                                id: reqId
-                            },
-                            relations: {
-                                recipes: {
-                                    categories: true
+                        branch = await AppDataSource
+                            .getRepository(Branch)
+                            .findOne({
+                                where: {
+                                    id: reqId
                                 },
-                                scheduledItems: true
-                            }
-                        });
+                                relations: {
+                                    recipes: {
+                                        categories: true
+                                    },
+                                    scheduledItems: true
+                                }
+                            });
 
                         logger.info("Branch " + branch!.id + " updated.", LOG_ENDPOINT.DATABASE);
                     });
