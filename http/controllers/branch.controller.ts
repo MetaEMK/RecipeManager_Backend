@@ -164,6 +164,7 @@ branchRouter.post("/", async function (req: Request, res: Response) {
 
 /**
  * (Partially) Update a branch.
+ * Able to add and remove recipes.
  */
 branchRouter.patch("/:id", async function (req: Request, res: Response) {
     // Parameters
