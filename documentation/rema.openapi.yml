@@ -1,0 +1,204 @@
+# TODOS
+# - FILL SCHEDULE ITEMS IN BRANCH GET SPECIFIC
+
+openapi: '3.0.2'
+info:
+  title: ReMa API
+  version: '1.0'
+  description: API for ReMa a simple recipe manager.
+servers:
+  - url: http://localhost:3000/api/v1
+paths:
+
+  #########
+  # Branch
+  #########
+  /branches:
+    get:
+      description: Get all branches
+      tags:
+        - Branch
+      parameters:
+        - name: name
+          in: query
+          description: Search branches for a specific name
+          schema:
+            type: string
+            minLength: 0
+            maxLength: 100
+      responses:
+        '200':
+          description: OK
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Branch'
+        '500':
+          description: Internal Server Error
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  /branches/{id}:
+    get:
+      description: Get a specific branch
+      tags:
+        - Branch
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Branch ID
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    $ref: '#/components/schemas/BranchFull'
+        '404':
+          description: Not Found Error
+        '500':
+          description: Internal Server Error
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+    post:
+      description: Create a branch
+      tags:
+        - Branch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+              required:
+                - type
+      responses:
+        "201":
+          description: CREATED
+      
+
+#############
+# Components
+#############
+components:
+  schemas:
+    ###########
+    # Entities
+    ###########
+    
+    #Branch
+    BranchBase:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+      example:
+        id: 1
+        name: Abteilung A
+        slug: abteilung_a
+    BranchAdd:
+      type: object
+      properties:
+        recipeCategories:
+          type: array
+          items:
+            type: object
+        recipes:
+          type: array
+          items:
+            type: object
+        scheduledItems:
+          type: array
+          items:
+            type: object
+      example:
+        recipeCategories: [
+          {
+            id: 1,
+            name: Kategorie A,
+            createdAt: 2022-01-01T00:00:00.000Z,
+            updatedAt: 2022-01-01T00:00:00.000Z
+          }
+        ]
+        recipes: [
+          {
+            id: 1,
+            name: Rezept A,
+            description: null,
+            imagePath: null,
+            categories: [
+              {
+                id: 1,
+                name: Kategorie A,
+                createdAt: 2022-01-01T00:00:00.000Z,
+                updatedAt: 2022-01-01T00:00:00.000Z
+              }
+            ],
+            createdAt: 2022-01-01T00:00:00.000Z,
+            updatedAt: 2022-01-01T00:00:00.000Z
+          }
+        ]
+        scheduledItems: []  # TODO FILL SCHEDULE ITEMS
+    Branch:
+      allOf:
+        - $ref: '#/components/schemas/BranchBase'
+        - $ref: '#/components/schemas/Timestamps'
+    BranchFull:
+      allOf:
+        - $ref: '#/components/schemas/BranchBase'
+        - $ref: '#/components/schemas/BranchAdd'
+        - $ref: '#/components/schemas/Timestamps'
+        
+    #Timestamps
+    Timestamps:
+      type: object
+      properties:
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      example:
+        createdAt: 2022-01-01T00:00:00.000Z
+        updatedAt: 2022-01-01T00:00:00.000Z
+
+    ################
+    # Error Objects
+    ################
+    InternalServerError:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            type:
+              type: string
+            message:
+              type: string
+      example:
+        error:
+          code: UNCAUGHT_EXCEPTION
+          type: UNCAUGHT_EXCEPTION_ERROR
+          message: An uncaught exception occurred.
