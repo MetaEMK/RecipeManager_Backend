@@ -206,11 +206,13 @@ branchRouter.patch("/:id", async function (req: Request, res: Response) {
     if(validator.getErrors().length === 0) {
         try {
             if(reqId) {
-                branch = await AppDataSource.getRepository(Branch).findOne({
-                    where: {
-                        id: reqId
-                    }
-                });
+                branch = await AppDataSource
+                    .getRepository(Branch)
+                    .findOne({
+                        where: {
+                            id: reqId
+                        }
+                    });
     
                 if(branch) {
                     await AppDataSource.transaction(async (transactionalEntityManager) => {
