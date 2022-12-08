@@ -294,7 +294,7 @@ branchRouter.delete("/:id", async function (req: Request, res: Response) {
         if(branch) {
             await repository.remove(branch);
 
-            logger.info("Branch with" + reqId + " deleted.", LOG_ENDPOINT.DATABASE);
+            logger.info("Branch with " + reqId + " deleted.", LOG_ENDPOINT.DATABASE);
 
             res.status(204);
         } else {
