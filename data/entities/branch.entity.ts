@@ -57,6 +57,7 @@ export class Branch {
      * Returns an object with Branch filter criteria.
      * 
      * @param name Searches entries with a similiar name attribute
+     * @param slug Searches entries with a similiar slug attribute
      * @returns Object with specified where statements
      */
     public static getFilter(name: string|undefined, slug: string|undefined): object 

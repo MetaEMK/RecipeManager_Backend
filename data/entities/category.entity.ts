@@ -46,6 +46,7 @@ export class Category {
      * Returns an object with Category filter criteria.
      * 
      * @param name Searches entries with a similiar name attribute
+     * @param slug Searches entries with a similiar slug attribute
      * @returns Object with specified where statements
      */
     public static getFilter(name: string|undefined, slug: string|undefined): Object
