@@ -5,11 +5,15 @@ import { Variant } from "./variant.entity.js";
 
 @Entity()
 @Unique(["name"])
+@Unique(["slug"])
 export class Recipe {
     @PrimaryGeneratedColumn()
     id!: number;
 
-    @Column()
+    @Column({
+        type: "nvarchar",
+        length: 100
+    })
     name!: string;
 
     @Column({
@@ -23,6 +27,12 @@ export class Recipe {
         nullable: true
     })
     imagePath!: string
+
+    @Column({
+        type: "nvarchar",
+        length: 100
+    })
+    slug!: string;
 
     @ManyToMany(() => Branch, (branch) => branch.recipes)
     branches!: Relation<Branch>[];

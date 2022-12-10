@@ -15,6 +15,10 @@ const logger = createLogger();
 
 /**
  * Get all recipes.
+ * 
+ * Able to choose which relations should be loaded.
+ * - description
+ * - image_path
  */
 recipeRouter.get("/", async function (req: Request, res: Response) {
     const recipes = await AppDataSource
@@ -37,6 +41,7 @@ recipeRouter.get("/:id", async function (req: Request, res: Response) {
 recipeRouter.post("/", async function (req: Request, res: Response) {
     const recipe = new Recipe();
     recipe.name = req.body.name;
+    recipe.slug = generateSlug(req.body.name);
 
     await AppDataSource
         .getRepository(Recipe)
