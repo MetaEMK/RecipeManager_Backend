@@ -2,7 +2,7 @@ import express  from "express";
 import { Request, Response } from "express";
 import { AppDataSource } from "../../config/datasource.js";
 import { createLogger, LOG_ENDPOINT } from "../../utils/logger.js";
-import { decodeURISpaces } from "../../utils/controller.util.js";
+import { decodeURISpaces, generateSlug } from "../../utils/controller.util.js";
 import { SQLiteErrorResponse } from "../../utils/sqliteErrorResponse.js";
 import { Category } from "../../data/entities/category.entity.js";
 import { CategoryValidator } from "../validators/category.validator.js";
@@ -15,21 +15,30 @@ const logger = createLogger();
 
 /**
  * Get all categories.
- * Able to filter the category name.
+ * Able to filter the category name and slug.
  */
 categoryRouter.get("/", async function (req: Request, res: Response) {
     // Parameters
     const filterByName: string|undefined = decodeURISpaces(req.query?.name as string);
+    const filterBySlug: string|undefined = decodeURISpaces(req.query?.slug as string);
 
     // Filter instance
     let filter: Object = {};
+    let filterName: string|undefined;
+    let filterSlug: string|undefined;
 
     // Validator instance
     const validator: CategoryValidator = new CategoryValidator();
 
-    // Validation
+    // Validation and sanitization
     if(validator.isValidCategoryName(filterByName))
-        filter = Category.getFilter(filterByName);
+        filterName = filterByName;
+    
+    if(filterBySlug)
+        filterSlug = generateSlug(filterBySlug);
+
+    // Set filter
+    filter = Category.getFilter(filterName, filterSlug);
 
     // ORM query
     try {
@@ -110,8 +119,10 @@ categoryRouter.post("/", async function (req: Request, res: Response) {
     const validator: CategoryValidator = new CategoryValidator();
 
     // Validation
-    if(validator.isValidCategoryName(reqName))
+    if(validator.isValidCategoryName(reqName)) {
         category.name = reqName;
+        category.slug = generateSlug(reqName);
+    }
 
     // ORM query
     if(validator.getErrors().length === 0) {
@@ -196,6 +207,7 @@ categoryRouter.patch("/:id", async function (req: Request, res: Response) {
                         // Update attributes
                         if(validatedName) {
                             category!.name = validatedName;
+                            category!.slug = generateSlug(validatedName);
 
                             await transactionalEntityManager.save(category);
                         }

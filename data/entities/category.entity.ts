@@ -3,6 +3,7 @@ import { Recipe } from "./recipe.entity.js";
 
 @Entity()
 @Unique(["name"])
+@Unique(["slug"])
 export class Category {
     @PrimaryGeneratedColumn()
     id!: number;
@@ -12,6 +13,12 @@ export class Category {
         length: 100
     })
     name!: string;
+
+    @Column({
+        type: "nvarchar",
+        length: 100
+    })
+    slug!: string;
 
     @ManyToMany(() => Recipe, (recipe) => recipe.categories)
     @JoinTable({
@@ -41,12 +48,16 @@ export class Category {
      * @param name Searches entries with a similiar name attribute
      * @returns Object with specified where statements
      */
-    public static getFilter(name: string|undefined): Object
+    public static getFilter(name: string|undefined, slug: string|undefined): Object
     {
-        const where: Record<string, FindOperator<string>> = {};
+        const where: Record<string, string|FindOperator<string>> = {};
 
         if(name) {
             where.name = Like(`%${ name }%`);
+        }
+
+        if(slug) {
+            where.slug = slug;
         }
 
         return where;
