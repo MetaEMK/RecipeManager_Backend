@@ -284,7 +284,7 @@ categoryRouter.delete("/:id", async function (req: Request, res: Response) {
         if (category) {
             await repository.remove(category);
 
-            logger.info("Category with " + reqId + " deleted.", LOG_ENDPOINT.DATABASE);
+            logger.info("Category with ID " + reqId + " deleted.", LOG_ENDPOINT.DATABASE);
 
             res.status(204);
         } else {
