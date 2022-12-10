@@ -16,21 +16,30 @@ const logger = createLogger();
 
 /**
  * Get all branches.
- * Able to filter the branch name.
+ * Able to filter the branch name and slug.
  */
 branchRouter.get("/", async function (req: Request, res: Response) {
     // Parameters
     const filterByName: string|undefined = decodeURISpaces(req.query?.name as string);
+    const filterBySlug: string|undefined = decodeURISpaces(req.query?.slug as string);
 
     // Filter instance
     let filter: Object = {};
+    let filterName: string|undefined;
+    let filterSlug: string|undefined;
 
     // Validator instance
     const validator: BranchValidator = new BranchValidator();
 
-    // Validation
+    // Validation and sanitization
     if(validator.isValidBranchName(filterByName))
-        filter = Branch.getFilter(filterByName);
+        filterName = filterByName;
+
+    if(filterBySlug)
+        filterSlug = generateSlug(filterBySlug);
+
+    // Set filter
+    filter = Branch.getFilter(filterName, filterSlug);
 
     // ORM query
     try {

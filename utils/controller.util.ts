@@ -15,19 +15,23 @@ export function decodeURISpaces(uriComponent: string|undefined): string|undefine
 }
 
 /**
- * Generates a slug for the given name.
- * Removes replaces spaces and german umlauts.
+ * Generates a slug for the given string.
  * 
- * @param name Name which should be turned into a slug 
+ * Only allows a-z, ä, ö, ü, ß, - and space.
+ * Replaces spaces, hyphens and german umlauts.
+ * 
+ * @param string String which should be turned into a slug 
  * @returns A slug conform string
  */
-export function generateSlug(name: string): string
+export function generateSlug(string: string): string
 {
-    return name
+    return string
         .toLowerCase()
+        .replaceAll(new RegExp("[^a-zäöüß_ \-]", "g"), "")
         .replaceAll(" ", "_")
-        .replaceAll("\u00fc", "ue")
+        .replaceAll("-", "_")
         .replaceAll("\u00e4", "ae")
         .replaceAll("\u00f6", "oe")
+        .replaceAll("\u00fc", "ue")
         .replaceAll("\u00df", "ss");
 }
