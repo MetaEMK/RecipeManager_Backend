@@ -33,14 +33,14 @@ apiRouter.use(jsonErrorHandler);
 
 // Routes
 apiRouter.use("/branches", branchRouter);
-apiRouter.use("/branches/:branchId/schedule", scheduleRouter);
+apiRouter.use("/branches/:branchId/schedule", scheduleRouter);  // TODO
 apiRouter.use("/categories", categoryRouter);
 apiRouter.use("/conversion_types", conversionTypeRouter);
-apiRouter.use("/conversion_types/:conversionTypeId/conversions", conversionRouter);
-apiRouter.use("/conversion_types/:conversionTypeId/sizes", sizeRouter);
-apiRouter.use("/ingredients", ingredientRouter);
-apiRouter.use("/recipes", recipeRouter);
-apiRouter.use("/recipes/:recipeId/variants", variantRouter);
+apiRouter.use("/conversion_types/:conversionTypeId/conversions", conversionRouter); // TODO
+apiRouter.use("/conversion_types/:conversionTypeId/sizes", sizeRouter); // TODO
+apiRouter.use("/ingredients", ingredientRouter);    // TODO
+apiRouter.use("/recipes", recipeRouter);    // TODO
+apiRouter.use("/recipes/:recipeId/variants", variantRouter);    // TODO
 
 // Default route if not exists
 apiRouter.use((req: Request, res: Response) => {
