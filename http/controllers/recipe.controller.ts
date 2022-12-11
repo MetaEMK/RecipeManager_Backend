@@ -15,17 +15,53 @@ const logger = createLogger();
 
 /**
  * Get all recipes.
- * 
- * Able to choose which relations should be loaded.
- * - description
- * - image_path
+ * Able to filter the recipe name, slug and search for a specific branch id or category id.
  */
 recipeRouter.get("/", async function (req: Request, res: Response) {
-    const recipes = await AppDataSource
-        .getRepository(Recipe)
-        .find();
+    // Parameters
+    const filterByName: string|undefined = decodeURISpaces(req.query?.name as string);
+    const filterBySlug: string|undefined = decodeURISpaces(req.query?.slug as string);
+    const filterByBranchId: number = Number(req.query?.branch);
+    const filterByCategoryId: number = Number(req.query?.category);
 
-    res.json(recipes);
+    // Validation instance
+    const validator: RecipeValidator = new RecipeValidator();
+
+    // ORM query
+    try {
+        const query = AppDataSource
+            .getRepository(Recipe)
+            .createQueryBuilder("recipe");
+
+        // Validation and sanitization for filter parameters
+        if(validator.isValidRecipeName(filterByName))
+            query.andWhere("recipe.name LIKE :recipeName", { recipeName: `%${ filterByName }%` });
+
+        if(filterBySlug)
+            query.andWhere("recipe.slug = :recipeSlug", { recipeSlug: generateSlug(filterBySlug) });
+
+        if(filterByBranchId) {
+            query.leftJoin("recipe.branches", "branch")
+                .andWhere("branch.id = :branchId", { branchId: filterByBranchId });
+        }
+
+        if(filterByCategoryId) {
+            query.leftJoin("recipe.categories", "category")
+                .andWhere("category.id = :categoryId", { categoryId: filterByCategoryId });
+        }
+
+        const recipes = await query.getMany();
+
+        res.json({
+            data: recipes
+        });
+    } catch (err) {
+        const errRes = new SQLiteErrorResponse(err); 
+        errRes.log();
+
+        res.status(errRes.statusCode);
+        res.json(errRes.toResponseObject());
+    }
 });
 
 /**
