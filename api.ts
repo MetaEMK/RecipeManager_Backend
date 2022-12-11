@@ -1,6 +1,5 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import cors from "cors";
-import { Request, Response } from "express";
 import { AppDataSource } from "./config/datasource.js";
 import { setJsonHeader } from "./http/middleware/headers.middleware.js";
 import { jsonErrorHandler } from "./http/middleware/json.middleware.js";
