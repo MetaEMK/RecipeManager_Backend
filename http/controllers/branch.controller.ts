@@ -16,7 +16,7 @@ const logger = createLogger();
 
 /**
  * Get all branches.
- * Able to filter the branch name and slug.
+ * Able to filter the branch name, slug and search for a specific recipe id.
  */
 branchRouter.get("/", async function (req: Request, res: Response) {
     // Parameters
