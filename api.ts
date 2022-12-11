@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import { AppDataSource } from "./config/datasource.js";
 import { setJsonHeader } from "./http/middleware/headers.middleware.js";
-import { jsonErrorHandler } from "./http/middleware/json.middleware.js";
+import { errorHandler } from "./http/middleware/errors.middleware.js";
 import { branchRouter } from "./http/controllers/branch.controller.js";
 import { categoryRouter } from "./http/controllers/category.controller.js";
 import { conversionRouter } from "./http/controllers/conversion.controller.js";
@@ -28,7 +28,6 @@ export const apiRouter = express.Router();
 apiRouter.use(cors());
 apiRouter.use(express.json());
 apiRouter.use(setJsonHeader);
-apiRouter.use(jsonErrorHandler);
 
 // Routes
 apiRouter.use("/branches", branchRouter);
@@ -46,3 +45,6 @@ apiRouter.use((req: Request, res: Response) => {
     res.status(404);
     res.send();
 });
+
+// Error handler
+apiRouter.use(errorHandler);
