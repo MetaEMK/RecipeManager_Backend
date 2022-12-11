@@ -21,27 +21,20 @@ ingredientRouter.get("/", async function (req: Request, res: Response) {
     // Parameters
     const filterByName: string|undefined = decodeURISpaces(req.query?.name as string);
 
-    // Filter instance
-    let filter = {};
-    let filterName: string|undefined;
-
     // Validator instance
     const validator: IngredientValidator = new IngredientValidator();
 
-    // Validation
-    if (validator.isValidIngredientName(filterByName))
-        filterName = filterByName;
-
-    // Set filter
-    filter = Ingredient.getFilter(filterName);
-
     // ORM query
     try {
-        const ingredients = await AppDataSource
+        const query = AppDataSource
             .getRepository(Ingredient)
-            .find({
-                where: filter
-            });
+            .createQueryBuilder("ingredient");
+
+        // Validation for filter parameter
+        if(validator.isValidIngredientName(filterByName))
+            query.andWhere("ingredient.name LIKE :ingredientName", { ingredientName: `%${ filterByName }` });
+
+        const ingredients = await query.getMany();
 
         res.json({
             data: ingredients
