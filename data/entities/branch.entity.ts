@@ -52,26 +52,4 @@ export class Branch {
         name: "updated_at"
     })
     updatedAt!: Date;
-
-    /**
-     * Returns an object with Branch filter criteria.
-     * 
-     * @param name Searches entries with a similiar name attribute
-     * @param slug Searches entries with a similiar slug attribute
-     * @returns Object with specified where statements
-     */
-    public static getFilter(name: string|undefined, slug: string|undefined): object 
-    {
-        const where: Record<string, string|FindOperator<string>> = {}
-
-        if(name) {
-            where.name = Like(`%${ name }%`);
-        }
-
-        if(slug) {
-            where.slug = slug;
-        }
-
-        return where;
-    }
 }

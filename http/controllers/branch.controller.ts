@@ -22,32 +22,30 @@ branchRouter.get("/", async function (req: Request, res: Response) {
     // Parameters
     const filterByName: string|undefined = decodeURISpaces(req.query?.name as string);
     const filterBySlug: string|undefined = decodeURISpaces(req.query?.slug as string);
-
-    // Filter instance
-    let filter: Object = {};
-    let filterName: string|undefined;
-    let filterSlug: string|undefined;
+    const filterByRecipeId: number = Number(req.query?.recipe);
 
     // Validator instance
     const validator: BranchValidator = new BranchValidator();
 
-    // Validation and sanitization
-    if(validator.isValidBranchName(filterByName))
-        filterName = filterByName;
-
-    if(filterBySlug)
-        filterSlug = generateSlug(filterBySlug);
-
-    // Set filter
-    filter = Branch.getFilter(filterName, filterSlug);
-
     // ORM query
     try {
-        const branches = await AppDataSource
+        let query = AppDataSource
             .getRepository(Branch)
-            .find({
-                where: filter
-            });
+            .createQueryBuilder("branch");
+
+        // Validation and sanitization for filter parameters
+        if(validator.isValidBranchName(filterByName))
+            query.andWhere("branch.name LIKE :branchName", { branchName: `%${ filterByName }%` });
+
+        if(filterBySlug)
+            query.andWhere("branch.slug = :branchSlug", { branchSlug: generateSlug(filterBySlug) });
+
+        if(filterByRecipeId) {
+            query.leftJoin("branch.recipes", "recipe")
+                .andWhere("recipe.id = :recipeId", { recipeId: filterByRecipeId });
+        }
+
+        const branches = await query.getMany();
 
         res.json({
             data: branches
