@@ -1,4 +1,4 @@
-import {  Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from "express";
 import { createLogger, LOG_ENDPOINT } from "../../utils/logger.js";
 
 /**
