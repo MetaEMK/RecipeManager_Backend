@@ -3,10 +3,11 @@ import { Request, Response } from "express";
 import { AppDataSource } from "../../config/datasource.js";
 import { createLogger, LOG_ENDPOINT } from "../../utils/logger.js";
 import { decodeURISpaces, generateSlug } from "../../utils/controller.util.js";
-import { SQLiteErrorResponse } from "../../utils/sqliteErrorResponse.js";
+import { SQLiteErrorResponse } from "../error_responses/sqliteErrorResponse.js";
 import { Branch } from "../../data/entities/branch.entity.js";
 import { Category } from "../../data/entities/category.entity.js";
 import { BranchValidator } from "../validators/branch.validator.js";
+import { validationErrorResponse } from "../error_responses/validationErrorResponse.js";
 
 // Router instance
 export const branchRouter = express.Router();
@@ -52,10 +53,7 @@ branchRouter.get("/", async function (req: Request, res: Response) {
         });
     } catch(err) {
         const errRes = new SQLiteErrorResponse(err); 
-        errRes.log();
-
-        res.status(errRes.statusCode);
-        res.json(errRes.toResponseObject());
+        errRes.response(res);
     }
 });
 
@@ -112,10 +110,7 @@ branchRouter.get("/:id", async function (req: Request, res: Response) {
         }
     } catch (err) {
         const errRes = new SQLiteErrorResponse(err); 
-        errRes.log();
-
-        res.status(errRes.statusCode);
-        res.json(errRes.toResponseObject());
+        errRes.response(res);
     }
 });
 
@@ -156,16 +151,10 @@ branchRouter.post("/", async function (req: Request, res: Response) {
             });
         } catch(err) {
             const errRes = new SQLiteErrorResponse(err); 
-            errRes.log();
-    
-            res.status(errRes.statusCode);
-            res.json(errRes.toResponseObject());
+            errRes.response(res);
         }
     } else {
-        res.status(400);
-        res.json({
-            error: validator.getErrors()?.[0]
-        });
+        validationErrorResponse(validator.getErrors(), res);
     }
 });
 
@@ -262,17 +251,11 @@ branchRouter.patch("/:id", async function (req: Request, res: Response) {
                 res.send();
             }  
         } catch(err) {
-            const errRes = new SQLiteErrorResponse(err);
-            errRes.log();
-    
-            res.status(errRes.statusCode);
-            res.json(errRes.toResponseObject());
+            const errRes = new SQLiteErrorResponse(err); 
+            errRes.response(res);
         }
     } else {
-        res.status(400);
-        res.json({
-            error: validator.getErrors()?.[0]
-        });
+        validationErrorResponse(validator.getErrors(), res);
     }
 });
 
@@ -312,10 +295,7 @@ branchRouter.delete("/:id", async function (req: Request, res: Response) {
     
         res.send();
     } catch (err) {
-        const errRes = new SQLiteErrorResponse(err);
-        errRes.log();
-
-        res.status(errRes.statusCode);
-        res.json(errRes.toResponseObject());
+        const errRes = new SQLiteErrorResponse(err); 
+        errRes.response(res);
     }
 });

@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import { AppDataSource } from "../../config/datasource.js";
 import { createLogger } from "../../utils/logger.js";
 import { decodeURISpaces, generateSlug } from "../../utils/controller.util.js";
-import { SQLiteErrorResponse } from "../../utils/sqliteErrorResponse.js";
+import { SQLiteErrorResponse } from "../error_responses/sqliteErrorResponse.js";
 import { Branch } from "../../data/entities/branch.entity.js";
 import { ScheduledItem } from "../../data/entities/scheduled_item.entity";
 import { ScheduleItemsValidator } from "../validators/schedule_items.validator";

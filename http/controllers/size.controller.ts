@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import { AppDataSource } from "../../config/datasource.js";
 import { createLogger } from "../../utils/logger.js";
 import { decodeURISpaces, generateSlug } from "../../utils/controller.util.js";
-import { SQLiteErrorResponse } from "../../utils/sqliteErrorResponse.js";
+import { SQLiteErrorResponse } from "../error_responses/sqliteErrorResponse.js";
 import { Size } from "../../data/entities/size.entity.js";
 import { SizeValidator } from "../validators/size.validator.js";
 

@@ -3,9 +3,10 @@ import { Request, Response } from "express";
 import { AppDataSource } from "../../config/datasource.js";
 import { createLogger, LOG_ENDPOINT } from "../../utils/logger.js";
 import { decodeURISpaces, generateSlug } from "../../utils/controller.util.js";
-import { SQLiteErrorResponse } from "../../utils/sqliteErrorResponse.js";
+import { SQLiteErrorResponse } from "../error_responses/sqliteErrorResponse.js";
 import { Category } from "../../data/entities/category.entity.js";
 import { CategoryValidator } from "../validators/category.validator.js";
+import { validationErrorResponse } from "../error_responses/validationErrorResponse.js";
 
 // Router instance
 export const categoryRouter = express.Router();
@@ -50,11 +51,8 @@ categoryRouter.get("/", async function (req: Request, res: Response) {
             data: categories
         });
     } catch (err) {
-        const errRes = new SQLiteErrorResponse(err);
-        errRes.log();
-
-        res.status(errRes.statusCode);
-        res.json(errRes.toResponseObject());
+        const errRes = new SQLiteErrorResponse(err); 
+        errRes.response(res);
     }
 });
 
@@ -95,11 +93,8 @@ categoryRouter.get("/:id", async function (req: Request, res: Response) {
             res.send();
         }
     } catch (err) {
-        const errRes = new SQLiteErrorResponse(err);
-        errRes.log();
-
-        res.status(errRes.statusCode);
-        res.json(errRes.toResponseObject());
+        const errRes = new SQLiteErrorResponse(err); 
+        errRes.response(res);
     }
 });
 
@@ -139,17 +134,11 @@ categoryRouter.post("/", async function (req: Request, res: Response) {
                 data: category
             });
         } catch (err) {
-            const errRes = new SQLiteErrorResponse(err);
-            errRes.log();
-
-            res.status(errRes.statusCode);
-            res.json(errRes.toResponseObject());
+            const errRes = new SQLiteErrorResponse(err); 
+            errRes.response(res);
         }
     } else {
-        res.status(400);
-        res.json({
-            error: validator.getErrors()?.[0]
-        });
+        validationErrorResponse(validator.getErrors(), res);
     }
 });
 
@@ -243,17 +232,11 @@ categoryRouter.patch("/:id", async function (req: Request, res: Response) {
                 res.send();
             }
         } catch (err) {
-            const errRes = new SQLiteErrorResponse(err);
-            errRes.log();
-
-            res.status(errRes.statusCode);
-            res.json(errRes.toResponseObject());
+            const errRes = new SQLiteErrorResponse(err); 
+            errRes.response(res);
         }
     } else {
-        res.status(400);
-        res.json({
-            error: validator.getErrors()?.[0]
-        });
+        validationErrorResponse(validator.getErrors(), res);
     }
 });
 
@@ -293,10 +276,7 @@ categoryRouter.delete("/:id", async function (req: Request, res: Response) {
 
         res.send();
     } catch (err) {
-        const errRes = new SQLiteErrorResponse(err);
-        errRes.log();
-
-        res.status(errRes.statusCode);
-        res.json(errRes.toResponseObject());
+        const errRes = new SQLiteErrorResponse(err); 
+        errRes.response(res);
     }
 });

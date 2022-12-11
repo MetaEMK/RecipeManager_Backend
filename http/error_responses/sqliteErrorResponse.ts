@@ -1,8 +1,9 @@
+import { Response } from "express";
 import { QueryFailedError } from "typeorm";
-import { createLogger, LOG_ENDPOINT, LOG_LEVEL } from "./logger.js";
+import { createLogger, LOG_ENDPOINT, LOG_LEVEL } from "../../utils/logger.js";
 
 /**
- * Simple sqlite error response class for parsing.
+ * Simple sqlite error response class.
  */
 export class SQLiteErrorResponse 
 {
@@ -64,21 +65,11 @@ export class SQLiteErrorResponse
     }
 
     /**
-     * Returns error HTTP response status code.
-     * 
-     * @returns HTTP response status code
-     */
-    public get statusCode(): number
-    {
-        return this._statusCode;
-    }
-
-    /**
      * Parses error to response object.
      * 
      * @returns Response object
      */
-    public toResponseObject(): object 
+    private toResponseObject(): object 
     {
         return {
             error: {
@@ -90,19 +81,9 @@ export class SQLiteErrorResponse
     }
 
     /**
-     * Parses error to a string.
-     * 
-     * @returns Error response string 
-     */
-    public toString(): string
-    {
-        return "Code: " + this._code + " - " + this._type + ": " + this._message;
-    }
-
-    /**
      * Logs the error.
      */
-    public log(): void
+    private log(): void
     {
         // Determines message based on if the exception is known
         let message = this.toString();
@@ -124,5 +105,28 @@ export class SQLiteErrorResponse
                 this._logger.error(message, LOG_ENDPOINT.DATABASE);
                 break;       
         }
+    }
+
+    /**
+     * Parses error to a string.
+     * 
+     * @returns Error response string 
+     */
+    public toString(): string
+    {
+        return "Code: " + this._code + " - " + this._type + ": " + this._message;
+    }    
+
+    /**
+     * Sends the error response.
+     * 
+     * @param res Express response object
+     */
+    public response(res: Response): void 
+    {
+        this.log();
+
+        res.status(this._statusCode);
+        res.json(this.toResponseObject());
     }
 }
