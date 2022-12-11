@@ -1,6 +1,6 @@
-import { GeneralValidationErrorCodes } from "../../../enums/GeneralValidationErrors.enum";
-import { Validator } from "../MainValidator";
-import { ValidationError } from "../validationError";
+import { GeneralValidationErrorCodes } from "../../../enums/GeneralValidationErrors.enum.js";
+import { Validator } from "../MainValidator.js";
+import { ValidationError } from "../validationError.js";
 
 export class ValidatorDescriptionUtilities extends Validator
 {
