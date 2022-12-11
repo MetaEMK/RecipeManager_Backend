@@ -34,7 +34,7 @@ apiRouter.use(jsonErrorHandler);
 // Routes
 apiRouter.use("/branches", branchRouter);
 apiRouter.use("/branches/:branchId/schedule", scheduleRouter);  // TODO
-apiRouter.use("/categories", categoryRouter);   // Refactor get all filter
+apiRouter.use("/categories", categoryRouter);
 apiRouter.use("/conversion_types", conversionTypeRouter);   // Refactor get all filter
 apiRouter.use("/conversion_types/:conversionTypeId/conversions", conversionRouter); // TODO
 apiRouter.use("/conversion_types/:conversionTypeId/sizes", sizeRouter); // TODO

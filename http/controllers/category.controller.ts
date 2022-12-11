@@ -15,38 +15,36 @@ const logger = createLogger();
 
 /**
  * Get all categories.
- * Able to filter the category name and slug.
+ * Able to filter the category name, slug and search for a specific recipe id.
  */
 categoryRouter.get("/", async function (req: Request, res: Response) {
     // Parameters
     const filterByName: string|undefined = decodeURISpaces(req.query?.name as string);
     const filterBySlug: string|undefined = decodeURISpaces(req.query?.slug as string);
-
-    // Filter instance
-    let filter: Object = {};
-    let filterName: string|undefined;
-    let filterSlug: string|undefined;
+    const filterByRecipeId: number = Number(req.query?.recipe);
 
     // Validator instance
     const validator: CategoryValidator = new CategoryValidator();
 
-    // Validation and sanitization
-    if(validator.isValidCategoryName(filterByName))
-        filterName = filterByName;
-    
-    if(filterBySlug)
-        filterSlug = generateSlug(filterBySlug);
-
-    // Set filter
-    filter = Category.getFilter(filterName, filterSlug);
-
     // ORM query
     try {
-        const categories = await AppDataSource
+        const query = AppDataSource
             .getRepository(Category)
-            .find({
-                where: filter
-            });
+            .createQueryBuilder("category");
+
+        // Validation and sanitization for filter parameters
+        if(validator.isValidCategoryName(filterByName))
+            query.andWhere("category.name LIKE :categoryName", { categoryName: `%${ filterByName }%` });
+        
+        if(filterBySlug)
+            query.andWhere("category.slug = :categorySlug", { categorySlug: generateSlug(filterBySlug) });
+
+        if(filterByRecipeId) {
+            query.leftJoin("category.recipes", "recipe")
+                .andWhere("recipe.id = :recipeId", { recipeId: filterByRecipeId });
+        }
+
+        const categories = await query.getMany();
 
         res.json({
             data: categories
