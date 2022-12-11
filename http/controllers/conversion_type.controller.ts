@@ -120,8 +120,10 @@ conversionTypeRouter.delete("/:id", async function (req: Request, res: Response)
     try {
         if (reqId) {
             conversionType = await repository
-                .findOneBy({
-                    id: reqId
+                .findOne({
+                    where: {
+                        id: reqId
+                    }
                 });
         }
 

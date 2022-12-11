@@ -295,8 +295,10 @@ branchRouter.delete("/:id", async function (req: Request, res: Response) {
     try {
         if(reqId) {
             branch = await repository
-                .findOneBy({
-                    id: reqId
+                .findOne({
+                    where: {
+                        id: reqId
+                    }
                 });
         }
 

@@ -32,13 +32,13 @@ apiRouter.use(setJsonHeader);
 apiRouter.use(jsonErrorHandler);
 
 // Routes
-apiRouter.use("/branches", branchRouter);
+apiRouter.use("/branches", branchRouter);   // Refactor get all filter
 apiRouter.use("/branches/:branchId/schedule", scheduleRouter);  // TODO
-apiRouter.use("/categories", categoryRouter);
-apiRouter.use("/conversion_types", conversionTypeRouter);
+apiRouter.use("/categories", categoryRouter);   // Refactor get all filter
+apiRouter.use("/conversion_types", conversionTypeRouter);   // Refactor get all filter
 apiRouter.use("/conversion_types/:conversionTypeId/conversions", conversionRouter); // TODO
 apiRouter.use("/conversion_types/:conversionTypeId/sizes", sizeRouter); // TODO
-apiRouter.use("/ingredients", ingredientRouter);
+apiRouter.use("/ingredients", ingredientRouter);    // Refactor get all filter
 apiRouter.use("/recipes", recipeRouter);    // TODO
 apiRouter.use("/recipes/:recipeId/variants", variantRouter);    // TODO
 

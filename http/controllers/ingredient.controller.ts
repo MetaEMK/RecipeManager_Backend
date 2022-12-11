@@ -120,8 +120,10 @@ ingredientRouter.delete("/:id", async function (req: Request, res: Response) {
     try {
         if (reqId) {
             ingredient = await repository
-                .findOneBy({
-                    id: reqId
+                .findOne({
+                    where: {
+                        id: reqId
+                    }
                 });
         }
 
