@@ -29,21 +29,4 @@ export class ConversionType {
         name: "updated_at"
     })
     updatedAt!: Date;
-
-    /**
-     * Returns an object with ConversionType filter criteria.
-     * 
-     * @param name Searches entries with a similiar name attribute
-     * @returns Object with specified where statements
-     */
-    public static getFilter(name: string|undefined): object 
-    {
-        const where: Record<string, FindOperator<string>> = {}
-
-        if(name) {
-            where.name = Like(`%${ name }%`);
-        }
-
-        return where;
-    }
 }

@@ -21,27 +21,20 @@ conversionTypeRouter.get("/", async function (req: Request, res: Response) {
     // Parameters
     const filterByName: string|undefined = decodeURISpaces(req.query?.name as string);
 
-    // Filter instance
-    let filter: Object = {};
-    let filterName: string|undefined;
-
     // Validator instance
     const validator: ConversionTypeValidator = new ConversionTypeValidator();
 
-    // Validation
-    if(validator.isValidName(filterByName))
-        filterName = filterByName;
-
-    // Set filter
-    filter = ConversionType.getFilter(filterName);
-
     // ORM query
     try {
-        const conversionTypes = await AppDataSource
+        const query = AppDataSource
             .getRepository(ConversionType)
-            .find({
-                where: filter
-            });
+            .createQueryBuilder("conversionType");
+
+        // Validation for filter parameter
+        if(validator.isValidName(filterByName))
+            query.andWhere("conversionType.name LIKE :conversionTypeName", { conversionTypeName: `%${ filterByName }%` });
+
+        const conversionTypes = await query.getMany();
 
         res.json({
             data: conversionTypes
