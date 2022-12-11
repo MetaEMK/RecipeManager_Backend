@@ -66,16 +66,66 @@ recipeRouter.get("/", async function (req: Request, res: Response) {
 
 /**
  * Get a specific recipe.
+ * 
+ * Loads additional data
+ * - Branch relation
+ * - Category relation
+ * - Variant relation
  */
 recipeRouter.get("/:id", async function (req: Request, res: Response) {
+    // Parameters
+    const reqId: number = Number(req.params?.id);
 
+    // Recipe instance
+    let recipe: Recipe|null = null;
+
+    // ORM query
+    try {
+        if(reqId) {
+            recipe = await AppDataSource
+                .getRepository(Recipe)
+                .findOne({
+                    where: {
+                        id: reqId
+                    },
+                    relations: {
+                        branches: true,
+                        categories: true,
+                        variants: true
+                    }
+                });
+        }
+
+        if (recipe) {
+            res.json({
+                data: recipe
+            });
+        } else {
+            res.status(404);
+            res.send();
+        }
+    } catch (err) {
+        const errRes = new SQLiteErrorResponse(err); 
+        errRes.log();
+
+        res.status(errRes.statusCode);
+        res.json(errRes.toResponseObject());
+    }
 });
 
 /**
  * Create a recipe.
  */
 recipeRouter.post("/", async function (req: Request, res: Response) {
-    const recipe = new Recipe();
+    // Parameters
+    const reqName: string = req.body?.name;
+    const reqDesc: string = req.body?.description;
+
+    // Recipe instance
+    const recipe: Recipe = new Recipe();
+
+
+    // TODO
     recipe.name = req.body.name;
     recipe.slug = generateSlug(req.body.name);
 
