@@ -1,10 +1,10 @@
 {
-  "name": "RecipeManager",
+  "name": "recipe-manager",
   "version": "0.0.1",
   "description": "RecipeManager Backend",
   "main": "app.js",
   "scripts": {
-    "start": "tsc && node ./start/setup.js",
+    "start": "tsc && node dist/app.js",
     "tsc-watch": "tsc --watch",
     "dev": "nodemon"
   },
