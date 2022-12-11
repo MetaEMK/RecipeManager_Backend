@@ -29,7 +29,7 @@ branchRouter.get("/", async function (req: Request, res: Response) {
 
     // ORM query
     try {
-        let query = AppDataSource
+        const query = AppDataSource
             .getRepository(Branch)
             .createQueryBuilder("branch");
 
