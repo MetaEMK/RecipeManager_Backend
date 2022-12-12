@@ -1,12 +1,11 @@
-import express  from "express";
-import { Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import { AppDataSource } from "../../config/datasource.js";
+import { decodeURISpaces, deleteResponse, generateSlug, getResponse, patchResponse, postResponse } from "../../utils/controller.util.js";
+import { HttpNotFoundException } from "../../exceptions/HttpException.js";
 import { createLogger, LOG_ENDPOINT } from "../../utils/logger.js";
-import { decodeURISpaces, generateSlug } from "../../utils/controller.util.js";
-import { SQLiteErrorResponse } from "../error_responses/sqliteErrorResponse.js";
 import { Category } from "../../data/entities/category.entity.js";
 import { CategoryValidator } from "../validators/category.validator.js";
-import { validationErrorResponse } from "../error_responses/validationErrorResponse.js";
+import { ValidationException } from "../../exceptions/ValidationException.js";
 
 // Router instance
 export const categoryRouter = express.Router();
@@ -18,7 +17,7 @@ const logger = createLogger();
  * Get all categories.
  * Able to filter the category name, slug and search for a specific recipe id.
  */
-categoryRouter.get("/", async function (req: Request, res: Response) {
+categoryRouter.get("/", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
     const filterByName: string|undefined = decodeURISpaces(req.query?.name as string);
     const filterBySlug: string|undefined = decodeURISpaces(req.query?.slug as string);
@@ -47,12 +46,9 @@ categoryRouter.get("/", async function (req: Request, res: Response) {
 
         const categories = await query.getMany();
 
-        res.json({
-            data: categories
-        });
+        getResponse(categories, res);
     } catch (err) {
-        const errRes = new SQLiteErrorResponse(err); 
-        errRes.response(res);
+        next(err);
     }
 });
 
@@ -62,7 +58,7 @@ categoryRouter.get("/", async function (req: Request, res: Response) {
  * Loads additional data
  * - Recipe realtion
  */
-categoryRouter.get("/:id", async function (req: Request, res: Response) {
+categoryRouter.get("/:id", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
     const reqId: number = Number(req.params?.id);
 
@@ -85,23 +81,19 @@ categoryRouter.get("/:id", async function (req: Request, res: Response) {
         }
 
         if(category) {
-            res.json({
-                data: category
-            });
+            getResponse(category, res);
         } else {
-            res.status(404);
-            res.send();
+            throw new HttpNotFoundException();
         }
     } catch (err) {
-        const errRes = new SQLiteErrorResponse(err); 
-        errRes.response(res);
+        next(err);
     }
 });
 
 /**
  * Create a category.
  */
-categoryRouter.post("/", async function (req: Request, res: Response) {
+categoryRouter.post("/", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
     const reqName: string = req.body?.name;
 
@@ -124,21 +116,14 @@ categoryRouter.post("/", async function (req: Request, res: Response) {
                 .getRepository(Category)
                 .save(category);
 
-            logger.info("Category " + category.id + " created.", LOG_ENDPOINT.DATABASE);
+            postResponse(category, req, res);
 
-            res.status(201);
-            res.set({
-                "Location": req.protocol + "://" + req.get("host") + req.originalUrl + "/" + category.id
-            });
-            res.json({
-                data: category
-            });
+            logger.info("Category " + category.id + " created.", LOG_ENDPOINT.DATABASE);
         } catch (err) {
-            const errRes = new SQLiteErrorResponse(err); 
-            errRes.response(res);
+            next(err);
         }
     } else {
-        validationErrorResponse(validator.getErrors(), res);
+        next(new ValidationException(validator.getErrors()));
     }
 });
 
@@ -146,7 +131,7 @@ categoryRouter.post("/", async function (req: Request, res: Response) {
  * (Partially) Update category.
  * Able to add and remove recipes.
  */
-categoryRouter.patch("/:id", async function (req: Request, res: Response) {
+categoryRouter.patch("/:id", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
     const reqId: number = Number(req.params?.id);
     const reqName: string = req.body?.name;
@@ -224,26 +209,22 @@ categoryRouter.patch("/:id", async function (req: Request, res: Response) {
             }
 
             if(category) {
-                res.json({
-                    data: category
-                });
+                patchResponse(category, res);
             } else {
-                res.status(404);
-                res.send();
+                throw new HttpNotFoundException();
             }
         } catch (err) {
-            const errRes = new SQLiteErrorResponse(err); 
-            errRes.response(res);
+            next(err);
         }
     } else {
-        validationErrorResponse(validator.getErrors(), res);
+        next(new ValidationException(validator.getErrors()));
     }
 });
 
 /**
  * Delete a category.
  */
-categoryRouter.delete("/:id", async function (req: Request, res: Response) {
+categoryRouter.delete("/:id", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
     const reqId = Number(req.params.id);
 
@@ -267,16 +248,13 @@ categoryRouter.delete("/:id", async function (req: Request, res: Response) {
         if (category) {
             await repository.remove(category);
 
+            deleteResponse(res);
+
             logger.info("Category with ID " + reqId + " deleted.", LOG_ENDPOINT.DATABASE);
-
-            res.status(204);
         } else {
-            res.status(404);
+            throw new HttpNotFoundException();
         }
-
-        res.send();
     } catch (err) {
-        const errRes = new SQLiteErrorResponse(err); 
-        errRes.response(res);
+        next(err);
     }
 });
