@@ -1,12 +1,11 @@
-import express  from "express";
-import { Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import { AppDataSource } from "../../config/datasource.js";
+import { decodeURISpaces, deleteResponse, getResponse, postResponse } from "../../utils/controller.util.js";
+import { HttpNotFoundException } from "../../exceptions/HttpException.js";
 import { createLogger, LOG_ENDPOINT } from "../../utils/logger.js";
-import { decodeURISpaces } from "../../utils/controller.util.js";
-import { SQLiteErrorResponse } from "../error_responses/sqliteErrorResponse.js";
 import { ConversionType } from "../../data/entities/conversion_type.entity.js";
 import { ConversionTypeValidator } from "../validators/conversion_type.validator.js";
-import { validationErrorResponse } from "../error_responses/validationErrorResponse.js";
+import { ValidationException } from "../../exceptions/ValidationException.js";
 
 // Router instance
 export const conversionTypeRouter = express.Router();
@@ -18,7 +17,7 @@ const logger = createLogger();
  * Get all conversion types.
  * Able to filter the category type name.
  */
-conversionTypeRouter.get("/", async function (req: Request, res: Response) {
+conversionTypeRouter.get("/", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
     const filterByName: string|undefined = decodeURISpaces(req.query?.name as string);
 
@@ -37,19 +36,16 @@ conversionTypeRouter.get("/", async function (req: Request, res: Response) {
 
         const conversionTypes = await query.getMany();
 
-        res.json({
-            data: conversionTypes
-        });
+        getResponse(conversionTypes, res);
     } catch (err) {
-        const errRes = new SQLiteErrorResponse(err); 
-        errRes.response(res);
+        next(err);
     }
 });
 
 /**
  * Create a conversion type.
  */
-conversionTypeRouter.post("/", async function (req: Request, res: Response) {
+conversionTypeRouter.post("/", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
     const reqName: string = req.body?.name;
 
@@ -64,34 +60,27 @@ conversionTypeRouter.post("/", async function (req: Request, res: Response) {
         conversionType.name = reqName;
     
     // ORM query
-    if (validator.getErrors().length === 0) {
-        try {
+    try {
+        if (validator.getErrors().length === 0) {
             await AppDataSource
                 .getRepository(ConversionType)
                 .save(conversionType);
 
+            postResponse(conversionType, req, res);
+            
             logger.info("Conversion type " + conversionType.id + " created.", LOG_ENDPOINT.DATABASE);
-
-            res.status(201)
-            res.set({
-                "Location": req.protocol + "://" + req.get("host") + req.originalUrl + "/" + conversionType.id
-            });
-            res.json({
-                data: conversionType
-            });
-        } catch (err) {
-            const errRes = new SQLiteErrorResponse(err); 
-            errRes.response(res);
-        }
-    } else {
-        validationErrorResponse(validator.getErrors(), res);
+        } else {
+            throw new ValidationException(validator.getErrors());
+        }        
+    } catch (err) {
+        next(err);
     }
 });
 
 /**
  * Delete a conversion type.
  */
-conversionTypeRouter.delete("/:id", async function (req: Request, res: Response) {
+conversionTypeRouter.delete("/:id", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
     const reqId = Number(req.params.id);
 
@@ -115,16 +104,13 @@ conversionTypeRouter.delete("/:id", async function (req: Request, res: Response)
         if (conversionType) {
             await repository.remove(conversionType);
 
+            deleteResponse(res);
+
             logger.info("Conversion type with ID " + reqId + " deleted.", LOG_ENDPOINT.DATABASE);
-
-            res.status(204);
         } else {
-            res.status(404);
+            throw new HttpNotFoundException();
         }
-
-        res.send();
     } catch (err) {
-        const errRes = new SQLiteErrorResponse(err); 
-        errRes.response(res);
+        next(err);
     }
 });
