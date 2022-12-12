@@ -53,27 +53,50 @@ categoryRouter.get("/", async function (req: Request, res: Response, next: NextF
 });
 
 /**
- * Get a specific category.
+ * Get a specific category by id.
+ */
+categoryRouter.get("/:id", getOneCategory);
+
+/**
+ * Get a specific category by slug.
+ */
+categoryRouter.get("/slug/:slug", getOneCategory);
+
+/**
+ * Get specific category callback.
  * 
  * Loads additional data
  * - Recipe realtion
  */
-categoryRouter.get("/:id", async function (req: Request, res: Response, next: NextFunction) {
+async function getOneCategory(req: Request, res: Response, next: NextFunction)
+{
     // Parameters
     const reqId: number = Number(req.params?.id);
+    const reqSlug: string = req.params?.slug;
 
     // Category instance
     let category: Category|null = null;
 
+    // Check which route and setup where clause with sanitized parameters
+    let whereClause = {};
+
+    if(reqId) {
+        whereClause = {
+            id: reqId
+        };
+    } else if(reqSlug) {
+        whereClause = {
+            slug: generateSlug(reqSlug)
+        };
+    }
+
     // ORM query
     try {
-        if (reqId) {
+        if (reqId || reqSlug) {
             category = await AppDataSource
                 .getRepository(Category)
                 .findOne({
-                    where: {
-                        id: reqId
-                    },
+                    where: whereClause,
                     relations: {
                         recipes: true
                     }
@@ -88,48 +111,7 @@ categoryRouter.get("/:id", async function (req: Request, res: Response, next: Ne
     } catch (err) {
         next(err);
     }
-});
-
-/**
- * TODO TMP
- * 
- * Get a specific category by slug.
- * 
- * Loads additional data
- * - Recipe relation
- */
-categoryRouter.get("/slug/:slug", async function (req: Request, res: Response, next: NextFunction) {
-    // Parameters
-    const reqSlug: string = req.params?.slug;
-
-    // Category instance
-    let category: Category|null = null;
-
-    // Sanitization
-    const sanitizedSlug = generateSlug(reqSlug);
-
-    // ORM query
-    try {
-        category = await AppDataSource
-            .getRepository(Category)
-            .findOne({
-                where: {
-                    slug: sanitizedSlug
-                },
-                relations: {
-                    recipes: true
-                }
-            });
-
-        if(category) {
-            getResponse(category, res);
-        } else {
-            throw new HttpNotFoundException();
-        }
-    } catch (err) {
-        next(err);
-    }
-});
+}
 
 /**
  * Create a category.
