@@ -11,8 +11,9 @@ setupPublicDir();
 // Express instance
 const app = express();
 
-// API router instance
+// Setup api and public routes
 app.use("/api/v1", apiRouter);
+app.use(express.static("public"));
 
 // Default route if not exists
 app.use((req: Request, res: Response) => {

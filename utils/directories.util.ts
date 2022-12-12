@@ -5,7 +5,7 @@ import * as fs from "node:fs";
  */
 export function setupPublicDir(): void
 {
-    const dir = process.env.DIR_RECIPES ?? "public/recipes";
+    const dir = process.env.DIR_RECIPES ?? "public/images/recipes";
 
     if(!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
