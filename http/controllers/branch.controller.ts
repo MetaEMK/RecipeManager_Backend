@@ -126,8 +126,8 @@ branchRouter.post("/", async function (req: Request, res: Response, next: NextFu
     }
 
     // ORM query
-    if(validator.getErrors().length === 0) {
-        try {
+    try {
+        if(validator.getErrors().length === 0) {
             await AppDataSource
                 .getRepository(Branch)
                 .save(branch);
@@ -135,11 +135,11 @@ branchRouter.post("/", async function (req: Request, res: Response, next: NextFu
             postResponse(branch, req, res);
 
             logger.info("Branch " + branch.id + " created.", LOG_ENDPOINT.DATABASE);
-        } catch(err) {
-            next(err);
-        }
-    } else {
-        next(new ValidationException(validator.getErrors()));
+        } else {
+           throw new ValidationException(validator.getErrors());
+        }        
+    } catch (err) {
+        next(err);
     }
 });
 
@@ -179,8 +179,8 @@ branchRouter.patch("/:id", async function (req: Request, res: Response, next: Ne
             validatedRecipesRmv = reqRecipesRmv;
 
     // ORM query
-    if(validator.getErrors().length === 0) {
-        try {
+    try {
+        if(validator.getErrors().length === 0) {
             if(reqId) {
                 branch = await AppDataSource
                     .getRepository(Branch)
@@ -232,11 +232,11 @@ branchRouter.patch("/:id", async function (req: Request, res: Response, next: Ne
             } else {
                 throw new HttpNotFoundException();
             }  
-        } catch(err) {
-            next(err);
+        } else {
+            throw new ValidationException(validator.getErrors());
         }
-    } else {
-        next(new ValidationException(validator.getErrors()));
+    } catch (err) {
+        next(err);
     }
 });
 

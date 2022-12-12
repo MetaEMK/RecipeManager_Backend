@@ -110,8 +110,8 @@ categoryRouter.post("/", async function (req: Request, res: Response, next: Next
     }
 
     // ORM query
-    if(validator.getErrors().length === 0) {
-        try {
+    try {
+        if(validator.getErrors().length === 0) {
             await AppDataSource
                 .getRepository(Category)
                 .save(category);
@@ -119,11 +119,11 @@ categoryRouter.post("/", async function (req: Request, res: Response, next: Next
             postResponse(category, req, res);
 
             logger.info("Category " + category.id + " created.", LOG_ENDPOINT.DATABASE);
-        } catch (err) {
-            next(err);
-        }
-    } else {
-        next(new ValidationException(validator.getErrors()));
+        } else {
+            throw new ValidationException(validator.getErrors());
+        }        
+    } catch (err) {
+        next(err);
     }
 });
 
@@ -163,8 +163,8 @@ categoryRouter.patch("/:id", async function (req: Request, res: Response, next: 
             validatedRecipesRmv = reqRecipesRmv;
 
     // ORM query
-    if(validator.getErrors().length === 0) {
-        try {
+    try {
+        if(validator.getErrors().length === 0) {
             if (reqId) {
                 category = await AppDataSource
                     .getRepository(Category)
@@ -213,11 +213,11 @@ categoryRouter.patch("/:id", async function (req: Request, res: Response, next: 
             } else {
                 throw new HttpNotFoundException();
             }
-        } catch (err) {
-            next(err);
-        }
-    } else {
-        next(new ValidationException(validator.getErrors()));
+        } else {
+            throw new ValidationException(validator.getErrors());
+        }        
+    } catch (err) {
+        next(err);
     }
 });
 
