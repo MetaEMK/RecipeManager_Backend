@@ -1,11 +1,11 @@
-import express  from "express";
-import { Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import { AppDataSource } from "../../config/datasource.js";
-import { createLogger } from "../../utils/logger.js";
 import { decodeURISpaces, generateSlug } from "../../utils/controller.util.js";
-import { SQLiteErrorResponse } from "../error_responses/sqliteErrorResponse.js";
+import { HttpNotFoundException } from "../../exceptions/HttpException.js";
+import { createLogger } from "../../utils/logger.js";
 import { Size } from "../../data/entities/size.entity.js";
 import { SizeValidator } from "../validators/size.validator.js";
+import { ValidationException } from "../../exceptions/ValidationException.js";
 
 // Router instance
 export const sizeRouter = express.Router({
@@ -18,20 +18,20 @@ const logger = createLogger();
 /**
  * Get all sizes of a conversion type.
  */
-sizeRouter.get("/", async function (req: Request, res: Response) {
+sizeRouter.get("/", async function (req: Request, res: Response, next: NextFunction) {
     
 });
 
 /**
  * Create a size of a conversion type.
  */
-sizeRouter.post("/", async function (req: Request, res: Response) {
+sizeRouter.post("/", async function (req: Request, res: Response, next: NextFunction) {
     
 });
 
 /**
  * Delete a size of a conversion type.
  */
-sizeRouter.delete("/:id", async function (req: Request, res: Response) {
+sizeRouter.delete("/:id", async function (req: Request, res: Response, next: NextFunction) {
     
 });
