@@ -1,3 +1,76 @@
+import { Request, Response } from "express";
+
+/**
+ * Sends a response for getting one or multiple resources.
+ * 
+ * @param data Response body
+ * @param res HTTP response object
+ */
+export function getResponse(data: any, res: Response): void
+{
+    res.status(200);
+    res.json({
+        data: data
+    });
+}
+
+/**
+ * Sends a response for creating a resource.
+ * 
+ * @param data Response body 
+ * @param res HTTP response object
+ * @param resourceId Created resource id
+ */
+export function postResponse(data: any, req: Request, res: Response, resourceId: any): void
+{
+    res.status(201);
+    res.set({
+        "Location": req.protocol + "://" + req.get("host") + req.originalUrl + "/" + resourceId
+    });
+    res.json({
+        data: data
+    });
+}
+
+/**
+ * Sends a response for partially updating a resource.
+ * 
+ * @param data Response body
+ * @param res HTTP response object
+ */
+export function patchResponse(data: any, res: Response): void
+{
+    res.status(200);
+    res.json({
+        data: data
+    });
+}
+
+/**
+ * Sends a response for replacing a resource.
+ * 
+ * @param data Response body
+ * @param res HTTP response object
+ */
+export function putResponse(data: any, res: Response): void
+{
+    res.status(200);
+    res.json({
+        data: data
+    });
+}
+
+/**
+ * Sends a response for deleting a resource.
+ * 
+ * @param res HTTP response object
+ */
+export function deleteResponse(res: Response): void
+{
+    res.status(204);
+    res.send();
+}
+
 /**
  * Decodes URI characters %20 and + to a space character.
  * 
