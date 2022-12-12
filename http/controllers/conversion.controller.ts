@@ -1,11 +1,11 @@
-import express  from "express";
-import { Request, Response } from "express";
+import express, { Request, Response } from "express";
 import { AppDataSource } from "../../config/datasource.js";
-import { createLogger } from "../../utils/logger.js";
 import { decodeURISpaces, generateSlug } from "../../utils/controller.util.js";
-import { SQLiteErrorResponse } from "../error_responses/sqliteErrorResponse.js";
+import { HttpNotFoundException } from "../../exceptions/HttpException.js";
+import { createLogger, LOG_ENDPOINT } from "../../utils/logger.js";
 import { Conversion } from "../../data/entities/conversion.entity.js";
 import { ConversionToSizeValidator } from "../validators/conversion_to_size.validator.js";
+import { ValidationException } from "../../exceptions/ValidationException.js";
 
 // Router instance
 export const conversionRouter = express.Router({
