@@ -1,13 +1,12 @@
-import express from "express";
-import { Request, Response } from "express";
+import express, { Request, Response, NextFunction } from "express";
 import { AppDataSource } from "../../config/datasource.js";
+import { decodeURISpaces, deleteResponse, generateSlug, getResponse, patchResponse, postResponse } from "../../utils/controller.util.js";
+import { HttpNotFoundException } from "../../exceptions/HttpException.js";
 import { createLogger, LOG_ENDPOINT } from "../../utils/logger.js";
-import { decodeURISpaces, generateSlug } from "../../utils/controller.util.js";
-import { SQLiteErrorResponse } from "../error_responses/sqliteErrorResponse.js";
 import { Branch } from "../../data/entities/branch.entity.js";
 import { Category } from "../../data/entities/category.entity.js";
 import { BranchValidator } from "../validators/branch.validator.js";
-import { validationErrorResponse } from "../error_responses/validationErrorResponse.js";
+import { ValidationException } from "../../exceptions/ValidationException.js";
 
 // Router instance
 export const branchRouter = express.Router();
@@ -19,7 +18,7 @@ const logger = createLogger();
  * Get all branches.
  * Able to filter the branch name, slug and search for a specific recipe id.
  */
-branchRouter.get("/", async function (req: Request, res: Response) {
+branchRouter.get("/", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
     const filterByName: string|undefined = decodeURISpaces(req.query?.name as string);
     const filterBySlug: string|undefined = decodeURISpaces(req.query?.slug as string);
@@ -48,12 +47,9 @@ branchRouter.get("/", async function (req: Request, res: Response) {
 
         const branches = await query.getMany();
 
-        res.json({
-            data: branches
-        });
+        getResponse(branches, res);
     } catch(err) {
-        const errRes = new SQLiteErrorResponse(err); 
-        errRes.response(res);
+        next(err);
     }
 });
 
@@ -65,7 +61,7 @@ branchRouter.get("/", async function (req: Request, res: Response) {
  * - Recipe relation with category sub relation
  * - Scheduled item relation
  */
-branchRouter.get("/:id", async function (req: Request, res: Response) {
+branchRouter.get("/:id", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
     const reqId: number = Number(req.params?.id);
 
@@ -101,23 +97,19 @@ branchRouter.get("/:id", async function (req: Request, res: Response) {
         }
 
         if(branch) {
-            res.json({
-                data: branch
-            });
+            getResponse(branch, res);
         } else {
-            res.status(404);
-            res.send();
+            next(new HttpNotFoundException());
         }
     } catch (err) {
-        const errRes = new SQLiteErrorResponse(err); 
-        errRes.response(res);
+        next(err);
     }
 });
 
 /**
  * Create a branch.
  */
-branchRouter.post("/", async function (req: Request, res: Response) {
+branchRouter.post("/", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
     const reqName: string = req.body?.name;
 
@@ -140,21 +132,14 @@ branchRouter.post("/", async function (req: Request, res: Response) {
                 .getRepository(Branch)
                 .save(branch);
             
-            logger.info("Branch " + branch.id + " created.", LOG_ENDPOINT.DATABASE);
+            postResponse(branch, req, res, branch.id);
 
-            res.status(201)
-            res.set({
-                "Location": req.protocol + "://" + req.get("host") + req.originalUrl + "/" + branch.id
-            });
-            res.json({
-                data: branch
-            });
+            logger.info("Branch " + branch.id + " created.", LOG_ENDPOINT.DATABASE);
         } catch(err) {
-            const errRes = new SQLiteErrorResponse(err); 
-            errRes.response(res);
+            next(err);
         }
     } else {
-        validationErrorResponse(validator.getErrors(), res);
+        next(new ValidationException(validator.getErrors()));
     }
 });
 
@@ -162,7 +147,7 @@ branchRouter.post("/", async function (req: Request, res: Response) {
  * (Partially) Update a branch.
  * Able to add and remove recipes.
  */
-branchRouter.patch("/:id", async function (req: Request, res: Response) {
+branchRouter.patch("/:id", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
     const reqId: number = Number(req.params?.id);
     const reqName: string = req.body?.name;
@@ -243,26 +228,22 @@ branchRouter.patch("/:id", async function (req: Request, res: Response) {
             }
     
             if(branch) {
-                res.json({
-                    data: branch
-                });
+                patchResponse(branch, res);
             } else {
-                res.status(404);
-                res.send();
+                next(new HttpNotFoundException());
             }  
         } catch(err) {
-            const errRes = new SQLiteErrorResponse(err); 
-            errRes.response(res);
+            next(err);
         }
     } else {
-        validationErrorResponse(validator.getErrors(), res);
+        next(new ValidationException(validator.getErrors()));
     }
 });
 
 /**
  * Delete a branch.
  */
-branchRouter.delete("/:id", async function (req: Request, res: Response) {
+branchRouter.delete("/:id", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
     const reqId = Number(req.params.id);
 
@@ -286,16 +267,13 @@ branchRouter.delete("/:id", async function (req: Request, res: Response) {
         if(branch) {
             await repository.remove(branch);
 
-            logger.info("Branch with ID " + reqId + " deleted.", LOG_ENDPOINT.DATABASE);
+            deleteResponse(res);
 
-            res.status(204);
+            logger.info("Branch with ID " + reqId + " deleted.", LOG_ENDPOINT.DATABASE);
         } else {
-            res.status(404);
+            next(new HttpNotFoundException());
         }
-    
-        res.send();
     } catch (err) {
-        const errRes = new SQLiteErrorResponse(err); 
-        errRes.response(res);
+        next(err);
     }
 });
