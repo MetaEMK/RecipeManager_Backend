@@ -67,5 +67,17 @@ export class ValidatorNameUtilities extends Validator
         
         return true;
     }
-        
+    
+    public isNotReserved(validator: string, name: string, pattern: RegExp): boolean
+    {
+        if(pattern.test(name))
+        {
+            let error = new ValidationError(GeneralValidationErrorCodes.NAME_RESERVED);
+            this.logError(validator, error.toString(), name);
+            this.errors.push(error);
+            return false;
+        }
+
+        return true;
+    }
 }

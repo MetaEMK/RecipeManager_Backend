@@ -10,6 +10,7 @@ export enum GeneralValidationErrorCodes {
     NAME_MISSING = "NAME_MISSING",
     NAME_INVALID = "Name must be a string",
     NAME_INVALID_LENGTH = "INVALID_NAME_LENGTH",
+    NAME_RESERVED = "Name is reserved for the system",
 
     //QUANTITY
     QUANTITY_MISSING = "Quantity is missing",

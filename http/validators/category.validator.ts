@@ -5,6 +5,13 @@ import { ValidatorStructualUtilities } from "./util/validatorStructualUtilities.
 export class CategoryValidator extends Validator
 {
     /**
+     * System reserved names
+     */
+    private reservedNamesRegex = {
+        noCategory: /^\bUnkategorisiert\b/i
+    };
+
+    /**
      * @param nameToValidate name to validate. can be null or undefined. If you pass null or undefined or an Object, the method will return false
      * @returns true if the name is valid for a category name and false otherwise
      */
@@ -13,6 +20,12 @@ export class CategoryValidator extends Validator
         let val = new ValidatorNameUtilities();
 
         if(!val.isValidAlpha("CategoryValidator", nameToValidate, {min: 1, max: 100}))
+        {
+            this.errors = this.errors.concat(val.getErrors());
+            return false;
+        }
+
+        if(!val.isNotReserved("CategoryValidator", nameToValidate, this.reservedNamesRegex.noCategory))
         {
             this.errors = this.errors.concat(val.getErrors());
             return false;
