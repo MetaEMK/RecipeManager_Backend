@@ -21,11 +21,11 @@ export function getResponse(data: any, res: Response): void
  * @param res HTTP response object
  * @param resourceId Created resource id
  */
-export function postResponse(data: any, req: Request, res: Response, resourceId: any): void
+export function postResponse(data: any, req: Request, res: Response): void
 {
     res.status(201);
     res.set({
-        "Location": req.protocol + "://" + req.get("host") + req.originalUrl + "/" + resourceId
+        "Location": req.protocol + "://" + req.get("host") + req.originalUrl + "/" + data?.id
     });
     res.json({
         data: data

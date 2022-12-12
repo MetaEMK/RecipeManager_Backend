@@ -99,7 +99,7 @@ branchRouter.get("/:id", async function (req: Request, res: Response, next: Next
         if(branch) {
             getResponse(branch, res);
         } else {
-            next(new HttpNotFoundException());
+            throw new HttpNotFoundException();
         }
     } catch (err) {
         next(err);
@@ -132,7 +132,7 @@ branchRouter.post("/", async function (req: Request, res: Response, next: NextFu
                 .getRepository(Branch)
                 .save(branch);
             
-            postResponse(branch, req, res, branch.id);
+            postResponse(branch, req, res);
 
             logger.info("Branch " + branch.id + " created.", LOG_ENDPOINT.DATABASE);
         } catch(err) {
@@ -230,7 +230,7 @@ branchRouter.patch("/:id", async function (req: Request, res: Response, next: Ne
             if(branch) {
                 patchResponse(branch, res);
             } else {
-                next(new HttpNotFoundException());
+                throw new HttpNotFoundException();
             }  
         } catch(err) {
             next(err);
@@ -271,7 +271,7 @@ branchRouter.delete("/:id", async function (req: Request, res: Response, next: N
 
             logger.info("Branch with ID " + reqId + " deleted.", LOG_ENDPOINT.DATABASE);
         } else {
-            next(new HttpNotFoundException());
+            throw new HttpNotFoundException();
         }
     } catch (err) {
         next(err);
