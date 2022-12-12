@@ -22,6 +22,7 @@ AppDataSource
     })
     .catch((err) => {
         console.error("Error during Data Source initialization:", err);
+        throw new Error("Error during Data Source initialization");
     });
 
 // Setup express

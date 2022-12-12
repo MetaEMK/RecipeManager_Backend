@@ -42,6 +42,9 @@ export function errorHandler(err: unknown, req: Request, res: Response, next: Ne
         case err instanceof ValidationException:
             validationError(err as ValidationException, res);
             break;
+        case err instanceof Error:
+            generalError(err as Error, res, logger);
+            break;
         default:
             defaultError(err, res, logger);
             break;
@@ -63,6 +66,32 @@ function defaultError(err: unknown, res: Response, logger: any): void
             code: "UNCAUGHT_ERROR",
             type: "UNCAUGHT_ERROR",
             message: "An uncaught error occurred."
+        }
+    };
+
+    // Response
+    res.status(500);
+    res.json(errorResponse);
+
+    // Log
+    logger.error(err, LOG_ENDPOINT.MAIN);
+}
+
+/**
+ * General error.
+ * 
+ * @param err Thrown error.
+ * @param res HTTP response object
+ * @param logger Logger instance
+ */
+function generalError(err: Error, res: Response, logger: any): void
+{
+    // Error response
+    const errorResponse: ErrorResponse = {
+        error: {
+            code: err.name,
+            type: "UNCAUGHT_ERROR",
+            message: err.message
         }
     };
 
