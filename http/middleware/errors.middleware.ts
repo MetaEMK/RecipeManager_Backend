@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from "express";
+import multer from "multer";
 import { QueryFailedError } from "typeorm";
 import { HttpNotFoundException } from "../../exceptions/HttpException.js";
+import { NotSupportedMediaTypeException } from "../../exceptions/NotSupportedMediaTypeException.js";
 import { ValidationException } from "../../exceptions/ValidationException.js";
 import { createLogger, LOG_ENDPOINT, LOG_LEVEL } from "../../utils/logger.js";
 
@@ -41,6 +43,12 @@ export function errorHandler(err: unknown, req: Request, res: Response, next: Ne
             break;
         case err instanceof ValidationException:
             validationError(err as ValidationException, res);
+            break;
+        case err instanceof multer.MulterError:
+            multipartFormDataError(err as multer.MulterError, res, logger);
+            break;
+        case err instanceof NotSupportedMediaTypeException:
+            notSupportedMediaTypeError(err as NotSupportedMediaTypeException, res, logger);
             break;
         case err instanceof Error:
             generalError(err as Error, res, logger);
@@ -209,4 +217,49 @@ function validationError(err: ValidationException, res: Response): void
     // Response
     res.status(400);
     res.json(errorResponse);
+}
+
+/**
+ * Multer/Multipart form data error.
+ * 
+ * @param err Thrown error
+ * @param res HTTP response object
+ * @param logger Logger instance
+ */
+function multipartFormDataError(err: multer.MulterError, res: Response, logger: any): void
+{
+    // Error response
+    const errorResponse: ErrorResponse = {
+        error: {
+            code: err.code,
+            type: err.name,
+            message: err.message,
+        }
+    };
+
+    // Response
+    res.status(400);
+    res.json(errorResponse);
+
+    // Log
+    logger.info(err.message, LOG_ENDPOINT.MAIN);
+}
+
+function notSupportedMediaTypeError(err: NotSupportedMediaTypeException, res: Response, logger: any): void
+{
+    // Error response
+    const errorResponse: ErrorResponse = {
+        error: {
+            code: err.code,
+            type: err.type,
+            message: err.message,
+        }
+    };
+
+    // Response
+    res.status(415);
+    res.json(errorResponse);
+
+    // Log
+    logger.info(err.message, LOG_ENDPOINT.MAIN);
 }
