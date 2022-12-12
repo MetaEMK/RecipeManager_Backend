@@ -48,7 +48,7 @@ export function errorHandler(err: unknown, req: Request, res: Response, next: Ne
         default:
             defaultError(err, res, logger);
             break;
-    }    
+    }
 }
 
 /**
@@ -63,9 +63,9 @@ function defaultError(err: unknown, res: Response, logger: any): void
     // Error response
     const errorResponse: ErrorResponse = {
         error: {
-            code: "UNCAUGHT_ERROR",
-            type: "UNCAUGHT_ERROR",
-            message: "An uncaught error occurred."
+            code: "UNEXPECTED_ERROR",
+            type: "UNEXPECTED_ERROR",
+            message: "An unexpteced error occurred."
         }
     };
 
@@ -90,8 +90,8 @@ function generalError(err: Error, res: Response, logger: any): void
     const errorResponse: ErrorResponse = {
         error: {
             code: err.name,
-            type: "UNCAUGHT_ERROR",
-            message: err.message
+            type: "UNEXPECTED_ERROR",
+            message: process.env.NODE_ENV === "production" ? "An unexpteced error occurred." : err.message
         }
     };
 
@@ -162,7 +162,7 @@ function sqliteError(err: QueryFailedError, res: Response, logger: any): void
         error: {
             code: code,
             type: "SQLITE_ERROR",
-            message: err.message
+            message: process.env.NODE_ENV === "production" ? "A SQLite error occurred." : err.message
         }
     };
 
