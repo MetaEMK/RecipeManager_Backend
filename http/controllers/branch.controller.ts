@@ -64,7 +64,7 @@ branchRouter.get("/:id", getOneBranch);
 branchRouter.get("/slug/:slug", getOneBranch);
 
 /**
- * Get specific branch middleware.
+ * Get specific branch callback.
  * 
  * Loads addtional data
  * - Recipe Categories: Distinct categories based on recipe relation
