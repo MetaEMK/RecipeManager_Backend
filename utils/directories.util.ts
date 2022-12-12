@@ -5,8 +5,10 @@ import * as fs from "node:fs";
  */
 export function setupPublicDir(): void
 {
-    if(!fs.existsSync("public/recipes")) {
-        fs.mkdirSync("public/recipes", { recursive: true });
+    const dir = process.env.DIR_RECIPES ?? "public/recipes";
+
+    if(!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
     }
 
     console.log("Successfully prepared all public directories.");    
