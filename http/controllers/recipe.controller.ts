@@ -1,11 +1,11 @@
-import express from "express";
-import { Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import { AppDataSource } from "../../config/datasource.js";
+import { decodeURISpaces, generateSlug, getResponse } from "../../utils/controller.util.js";
+import { HttpNotFoundException } from "../../exceptions/HttpException.js";
 import { createLogger } from "../../utils/logger.js";
-import { decodeURISpaces, generateSlug } from "../../utils/controller.util.js";
-import { SQLiteErrorResponse } from "../error_responses/sqliteErrorResponse.js";
 import { Recipe } from "../../data/entities/recipe.entity.js";
 import { RecipeValidator } from "../validators/recipe.validator.js";
+import { ValidationException } from "../../exceptions/ValidationException.js";
 
 // Router instance
 export const recipeRouter = express.Router();
@@ -17,7 +17,7 @@ const logger = createLogger();
  * Get all recipes.
  * Able to filter the recipe name, slug and search for a specific branch id or category id.
  */
-recipeRouter.get("/", async function (req: Request, res: Response) {
+recipeRouter.get("/", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
     const filterByName: string|undefined = decodeURISpaces(req.query?.name as string);
     const filterBySlug: string|undefined = decodeURISpaces(req.query?.slug as string);
@@ -52,12 +52,9 @@ recipeRouter.get("/", async function (req: Request, res: Response) {
 
         const recipes = await query.getMany();
 
-        res.json({
-            data: recipes
-        });
+        getResponse(recipes, res);
     } catch (err) {
-        const errRes = new SQLiteErrorResponse(err); 
-        errRes.response(res);
+        next(err);
     }
 });
 
@@ -69,7 +66,7 @@ recipeRouter.get("/", async function (req: Request, res: Response) {
  * - Category relation
  * - Variant relation
  */
-recipeRouter.get("/:id", async function (req: Request, res: Response) {
+recipeRouter.get("/:id", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
     const reqId: number = Number(req.params?.id);
 
@@ -94,23 +91,19 @@ recipeRouter.get("/:id", async function (req: Request, res: Response) {
         }
 
         if (recipe) {
-            res.json({
-                data: recipe
-            });
+            getResponse(recipe, res);
         } else {
-            res.status(404);
-            res.send();
+            throw new HttpNotFoundException();
         }
     } catch (err) {
-        const errRes = new SQLiteErrorResponse(err); 
-        errRes.response(res);
+        next(err);
     }
 });
 
 /**
  * Create a recipe.
  */
-recipeRouter.post("/", async function (req: Request, res: Response) {
+recipeRouter.post("/", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
     const reqName: string = req.body?.name;
     const reqDesc: string = req.body?.description;
@@ -133,14 +126,14 @@ recipeRouter.post("/", async function (req: Request, res: Response) {
 /**
  * (Partially) Update a recipe.
  */
-recipeRouter.patch("/:id", async function (req: Request, res: Response) {
+recipeRouter.patch("/:id", async function (req: Request, res: Response, next: NextFunction) {
 
 });
 
 /**
  * Delete a recipe.
  */
-recipeRouter.delete("/:id", async function (req: Request, res: Response) {
+recipeRouter.delete("/:id", async function (req: Request, res: Response, next: NextFunction) {
     const results = await AppDataSource.getRepository(Recipe).delete(req.params.id);
     res.json(results);
 });
