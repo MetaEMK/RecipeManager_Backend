@@ -91,6 +91,47 @@ categoryRouter.get("/:id", async function (req: Request, res: Response, next: Ne
 });
 
 /**
+ * TODO TMP
+ * 
+ * Get a specific category by slug.
+ * 
+ * Loads additional data
+ * - Recipe relation
+ */
+categoryRouter.get("/slug/:slug", async function (req: Request, res: Response, next: NextFunction) {
+    // Parameters
+    const reqSlug: string = req.params?.slug;
+
+    // Category instance
+    let category: Category|null = null;
+
+    // Sanitization
+    const sanitizedSlug = generateSlug(reqSlug);
+
+    // ORM query
+    try {
+        category = await AppDataSource
+            .getRepository(Category)
+            .findOne({
+                where: {
+                    slug: sanitizedSlug
+                },
+                relations: {
+                    recipes: true
+                }
+            });
+
+        if(category) {
+            getResponse(category, res);
+        } else {
+            throw new HttpNotFoundException();
+        }
+    } catch (err) {
+        next(err);
+    }
+});
+
+/**
  * Create a category.
  */
 categoryRouter.post("/", async function (req: Request, res: Response, next: NextFunction) {
