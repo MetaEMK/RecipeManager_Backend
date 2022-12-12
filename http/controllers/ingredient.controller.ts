@@ -1,12 +1,11 @@
-import express  from "express";
-import { Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import { AppDataSource } from "../../config/datasource.js";
+import { decodeURISpaces, deleteResponse, getResponse, postResponse } from "../../utils/controller.util.js";
+import { HttpNotFoundException } from "../../exceptions/HttpException.js";
 import { createLogger, LOG_ENDPOINT } from "../../utils/logger.js";
-import { decodeURISpaces, generateSlug } from "../../utils/controller.util.js";
-import { SQLiteErrorResponse } from "../error_responses/sqliteErrorResponse.js";
 import { Ingredient } from "../../data/entities/ingredient.entity.js";
 import { IngredientValidator } from "../validators/ingredient.validator.js";
-import { validationErrorResponse } from "../error_responses/validationErrorResponse.js";
+import { ValidationException } from "../../exceptions/ValidationException.js";
 
 // Router instance
 export const ingredientRouter = express.Router();
@@ -18,7 +17,7 @@ const logger = createLogger();
  * Get all ingredients.
  * Able to filter the ingredient name.
  */
-ingredientRouter.get("/", async function (req: Request, res: Response) {
+ingredientRouter.get("/", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
     const filterByName: string|undefined = decodeURISpaces(req.query?.name as string);
 
@@ -37,19 +36,16 @@ ingredientRouter.get("/", async function (req: Request, res: Response) {
 
         const ingredients = await query.getMany();
 
-        res.json({
-            data: ingredients
-        });
+        getResponse(ingredients, res);
     } catch (err) {
-        const errRes = new SQLiteErrorResponse(err); 
-        errRes.response(res);
+        next(err);
     }
 });
 
 /**
  * Create an ingredient.
  */
-ingredientRouter.post("/", async function (req: Request, res:Response) {
+ingredientRouter.post("/", async function (req: Request, res:Response, next: NextFunction) {
     // Parameters
     const reqName: string = req.body?.name;
 
@@ -64,34 +60,27 @@ ingredientRouter.post("/", async function (req: Request, res:Response) {
         ingredient.name = reqName;
 
     // ORM query
-    if (validator.getErrors().length === 0) {
-        try {
+    try {
+        if (validator.getErrors().length === 0) {
             await AppDataSource
                 .getRepository(Ingredient)
                 .save(ingredient);
 
-            logger.info("Ingredient " + ingredient.id + " created.", LOG_ENDPOINT.DATABASE);
+            postResponse(ingredient, req, res);
 
-            res.status(201);
-            res.set({
-                "Location": req.protocol + "://" + req.get("host") + req.originalUrl + "/" + ingredient.id
-            });
-            res.json({
-                data: ingredient
-            });
-        } catch (err) {
-            const errRes = new SQLiteErrorResponse(err); 
-            errRes.response(res);
+            logger.info("Ingredient " + ingredient.id + " created.", LOG_ENDPOINT.DATABASE);
+        } else {
+            throw new ValidationException(validator.getErrors());
         }
-    } else {
-        validationErrorResponse(validator.getErrors(), res);
+    } catch (err) {
+        next(err);
     }
 });
 
 /**
  * Delete an ingredient.
  */
-ingredientRouter.delete("/:id", async function (req: Request, res: Response) {
+ingredientRouter.delete("/:id", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
     const reqId = Number(req.params.id);
 
@@ -115,16 +104,13 @@ ingredientRouter.delete("/:id", async function (req: Request, res: Response) {
         if (ingredient) {
             await repository.remove(ingredient);
 
+            deleteResponse(res);
+
             logger.info("Ingredient with ID " + reqId + " deleted.", LOG_ENDPOINT.DATABASE);
-
-            res.status(204);
         } else {
-            res.status(404);
+            throw new HttpNotFoundException();
         }
-
-        res.send();
     } catch (err) {
-        const errRes = new SQLiteErrorResponse(err); 
-        errRes.response(res);
+        next(err);
     }
 });
