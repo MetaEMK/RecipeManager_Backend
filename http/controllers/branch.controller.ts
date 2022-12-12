@@ -54,29 +54,52 @@ branchRouter.get("/", async function (req: Request, res: Response, next: NextFun
 });
 
 /**
- * Get a specific branch.
+ * Get a specific branch by id.
+ */
+branchRouter.get("/:id", getOneBranch);
+
+/**
+ * Get a specific branch by slug.
+ */
+branchRouter.get("/slug/:slug", getOneBranch);
+
+/**
+ * Get specific branch middleware.
  * 
  * Loads addtional data
  * - Recipe Categories: Distinct categories based on recipe relation
  * - Recipe relation with category sub relation
  * - Scheduled item relation
  */
-branchRouter.get("/:id", async function (req: Request, res: Response, next: NextFunction) {
+async function getOneBranch(req: Request, res: Response, next: NextFunction)
+{
     // Parameters
     const reqId: number = Number(req.params?.id);
+    const reqSlug: string = req.params?.slug;
 
     // Branch instance
     let branch: Branch|null = null;
 
+    // Check which route and setup where clause with sanitized parameters
+    let whereClause = {};
+
+    if(reqId) {
+        whereClause = {
+            id: reqId
+        };
+    } else if(reqSlug) {
+        whereClause = {
+            slug: generateSlug(reqSlug)
+        };
+    }
+
     // ORM query
     try {
-        if(reqId) {
+        if(reqId || reqSlug) {
             branch = await AppDataSource
                 .getRepository(Branch)
                 .findOne({
-                    where: {
-                        id: reqId
-                    },
+                    where: whereClause,
                     relations: {
                         recipes: {
                             categories: true
@@ -91,7 +114,7 @@ branchRouter.get("/:id", async function (req: Request, res: Response, next: Next
                     .createQueryBuilder("category")
                     .innerJoin("category.recipes", "recipe")
                     .innerJoin("recipe.branches", "branch")
-                    .where("branch.id = :id", { id: reqId })
+                    .where("branch.id = :id", { id: branch.id })
                     .getMany();
             }
         }
@@ -104,63 +127,7 @@ branchRouter.get("/:id", async function (req: Request, res: Response, next: Next
     } catch (err) {
         next(err);
     }
-});
-
-/**
- * TODO TMP
- * 
- * Get a specific branch by slug.
- * 
- * Loads addtional data
- * - Recipe Categories: Distinct categories based on recipe relation
- * - Recipe relation with category sub relation
- * - Scheduled item relation
- */
-branchRouter.get("/slug/:slug", async function (req: Request, res: Response, next: NextFunction) {
-    // Parameters
-    const reqSlug: string = req.params?.slug;
-
-    // Branch instance
-    let branch: Branch|null = null;
-
-    // Sanitization
-    const sanitizedSlug = generateSlug(reqSlug);
-
-    // ORM query
-    try {
-        branch = await AppDataSource
-            .getRepository(Branch)
-            .findOne({
-                where: {
-                    slug: sanitizedSlug
-                },
-                relations: {
-                    recipes: {
-                        categories: true
-                    },
-                    scheduledItems: true
-                }
-            });
-        
-        if(branch) {
-            branch.recipeCategories = await AppDataSource
-                .getRepository(Category)
-                .createQueryBuilder("category")
-                .innerJoin("category.recipes", "recipe")
-                .innerJoin("recipe.branches", "branch")
-                .where("branch.id = :id", { id: branch.id })
-                .getMany();
-        }
-
-        if(branch) {
-            getResponse(branch, res);
-        } else {
-            throw new HttpNotFoundException();
-        }
-    } catch (err) {
-        next(err);
-    }
-});
+}
 
 /**
  * Create a branch.
