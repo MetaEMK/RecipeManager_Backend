@@ -3,6 +3,7 @@ import cors from "cors";
 import { AppDataSource } from "./config/datasource.js";
 import { setJsonHeader } from "./http/middleware/headers.middleware.js";
 import { errorHandler } from "./http/middleware/errors.middleware.js";
+import { HttpNotFoundException } from "./exceptions/HttpException.js";
 import { branchRouter } from "./http/controllers/branch.controller.js";
 import { categoryRouter } from "./http/controllers/category.controller.js";
 import { conversionRouter } from "./http/controllers/conversion.controller.js";
@@ -42,8 +43,7 @@ apiRouter.use("/recipes/:recipeId/variants", variantRouter);    // TODO
 
 // Default route if not exists
 apiRouter.use((req: Request, res: Response) => {
-    res.status(404);
-    res.send();
+    throw new HttpNotFoundException();
 });
 
 // Error handler
