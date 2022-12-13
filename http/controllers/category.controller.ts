@@ -105,7 +105,7 @@ async function getOneCategory(req: Request, res: Response, next: NextFunction)
                     .getRepository(Branch)
                     .createQueryBuilder("branch")
                     .innerJoin("branch.recipes", "recipe")
-                    .innerJoin("recipe.category", "category")
+                    .innerJoin("recipe.categories", "category")
                     .where("category.id = :id", { id: category.id })
                     .getMany();
             }
