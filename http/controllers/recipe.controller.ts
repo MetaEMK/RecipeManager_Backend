@@ -1,11 +1,14 @@
 import express, { NextFunction, Request, Response } from "express";
+import * as fs from "node:fs";
+import path from "path";
 import { AppDataSource } from "../../config/datasource.js";
-import { decodeURISpaces, generateSlug, getResponse } from "../../utils/controller.util.js";
+import { decodeURISpaces, generatePublicURI, generateSlug, getResponse, postResponse } from "../../utils/controller.util.js";
 import { HttpNotFoundException } from "../../exceptions/HttpException.js";
-import { createLogger } from "../../utils/logger.js";
+import { createLogger, LOG_ENDPOINT } from "../../utils/logger.js";
 import { Recipe } from "../../data/entities/recipe.entity.js";
 import { RecipeValidator } from "../validators/recipe.validator.js";
 import { ValidationException } from "../../exceptions/ValidationException.js";
+import { uploadRecipeImages as upload } from "../../config/storage.js";
 
 // Router instance
 export const recipeRouter = express.Router();
@@ -58,6 +61,7 @@ recipeRouter.get("/", async function (req: Request, res: Response, next: NextFun
     }
 });
 
+// TODO GET SPECIFIC BY SLUG
 /**
  * Get a specific recipe.
  * 
@@ -103,24 +107,58 @@ recipeRouter.get("/:id", async function (req: Request, res: Response, next: Next
 /**
  * Create a recipe.
  */
-recipeRouter.post("/", async function (req: Request, res: Response, next: NextFunction) {
+recipeRouter.post("/", upload.single("image"), async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
     const reqName: string = req.body?.name;
     const reqDesc: string = req.body?.description;
+    const reqFilePath: string = req.file?.path || "";
 
     // Recipe instance
     const recipe: Recipe = new Recipe();
 
+    // Validator instance
+    const validator: RecipeValidator = new RecipeValidator();
 
-    // TODO
-    recipe.name = req.body.name;
-    recipe.slug = generateSlug(req.body.name);
+    // Validation and sanitization
+    if(validator.isValidRecipeName(reqName)) {
+        recipe.name = reqName;
+        recipe.slug = generateSlug(reqName);
+    }
 
-    await AppDataSource
-        .getRepository(Recipe)
-        .save(recipe);
+    if(validator.isValidRecipeDescription(reqDesc))
+        recipe.description = reqDesc;
 
-    res.json(recipe);
+    if(reqFilePath) {
+        recipe.imagePath = path
+            .normalize(reqFilePath)
+            .split(path.sep)
+            .join("/");
+    }
+
+    // ORM query
+    try {
+        if(validator.getErrors().length === 0) {
+            await AppDataSource
+                .getRepository(Recipe)
+                .save(recipe);
+
+            if(recipe.imagePath)
+                recipe.imagePath = generatePublicURI(recipe.imagePath, req);
+
+            postResponse(recipe, req, res);
+
+            logger.info("Recipe " + recipe.id + " created.", LOG_ENDPOINT.DATABASE);
+        } else {
+            throw new ValidationException(validator.getErrors());
+        }
+    } catch (err) {
+        // Delete uploaded image
+        if(fs.existsSync(reqFilePath)) {
+            fs.rmSync(reqFilePath);
+        }
+
+        next(err);
+    }
 });
 
 /**

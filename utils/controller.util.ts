@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import path from "path";
 
 /**
  * Sends a response for getting one or multiple resources.
@@ -18,8 +19,8 @@ export function getResponse(data: any, res: Response): void
  * Sends a response for creating a resource.
  * 
  * @param data Response body 
+ * @param req HTTP request object
  * @param res HTTP response object
- * @param resourceId Created resource id
  */
 export function postResponse(data: any, req: Request, res: Response): void
 {
@@ -107,4 +108,26 @@ export function generateSlug(string: string): string
         .replaceAll("\u00f6", "oe")
         .replaceAll("\u00fc", "ue")
         .replaceAll("\u00df", "ss");
+}
+
+/**
+ * Normalizes and generates a public URI for a given path.
+ * 
+ * @param urlPath Base path
+ * @param req HTTP request object  
+ * @returns Public URI
+ */
+export function generatePublicURI(urlPath: string, req: Request): string
+{
+    urlPath = path
+        .normalize(urlPath)
+        .split(path.sep)
+        .join("/");   
+
+    const protocol = req.protocol + "://";
+    const host = req.get("host") + "/";
+    const publicPath = urlPath.replace("public/", "");
+    const resultPath = protocol + host + publicPath;
+
+    return resultPath;
 }

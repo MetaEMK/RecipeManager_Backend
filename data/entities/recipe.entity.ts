@@ -24,6 +24,7 @@ export class Recipe {
 
     @Column({
         name: "image_path",
+        type: "text",
         nullable: true
     })
     imagePath!: string
