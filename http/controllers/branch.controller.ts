@@ -220,8 +220,8 @@ branchRouter.patch("/:id", async function (req: Request, res: Response, next: Ne
                             branch!.name = validatedName;
                             branch!.slug = generateSlug(validatedName);
                         }
-                        
-                        await transactionalEntityManager.save(branch!);
+
+                        await transactionalEntityManager.save(branch);
 
                         // Updated many-to-many relations
                         await transactionalEntityManager
