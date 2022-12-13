@@ -99,13 +99,7 @@ async function getOneBranch(req: Request, res: Response, next: NextFunction)
             branch = await AppDataSource
                 .getRepository(Branch)
                 .findOne({
-                    where: whereClause,
-                    relations: {
-                        recipes: {
-                            categories: true
-                        },
-                        scheduledItems: true
-                    }
+                    where: whereClause
                 });
             
             if(branch) {
