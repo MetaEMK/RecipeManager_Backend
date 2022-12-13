@@ -19,15 +19,15 @@ export class ValidatorStructualUtilities extends Validator
             {
                 array = body as any[];
 
-                array.forEach(element => {
-                    if(typeof(element) !== "number")
-                        {
-                            let err = new ValidationError(GeneralValidationErrorCodes.ARRAY_INVALID, "Array contains non-number element:" + element);
-                            this.errors.push(err);
-                            this.logError(validator, err.toString(), element);
-                            return false;
-                        }
-                });
+                for(const element of array) {
+                    if(Number.isNaN(+element))
+                    {
+                        let err = new ValidationError(GeneralValidationErrorCodes.ARRAY_INVALID, "Array contains non-number element:" + element);
+                        this.errors.push(err);
+                        this.logError(validator, err.toString(), element);
+                        return false;
+                    }
+                }
             }
             else
             {
