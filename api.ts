@@ -10,6 +10,7 @@ import { conversionRouter } from "./http/controllers/conversion.controller.js";
 import { conversionTypeRouter } from "./http/controllers/conversion_type.controller.js";
 import { ingredientRouter } from "./http/controllers/ingredient.controller.js";
 import { recipeRouter } from "./http/controllers/recipe.controller.js";
+import { recipeImageRouter } from "./http/controllers/recipe_image.controller.js";
 import { scheduleRouter } from "./http/controllers/schedule.controller.js";
 import { variantRouter } from "./http/controllers/variant.controller.js";
 import { sizeRouter } from "./http/controllers/size.controller.js";
@@ -32,14 +33,15 @@ apiRouter.use(express.json());
 apiRouter.use(setJsonHeader);
 
 // Routes
-apiRouter.use("/branches", branchRouter);
+apiRouter.use("/branches", branchRouter);   // TODO
 apiRouter.use("/branches/:branchId/schedule", scheduleRouter);  // TODO
-apiRouter.use("/categories", categoryRouter);
-apiRouter.use("/conversion_types", conversionTypeRouter);
+apiRouter.use("/categories", categoryRouter);   // TODO
+apiRouter.use("/conversion_types", conversionTypeRouter);   // TODO
 apiRouter.use("/conversion_types/:conversionTypeId/conversions", conversionRouter); // TODO
 apiRouter.use("/conversion_types/:conversionTypeId/sizes", sizeRouter); // TODO
-apiRouter.use("/ingredients", ingredientRouter);
+apiRouter.use("/ingredients", ingredientRouter);    // TODO
 apiRouter.use("/recipes", recipeRouter);    // TODO
+apiRouter.use("/recipes/:recipeId/image", recipeImageRouter);   // TODO
 apiRouter.use("/recipes/:recipeId/variants", variantRouter);    // TODO
 
 // Default route if not exists
