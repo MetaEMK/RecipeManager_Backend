@@ -8,7 +8,6 @@ import { branchRouter } from "./http/controllers/branch.controller.js";
 import { categoryRouter } from "./http/controllers/category.controller.js";
 import { conversionRouter } from "./http/controllers/conversion.controller.js";
 import { conversionTypeRouter } from "./http/controllers/conversion_type.controller.js";
-import { ingredientRouter } from "./http/controllers/ingredient.controller.js";
 import { recipeRouter } from "./http/controllers/recipe.controller.js";
 import { recipeImageRouter } from "./http/controllers/recipe_image.controller.js";
 import { scheduleRouter } from "./http/controllers/schedule.controller.js";
@@ -39,7 +38,6 @@ apiRouter.use("/categories", categoryRouter);   // TODO
 apiRouter.use("/conversion_types", conversionTypeRouter);   // TODO
 apiRouter.use("/conversion_types/:conversionTypeId/conversions", conversionRouter); // TODO
 apiRouter.use("/conversion_types/:conversionTypeId/sizes", sizeRouter); // TODO
-apiRouter.use("/ingredients", ingredientRouter);    // TODO
 apiRouter.use("/recipes", recipeRouter);    // TODO
 apiRouter.use("/recipes/:recipeId/image", recipeImageRouter);   // TODO
 apiRouter.use("/recipes/:recipeId/variants", variantRouter);    // TODO

@@ -1,6 +1,7 @@
 import { GeneralValidationErrorCodes } from "../../enums/GeneralValidationErrors.enum.js";
 import { Validator } from "./MainValidator.js";
 import { ValidatorIdUtilities } from "./util/validatorIdUtilities.js";
+import { ValidatorNameUtilities } from "./util/validatorNameUtilities.js";
 import { ValidatorQuanitiyUtilities } from "./util/validatorQuantityUtilities.js";
 import { ValidationError } from "./validationError.js";
 
@@ -9,21 +10,21 @@ export class VariantIngredientValidator extends Validator
 {
     /**
      * 
-     * @param idToValidate id to validate. can be null or undefined. If you pass null or undefined or an Object, the method will return false
-     * @returns true if the id is valid for a variant ingredient id and false otherwise
+     * @param nameToValidate name to validate. can be null or undefined. If you pass null or undefined or an Object, the method will return false
+     * @returns true if the name is valid for an ingredient name and false otherwise
      */
-    public idValidIngredientId(idToValidate?: any): boolean
-    {
-        let val = new ValidatorIdUtilities();
-        if(!val.isValidId("VariantIngredientValidator" ,idToValidate))
-        {
-            this.errors = this.errors.concat(val.getErrors());
-            return false;
-        }
-
-        this.logSuccess("VariantIngredientValidator", "ingredient_id is valid", idToValidate.toString());
-        return true;
-    }
+     public isValidIngredientName(nameToValidate?: any): boolean
+     {
+         let val = new ValidatorNameUtilities();
+         if(!val.isValidAlpha("IngredientValidator", nameToValidate, {min: 1, max: 100}))
+         {
+             this.errors = this.errors.concat(val.getErrors());
+             return false;
+         }
+ 
+         this.logSuccess("IngredientValidator", "Ingredient is valid", nameToValidate);
+         return true;
+     }
 
     /**
      * 
