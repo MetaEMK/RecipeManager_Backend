@@ -2,7 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, Relation, ManyToOne, JoinColumn
 import { Variant } from "./variant.entity.js";
 
 @Entity()
-export class VariantIngredient {
+export class Ingredient {
     @PrimaryGeneratedColumn()
     id!: number;
 
@@ -26,7 +26,7 @@ export class VariantIngredient {
     })
     order!: number;
 
-    @ManyToOne(() => Variant, (variant) => variant.variantIngredients, {
+    @ManyToOne(() => Variant, (variant) => variant.ingredients, {
         nullable: false,
         onDelete: "CASCADE"
     })

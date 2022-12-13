@@ -2,7 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, Relation, ManyToOne, JoinColumn
 import { Recipe } from "./recipe.entity.js";
 import { ScheduledItem } from "./scheduled_item.entity.js";
 import { Size } from "./size.entity.js";
-import { VariantIngredient } from "./variant_ingredient.entity.js";
+import { Ingredient } from "./ingredient.entity.js";
 
 @Entity()
 export class Variant {
@@ -38,8 +38,8 @@ export class Variant {
     @OneToMany(() => ScheduledItem, (scheduledItem) => scheduledItem.variant)
     scheduledItems!: Relation<ScheduledItem>[];
 
-    @OneToMany(() => VariantIngredient, (variantIngredient) => variantIngredient.variant)
-    variantIngredients!: Relation<VariantIngredient>[];
+    @OneToMany(() => Ingredient, (ingredient) => ingredient.variant)
+    ingredients!: Relation<Ingredient>[];
 
     @CreateDateColumn({
         name: "created_at"

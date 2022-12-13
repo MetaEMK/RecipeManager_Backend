@@ -5,9 +5,9 @@ import { HttpNotFoundException } from "../../exceptions/HttpException.js";
 import { createLogger } from "../../utils/logger.js";
 import { Recipe } from "../../data/entities/recipe.entity.js";
 import { Variant } from "../../data/entities/variant.entity.js";
-import { VariantIngredient } from "../../data/entities/variant_ingredient.entity.js";
+import { Ingredient } from "../../data/entities/ingredient.entity.js";
 import { VariantValidator } from "../validators/variant.validator.js";
-import { VariantIngredientValidator } from "../validators/variantIngredient.validator.js";
+import { IngredientValidator } from "../validators/ingredient.validator.js";
 import { ValidationException } from "../../exceptions/ValidationException.js";
 
 // Router instance

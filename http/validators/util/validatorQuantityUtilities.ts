@@ -15,7 +15,7 @@ export class ValidatorQuanitiyUtilities extends Validator
                 return false;
             }
             let val = new ValidatorIdUtilities();
-            let num = val.convertToNumber("VariantIngredientValidator", quantity);
+            let num = val.convertToNumber("IngredientValidator", quantity);
             if (!num)
             {
                 let err = new ValidationError(GeneralValidationErrorCodes.QUANTITY_INVALID);
