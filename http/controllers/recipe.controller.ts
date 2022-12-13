@@ -55,6 +55,10 @@ recipeRouter.get("/", async function (req: Request, res: Response, next: NextFun
 
         const recipes = await query.getMany();
 
+        recipes.forEach((recipe) => {
+            recipe.imagePath = generatePublicURI(recipe.imagePath, req);
+        });
+
         getResponse(recipes, res);
     } catch (err) {
         next(err);
@@ -95,6 +99,8 @@ recipeRouter.get("/:id", async function (req: Request, res: Response, next: Next
         }
 
         if (recipe) {
+            recipe.imagePath = generatePublicURI(recipe.imagePath, req);
+
             getResponse(recipe, res);
         } else {
             throw new HttpNotFoundException();
