@@ -2,6 +2,7 @@ import express, { NextFunction, Request, Response } from "express";
 import * as fs from "node:fs";
 import path from "path";
 import { AppDataSource } from "../../config/datasource.js";
+import { Brackets } from "typeorm";
 import { decodeURISpaces, deleteResponse, generatePublicURI, generateSlug, getResponse, patchResponse, postResponse } from "../../utils/controller.util.js";
 import { HttpNotFoundException } from "../../exceptions/HttpException.js";
 import { createLogger, LOG_ENDPOINT } from "../../utils/logger.js";
@@ -18,7 +19,8 @@ const logger = createLogger();
 
 /**
  * Get all recipes.
- * Able to filter the recipe name, slug and search for branch ids or category ids.
+ * Able to filter the recipe name, slug and search for branch ids, category ids,
+ * recipes with no branches and recipes with no categories.
  */
 recipeRouter.get("/", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
@@ -26,6 +28,8 @@ recipeRouter.get("/", async function (req: Request, res: Response, next: NextFun
     const filterBySlug: string|undefined = decodeURISpaces(req.query?.slug as string);
     let filterByBranchIds: string|string[] = req.query?.branch as string;
     let filterByCategoryIds: string|string[] = req.query?.category as string;
+    const filterByHavingNoBranches: boolean = (req.query?.havingNoBranches === "true") ? true : false;
+    const filterByHavingNoCategories: boolean = (req.query?.havingNoCategories === "true") ? true : false;
 
     // Validation instance
     const validator: RecipeValidator = new RecipeValidator();
@@ -36,33 +40,56 @@ recipeRouter.get("/", async function (req: Request, res: Response, next: NextFun
             .getRepository(Recipe)
             .createQueryBuilder("recipe");
 
-        // Validation and sanitization for filter parameters
+        // Filter parameters validatation and sanitziation to build the where clause
         if(validator.isValidRecipeName(filterByName))
             query.andWhere("recipe.name LIKE :recipeName", { recipeName: `%${ filterByName }%` });
 
         if(filterBySlug)
             query.andWhere("recipe.slug = :recipeSlug", { recipeSlug: generateSlug(filterBySlug) });
 
-        if(filterByBranchIds) {
-            filterByBranchIds = Array.isArray(filterByBranchIds) ? filterByBranchIds : [filterByBranchIds];
+        if(filterByBranchIds || filterByHavingNoBranches) {
+            query.leftJoin("recipe.branches", "branch");
 
-            if(validator.isValidIdArray(filterByBranchIds)) {
-                query.leftJoin("recipe.branches", "branch")
-                    .andWhere("branch.id IN (:...branchIds)", { branchIds: filterByBranchIds });
-            }
+            query.andWhere(
+                new Brackets ((qb) => {
+                    if(filterByBranchIds) {
+                        filterByBranchIds = Array.isArray(filterByBranchIds) ? filterByBranchIds : [filterByBranchIds];
+            
+                        if(validator.isValidIdArray(filterByBranchIds)) {
+                            qb.orWhere("branch.id IN (:...branchIds)", { branchIds: filterByBranchIds });
+                        }
+                    }
+                    
+                    if(filterByHavingNoBranches) {
+                        qb.orWhere("branch.id IS NULL");
+                    }
+                })
+            );
         }
 
-        if(filterByCategoryIds) {
-            filterByCategoryIds = Array.isArray(filterByCategoryIds) ? filterByCategoryIds : [filterByCategoryIds];
+        if(filterByCategoryIds || filterByHavingNoCategories) {
+            query.leftJoin("recipe.categories", "category");
 
-            if (validator.isValidIdArray(filterByCategoryIds)) {
-                query.leftJoin("recipe.categories", "category")
-                    .andWhere("category.id IN (:...categoryIds)", { categoryIds: filterByCategoryIds });   
-            }
+            query.andWhere(
+                new Brackets((qb) => {
+                    if(filterByCategoryIds) {
+                        filterByCategoryIds = Array.isArray(filterByCategoryIds) ? filterByCategoryIds : [filterByCategoryIds];
+            
+                        if (validator.isValidIdArray(filterByCategoryIds)) {
+                            qb.orWhere("category.id IN (:...categoryIds)", { categoryIds: filterByCategoryIds });   
+                        }
+                    }
+
+                    if(filterByHavingNoCategories) {
+                        qb.orWhere("category.id IS NULL");
+                    }
+                })
+            );
         }
 
         const recipes = await query.getMany();
 
+        // Generate public image uri
         recipes.forEach((recipe) => {
             if(recipe.imagePath)
                 recipe.imagePath = generatePublicURI(recipe.imagePath, req);
