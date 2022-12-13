@@ -3,6 +3,7 @@ import { AppDataSource } from "../../config/datasource.js";
 import { decodeURISpaces, deleteResponse, generateSlug, getResponse, patchResponse, postResponse } from "../../utils/controller.util.js";
 import { HttpNotFoundException } from "../../exceptions/HttpException.js";
 import { createLogger, LOG_ENDPOINT } from "../../utils/logger.js";
+import { Branch } from "../../data/entities/branch.entity.js";
 import { Category } from "../../data/entities/category.entity.js";
 import { CategoryValidator } from "../validators/category.validator.js";
 import { ValidationException } from "../../exceptions/ValidationException.js";
@@ -66,7 +67,7 @@ categoryRouter.get("/slug/:slug", getOneCategory);
  * Get specific category callback.
  * 
  * Loads additional data
- * - Recipe realtion
+ * - Recipe Branches: Distinct branches based on recipe relation
  */
 async function getOneCategory(req: Request, res: Response, next: NextFunction)
 {
@@ -96,11 +97,18 @@ async function getOneCategory(req: Request, res: Response, next: NextFunction)
             category = await AppDataSource
                 .getRepository(Category)
                 .findOne({
-                    where: whereClause,
-                    relations: {
-                        recipes: true
-                    }
+                    where: whereClause
                 });
+
+            if(category) {
+                category.recipeBranches = await AppDataSource
+                    .getRepository(Branch)
+                    .createQueryBuilder("branch")
+                    .innerJoin("branch.recipes", "recipe")
+                    .innerJoin("recipe.category", "category")
+                    .where("category.id = :id", { id: category.id })
+                    .getMany();
+            }
         }
 
         if(category) {
@@ -220,9 +228,6 @@ categoryRouter.patch("/:id", async function (req: Request, res: Response, next: 
                             .findOne({
                                 where: {
                                     id: reqId
-                                },
-                                relations: {
-                                    recipes: true
                                 }
                             });
                         

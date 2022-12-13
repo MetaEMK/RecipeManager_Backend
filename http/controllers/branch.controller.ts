@@ -68,8 +68,6 @@ branchRouter.get("/slug/:slug", getOneBranch);
  * 
  * Loads addtional data
  * - Recipe Categories: Distinct categories based on recipe relation
- * - Recipe relation with category sub relation
- * - Scheduled item relation
  */
 async function getOneBranch(req: Request, res: Response, next: NextFunction)
 {
@@ -230,12 +228,6 @@ branchRouter.patch("/:id", async function (req: Request, res: Response, next: Ne
                             .findOne({
                                 where: {
                                     id: reqId
-                                },
-                                relations: {
-                                    recipes: {
-                                        categories: true
-                                    },
-                                    scheduledItems: true
                                 }
                             });
 

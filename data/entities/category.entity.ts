@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, Relation, Unique, Like, CreateDateColumn, UpdateDateColumn, ManyToMany, JoinTable, FindOperator } from "typeorm";
+import { Branch } from "./branch.entity.js";
 import { Recipe } from "./recipe.entity.js";
 
 @Entity()
@@ -19,6 +20,12 @@ export class Category {
         length: 100
     })
     slug!: string;
+
+    /**
+     * Non database attribute.
+     * Needed to add additonal data to the entity for response purposes.
+     */
+    recipeBranches?: Branch[];
 
     @ManyToMany(() => Recipe, (recipe) => recipe.categories)
     @JoinTable({
