@@ -2,7 +2,7 @@ import express, { NextFunction, Request, Response } from "express";
 import * as fs from "node:fs";
 import path from "path";
 import { AppDataSource } from "../../config/datasource.js";
-import { decodeURISpaces, generatePublicURI, generateSlug, getResponse, patchResponse, postResponse } from "../../utils/controller.util.js";
+import { decodeURISpaces, deleteResponse, generatePublicURI, generateSlug, getResponse, patchResponse, postResponse } from "../../utils/controller.util.js";
 import { HttpNotFoundException } from "../../exceptions/HttpException.js";
 import { createLogger, LOG_ENDPOINT } from "../../utils/logger.js";
 import { Recipe } from "../../data/entities/recipe.entity.js";
@@ -319,6 +319,42 @@ recipeRouter.patch("/:id", async function (req: Request, res: Response, next: Ne
  * Delete a recipe.
  */
 recipeRouter.delete("/:id", async function (req: Request, res: Response, next: NextFunction) {
-    const results = await AppDataSource.getRepository(Recipe).delete(req.params.id);
-    res.json(results);
+    // Parameters
+    const reqId = Number(req.params.id);
+
+    // Repository instance
+    const repository = AppDataSource.getRepository(Recipe);
+
+    // Recipe instance
+    let recipe: Recipe|null = null;
+
+    // ORM query
+    try {
+        if(reqId) {
+            recipe = await repository
+                .findOne({
+                    where: {
+                        id: reqId
+                    }
+                });
+        }
+
+        if (recipe) {
+            // Delete corresponding image afterwards
+            const imagePath = recipe.imagePath;
+            await repository.remove(recipe);
+
+            if(fs.existsSync(imagePath)) {
+                fs.rmSync(imagePath);
+            }
+
+            deleteResponse(res);
+
+            logger.info("Recipe with ID " + reqId + " deleted.", LOG_ENDPOINT.DATABASE);
+        } else {
+            throw new HttpNotFoundException();
+        }
+    } catch (err) {
+        next(err);
+    }
 });
