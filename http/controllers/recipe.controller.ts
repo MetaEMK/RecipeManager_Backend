@@ -18,14 +18,14 @@ const logger = createLogger();
 
 /**
  * Get all recipes.
- * Able to filter the recipe name, slug and search for a specific branch id or category id.
+ * Able to filter the recipe name, slug and search for branch ids or category ids.
  */
 recipeRouter.get("/", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
     const filterByName: string|undefined = decodeURISpaces(req.query?.name as string);
     const filterBySlug: string|undefined = decodeURISpaces(req.query?.slug as string);
-    const filterByBranchId: number = Number(req.query?.branch);
-    const filterByCategoryId: number = Number(req.query?.category);
+    let filterByBranchIds: string|string[] = req.query?.branch as string;
+    let filterByCategoryIds: string|string[] = req.query?.category as string;
 
     // Validation instance
     const validator: RecipeValidator = new RecipeValidator();
@@ -43,14 +43,22 @@ recipeRouter.get("/", async function (req: Request, res: Response, next: NextFun
         if(filterBySlug)
             query.andWhere("recipe.slug = :recipeSlug", { recipeSlug: generateSlug(filterBySlug) });
 
-        if(filterByBranchId) {
-            query.leftJoin("recipe.branches", "branch")
-                .andWhere("branch.id = :branchId", { branchId: filterByBranchId });
+        if(filterByBranchIds) {
+            filterByBranchIds = Array.isArray(filterByBranchIds) ? filterByBranchIds : [filterByBranchIds];
+
+            if(validator.isValidIdArray(filterByBranchIds)) {
+                query.leftJoin("recipe.branches", "branch")
+                    .andWhere("branch.id IN (:...branchIds)", { branchIds: filterByBranchIds });
+            }
         }
 
-        if(filterByCategoryId) {
-            query.leftJoin("recipe.categories", "category")
-                .andWhere("category.id = :categoryId", { categoryId: filterByCategoryId });
+        if(filterByCategoryIds) {
+            filterByCategoryIds = Array.isArray(filterByCategoryIds) ? filterByCategoryIds : [filterByCategoryIds];
+
+            if (validator.isValidIdArray(filterByCategoryIds)) {
+                query.leftJoin("recipe.categories", "category")
+                    .andWhere("category.id IN (:...categoryIds)", { categoryIds: filterByCategoryIds });   
+            }
         }
 
         const recipes = await query.getMany();
