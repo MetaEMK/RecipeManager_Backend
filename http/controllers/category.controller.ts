@@ -203,9 +203,9 @@ categoryRouter.patch("/:id", async function (req: Request, res: Response, next: 
                         if(validatedName) {
                             category!.name = validatedName;
                             category!.slug = generateSlug(validatedName);
-
-                            await transactionalEntityManager.save(category);
                         }
+
+                        await transactionalEntityManager.save(category);
 
                         // Update many-to-many relations
                         await transactionalEntityManager
