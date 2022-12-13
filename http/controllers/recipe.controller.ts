@@ -2,7 +2,7 @@ import express, { NextFunction, Request, Response } from "express";
 import * as fs from "node:fs";
 import path from "path";
 import { AppDataSource } from "../../config/datasource.js";
-import { decodeURISpaces, generatePublicURI, generateSlug, getResponse, postResponse } from "../../utils/controller.util.js";
+import { decodeURISpaces, generatePublicURI, generateSlug, getResponse, patchResponse, postResponse } from "../../utils/controller.util.js";
 import { HttpNotFoundException } from "../../exceptions/HttpException.js";
 import { createLogger, LOG_ENDPOINT } from "../../utils/logger.js";
 import { Recipe } from "../../data/entities/recipe.entity.js";
@@ -56,7 +56,8 @@ recipeRouter.get("/", async function (req: Request, res: Response, next: NextFun
         const recipes = await query.getMany();
 
         recipes.forEach((recipe) => {
-            recipe.imagePath = generatePublicURI(recipe.imagePath, req);
+            if(recipe.imagePath)
+                recipe.imagePath = generatePublicURI(recipe.imagePath, req);
         });
 
         getResponse(recipes, res);
@@ -121,7 +122,9 @@ async function getOneRecipe(req: Request, res: Response, next: NextFunction)
         }
 
         if (recipe) {
-            recipe.imagePath = generatePublicURI(recipe.imagePath, req);
+            if(recipe.imagePath)
+                recipe.imagePath = generatePublicURI(recipe.imagePath, req);
+            
             getResponse(recipe, res);
         } else {
             throw new HttpNotFoundException();
@@ -190,9 +193,126 @@ recipeRouter.post("/", upload.single("image"), async function (req: Request, res
 
 /**
  * (Partially) Update a recipe.
+ * Able to add and remove branches.
+ * Able to add and remove categories.
  */
 recipeRouter.patch("/:id", async function (req: Request, res: Response, next: NextFunction) {
+    // Parameters
+    const reqId: number = Number(req.params?.id);
+    const reqName: string = req.body?.name;
+    const reqDesc: string = req.body?.description;
+    const reqBranchesAdd: Array<number> = req.body?.branch_ids?.add;
+    const reqBranchesRmv: Array<number> = req.body?.branch_ids?.rmv;
+    const reqCategoriesAdd: Array<number> = req.body?.category_ids?.add;
+    const reqCategoriesRmv: Array<number> = req.body?.category_ids?.rmv;
 
+    // Recipe instance
+    let recipe: Recipe|null = null;
+
+    // Validator instance
+    const validator: RecipeValidator = new RecipeValidator();
+
+    // Validated parameters
+    let validatedName: string|undefined = undefined;
+    let validatedDesc: string|undefined = undefined;
+    let validatedBranchesAdd: Array<number> = [];
+    let validatedBranchesRmv: Array<number> = [];
+    let validatedCategoriesAdd: Array<number> = [];
+    let validatedCategoriesRmv: Array<number> = [];
+
+    // Validation
+    if(reqName)
+        if(validator.isValidRecipeName(reqName))
+            validatedName = reqName;
+
+    if(reqDesc)
+        if(validator.isValidRecipeDescription(reqDesc))
+            validatedDesc = reqDesc;
+
+    if(reqBranchesAdd)
+        if(validator.isValidIdArray(reqBranchesAdd))
+            validatedBranchesAdd = reqBranchesAdd;
+
+    if(reqBranchesRmv)
+        if(validator.isValidIdArray(reqBranchesRmv))
+            validatedBranchesRmv = reqBranchesRmv;
+
+    if(reqCategoriesAdd)
+        if(validator.isValidIdArray(reqCategoriesAdd))
+            validatedCategoriesAdd = reqCategoriesAdd;
+
+    if(reqCategoriesRmv)
+        if(validator.isValidIdArray(reqCategoriesRmv))
+            validatedCategoriesRmv = reqCategoriesRmv;
+            
+    // ORM query
+    try {
+        if (validator.getErrors().length === 0) {
+            if(reqId) {
+                recipe = await AppDataSource
+                    .getRepository(Recipe)
+                    .findOne({
+                        where: {
+                            id: reqId
+                        }
+                    });
+                
+                if (recipe) {
+                    await AppDataSource.transaction(async (transactionalEntityManager) => {
+                        // Update attributes
+                        if(validatedName) {
+                            recipe!.name = validatedName;
+                            recipe!.slug = generateSlug(validatedName);
+                        }
+
+                        if(validatedDesc)
+                            recipe!.description = validatedDesc;
+
+                        await transactionalEntityManager.save(recipe);
+
+                        // Update many-to-many and one-to-many relations
+                        await transactionalEntityManager
+                            .createQueryBuilder()
+                            .relation(Recipe, "branches")
+                            .of(recipe)
+                            .addAndRemove(validatedBranchesAdd, validatedBranchesRmv);
+
+                        await transactionalEntityManager
+                            .createQueryBuilder()
+                            .relation(Recipe, "categories")
+                            .of(recipe)
+                            .addAndRemove(validatedCategoriesAdd, validatedCategoriesRmv);
+
+                        // Refresh entity
+                        recipe = await transactionalEntityManager
+                            .getRepository(Recipe)
+                            .findOne({
+                                where: {
+                                    id: reqId
+                                },
+                                relations: {
+                                    branches: true,
+                                    categories: true,
+                                    variants: true
+                                }
+                            });
+
+                        logger.info("Recipe " + recipe!.id + " updated.", LOG_ENDPOINT.DATABASE);
+                    });
+                }
+            }
+
+            if(recipe) {
+                patchResponse(recipe, res);
+            } else {
+                throw new HttpNotFoundException();
+            }
+        } else {
+            throw new ValidationException(validator.getErrors());
+        }
+    } catch (err) {
+        next(err);
+    }
 });
 
 /**
