@@ -65,31 +65,53 @@ recipeRouter.get("/", async function (req: Request, res: Response, next: NextFun
     }
 });
 
-// TODO GET SPECIFIC BY SLUG
 /**
- * Get a specific recipe.
+ * Get a specific recipe by id.
+ */
+recipeRouter.get("/:id", getOneRecipe);
+
+/**
+ * Get a specific recipe by slug.
+ */
+ recipeRouter.get("/slug/:slug", getOneRecipe);
+
+/**
+ * Get specific recipe callback.
  * 
  * Loads additional data
  * - Branch relation
  * - Category relation
  * - Variant relation
  */
-recipeRouter.get("/:id", async function (req: Request, res: Response, next: NextFunction) {
+async function getOneRecipe(req: Request, res: Response, next: NextFunction)
+{
     // Parameters
     const reqId: number = Number(req.params?.id);
+    const reqSlug: string = req.params?.slug;
 
     // Recipe instance
     let recipe: Recipe|null = null;
 
+    // Check which route and setup where clause with sanitized parameters
+    let whereClause = {};
+
+    if(reqId) {
+        whereClause = {
+            id: reqId
+        };
+    } else if(reqSlug) {
+        whereClause = {
+            slug: generateSlug(reqSlug)
+        };
+    }
+
     // ORM query
     try {
-        if(reqId) {
+        if(reqId || reqSlug) {
             recipe = await AppDataSource
                 .getRepository(Recipe)
                 .findOne({
-                    where: {
-                        id: reqId
-                    },
+                    where: whereClause,
                     relations: {
                         branches: true,
                         categories: true,
@@ -100,7 +122,6 @@ recipeRouter.get("/:id", async function (req: Request, res: Response, next: Next
 
         if (recipe) {
             recipe.imagePath = generatePublicURI(recipe.imagePath, req);
-
             getResponse(recipe, res);
         } else {
             throw new HttpNotFoundException();
@@ -108,7 +129,7 @@ recipeRouter.get("/:id", async function (req: Request, res: Response, next: Next
     } catch (err) {
         next(err);
     }
-});
+}
 
 /**
  * Create a recipe.
