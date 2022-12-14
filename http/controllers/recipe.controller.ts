@@ -144,7 +144,7 @@ recipeRouter.get("/:id", getOneRecipe);
 async function getOneRecipe(req: Request, res: Response, next: NextFunction) {
     // Parameters
     const reqId: number = Number(req.params.id);
-    const reqSlug: string = <string> req.params.slug;
+    const reqSlug: string = req.params.slug;
 
     // Recipe instance
     let recipe: Recipe|null = null;
