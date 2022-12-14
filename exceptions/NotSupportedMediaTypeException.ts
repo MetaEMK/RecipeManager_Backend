@@ -5,7 +5,6 @@ export const allowedFileExtensions = [
     ".jpg",
     ".jpeg",
     ".jpe",
-    ".jfif",
     ".png"
 ];
 
