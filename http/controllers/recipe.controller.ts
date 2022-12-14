@@ -21,14 +21,14 @@ const logger = createLogger();
  * Get all recipes.
  * 
  * Filter params:
- * - name
- * - slug
- * - branch
- * - category 
- * - branchExclude
- * - categoryExclude
- * - branchNone
- * - categoryNone 
+ * - name: Search for similar name
+ * - slug: Search for exact same slug
+ * - branch: Search for (multiple) branch ids
+ * - category: Search for (multiple) category ids 
+ * - branchExclude: Exclude (multiple) branch ids from search
+ * - categoryExclude: Exclude (multiple) category ids from search
+ * - branchNone: Search for recipes with no branches
+ * - categoryNone: Search fro recipes with no categories 
  */
 recipeRouter.get("/", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
