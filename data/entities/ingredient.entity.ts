@@ -6,6 +6,11 @@ export class Ingredient {
     @PrimaryGeneratedColumn()
     id!: number;
 
+    @Column({
+        type: "nvarchar"
+    })
+    name!: string
+
     @Column()
     quantity!: number;
 

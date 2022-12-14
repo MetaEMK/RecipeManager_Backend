@@ -11,7 +11,7 @@ export class ConversionTypeValidator extends Validator
     public isValidName(nameToValidate?: any): boolean
     {
         let val = new ValidatorNameUtilities();
-        if(!val.isValidAlpha("ConversionTypeValidator" ,nameToValidate, {min: 1, max: 30}))
+        if(!val.isValidAlpha("ConversionTypeValidator" ,nameToValidate, {min: 3, max: 30}))
         {
             this.errors = this.errors.concat(val.getErrors());
             return false;

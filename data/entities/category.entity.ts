@@ -16,8 +16,7 @@ export class Category {
     name!: string;
 
     @Column({
-        type: "nvarchar",
-        length: 100
+        type: "nvarchar"
     })
     slug!: string;
 

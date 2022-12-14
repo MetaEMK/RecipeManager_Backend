@@ -30,8 +30,7 @@ export class Recipe {
     imagePath!: string|null
 
     @Column({
-        type: "nvarchar",
-        length: 100
+        type: "nvarchar"
     })
     slug!: string;
 

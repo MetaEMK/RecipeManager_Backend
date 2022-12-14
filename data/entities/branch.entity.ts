@@ -17,8 +17,7 @@ export class Branch {
     name!: string;
 
     @Column({
-        type: "nvarchar",
-        length: 100
+        type: "nvarchar"
     })
     slug!: string;
 
