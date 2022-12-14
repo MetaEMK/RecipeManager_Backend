@@ -41,8 +41,8 @@ recipeRouter.get("/", async function (req: Request, res: Response, next: NextFun
     let filterByBranchExcludeIds: string|string[] = <string>req.query.branchExclude;
     let filterByCategoryExcludeIds: string|string[] = <string>req.query.categoryExclude;
 
-    const filterByBranchNone:string = <string>req.query.branchNone;
-    const filterByCategoryNone:string = <string>req.query.categoryNone;
+    const filterByBranchNone: string = <string>req.query.branchNone;
+    const filterByCategoryNone: string = <string>req.query.categoryNone;
 
     // Validation instance
     const validator = new RecipeValidator();
@@ -143,8 +143,8 @@ recipeRouter.get("/:id", getOneRecipe);
  */
 async function getOneRecipe(req: Request, res: Response, next: NextFunction) {
     // Parameters
-    const reqId:number = Number(req.params.id);
-    const reqSlug:string = <string> req.params.slug;
+    const reqId: number = Number(req.params.id);
+    const reqSlug: string = <string> req.params.slug;
 
     // Recipe instance
     let recipe: Recipe|null = null;
@@ -363,7 +363,7 @@ recipeRouter.patch("/:id", async function (req: Request, res: Response, next: Ne
  */
 recipeRouter.delete("/:id", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
-    const reqId:number = Number(req.params.id);
+    const reqId: number = Number(req.params.id);
 
     // Repository instance
     const repository = AppDataSource.getRepository(Recipe);
