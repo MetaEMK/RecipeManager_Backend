@@ -22,7 +22,7 @@ const logger = createLogger();
  * - name: Search for similar name
  * - slug: Search for exact same slug
  * - recipe: Search for (multiple) recipe ids
- * - recipeExclude: Exclude (multiple) recipe ids from search
+ * - recipeExclude: Exclude (multiple) recipe ids from search - Takes precedence over include
  * - recipeNone: Search for branches with no recipes
  */
 branchRouter.get("/", async function (req: Request, res: Response, next: NextFunction) {
@@ -53,7 +53,7 @@ branchRouter.get("/", async function (req: Request, res: Response, next: NextFun
         if (filterByRecipeIds || filterByRecipeExcludeIds || filterByRecipeNone) {
             query.leftJoin("branch.recipes", "recipe");
 
-            if(filterByRecipeIds || filterByRecipeNone) {
+            if((filterByRecipeIds || filterByRecipeNone) && !filterByRecipeExcludeIds) {
                 query.andWhere(
                     new Brackets((qb) => {
                         if(filterByRecipeIds) {

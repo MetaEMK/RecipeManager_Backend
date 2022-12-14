@@ -25,8 +25,8 @@ const logger = createLogger();
  * - slug: Search for exact same slug
  * - branch: Search for (multiple) branch ids
  * - category: Search for (multiple) category ids 
- * - branchExclude: Exclude (multiple) branch ids from search
- * - categoryExclude: Exclude (multiple) category ids from search
+ * - branchExclude: Exclude (multiple) branch ids from search - Takes precedence over include
+ * - categoryExclude: Exclude (multiple) category ids from search - Takes precedence over include
  * - branchNone: Search for recipes with no branches
  * - categoryNone: Search for recipes with no categories 
  */
@@ -63,7 +63,7 @@ recipeRouter.get("/", async function (req: Request, res: Response, next: NextFun
         if(filterByBranchIds || filterByBranchExcludeIds || filterByBranchNone) {
             query.leftJoin("recipe.branches", "branch");
 
-            if(filterByBranchIds || filterByBranchNone) {
+            if((filterByBranchIds || filterByBranchNone) && !filterByBranchExcludeIds) {
                 query.andWhere(
                     new Brackets((qb) => {
                         if(filterByBranchIds) {
@@ -96,7 +96,7 @@ recipeRouter.get("/", async function (req: Request, res: Response, next: NextFun
         if(filterByCategoryIds || filterByCategoryExcludeIds || filterByCategoryNone) {
             query.leftJoin("recipe.categories", "category");
 
-            if (filterByCategoryIds || filterByCategoryNone) {
+            if (filterByCategoryIds || filterByCategoryNone && !filterByCategoryExcludeIds) {
                 query.andWhere(
                     new Brackets((qb) => {
                         if(filterByCategoryIds) {
