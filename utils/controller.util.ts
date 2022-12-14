@@ -109,6 +109,20 @@ export function generateSlug(string: string): string
 }
 
 /**
+ * Normlizes a given path.
+ * 
+ * @param urlPath Base path
+ * @returns Normalized path
+ */
+export function normalizeURI(urlPath: string): string
+{
+    return path
+        .normalize(urlPath)
+        .split(path.sep)
+        .join("/");
+}
+
+/**
  * Normalizes and generates a public URI for a given path.
  * 
  * @param urlPath Base path
@@ -117,10 +131,7 @@ export function generateSlug(string: string): string
  */
 export function generatePublicURI(urlPath: string, req: Request): string
 {
-    urlPath = path
-        .normalize(urlPath)
-        .split(path.sep)
-        .join("/");   
+    urlPath = normalizeURI(urlPath);   
 
     const protocol = req.protocol + "://";
     const host = req.get("host") + "/";

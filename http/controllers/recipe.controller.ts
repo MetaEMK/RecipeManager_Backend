@@ -3,7 +3,7 @@ import * as fs from "node:fs";
 import path from "path";
 import { AppDataSource } from "../../config/datasource.js";
 import { Brackets } from "typeorm";
-import { decodeURISpaces, deleteResponse, generatePublicURI, generateSlug, getResponse, patchResponse, postResponse, prepareForSqlInParams } from "../../utils/controller.util.js";
+import { decodeURISpaces, deleteResponse, generatePublicURI, generateSlug, getResponse, normalizeURI, patchResponse, postResponse, prepareForSqlInParams } from "../../utils/controller.util.js";
 import { HttpNotFoundException } from "../../exceptions/HttpException.js";
 import { createLogger, LOG_ENDPOINT } from "../../utils/logger.js";
 import { Recipe } from "../../data/entities/recipe.entity.js";
@@ -222,10 +222,7 @@ recipeRouter.post("/", upload.single("image"), async function (req: Request, res
         recipe.description = reqDesc;
 
     if(reqFilePath) {
-        recipe.imagePath = path
-            .normalize(reqFilePath)
-            .split(path.sep)
-            .join("/");
+        recipe.imagePath = normalizeURI(reqFilePath);
     }
 
     // ORM query
