@@ -36,7 +36,7 @@ apiRouter.use("/branches/:branchId/schedule", scheduleRouter);  // TODO
 apiRouter.use("/categories", categoryRouter);
 apiRouter.use("/conversion_types", conversionTypeRouter);
 apiRouter.use("/conversion_types/:conversionTypeId/conversions", conversionRouter); // TODO
-apiRouter.use("/conversion_types/:conversionTypeId/sizes", sizeRouter); // TODO
+apiRouter.use("/conversion_types/:conversionTypeId/sizes", sizeRouter);
 apiRouter.use("/recipes", recipeRouter);
 apiRouter.use("/recipes/:recipeId/image", recipeImageRouter);
 apiRouter.use("/recipes/:recipeId/variants", variantRouter);    // TODO
