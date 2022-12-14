@@ -78,12 +78,10 @@ export function deleteResponse(res: Response): void
  * @param uriComponent URI component to decode
  * @returns Decoded URI component
  */
-export function decodeURISpaces(uriComponent: string|undefined): string|undefined
+export function decodeURISpaces(uriComponent: string): string
 {
-    if (uriComponent) {
-        uriComponent = uriComponent.replaceAll("%20", " ");
-        uriComponent = uriComponent.replaceAll("+", " ");
-    }
+    uriComponent = uriComponent.replaceAll("%20", " ");
+    uriComponent = uriComponent.replaceAll("+", " ");
 
     return uriComponent;
 }
@@ -130,4 +128,17 @@ export function generatePublicURI(urlPath: string, req: Request): string
     const resultPath = protocol + host + publicPath;
 
     return resultPath;
+}
+
+/**
+ * Prepares parameters to be used in a SQL IN clause.
+ * 
+ * @param params Parameters to be used in a SQL IN clause
+ * @returns Prepared parameters for a SQL IN clause or undefined
+ */
+export function prepareForSqlInParams(params: string|string[]): string|string[] {        
+    if(Array.isArray(params))
+        return params;
+
+    return [params];
 }
