@@ -28,7 +28,7 @@ const logger = createLogger();
  * - branchExclude: Exclude (multiple) branch ids from search
  * - categoryExclude: Exclude (multiple) category ids from search
  * - branchNone: Search for recipes with no branches
- * - categoryNone: Search fro recipes with no categories 
+ * - categoryNone: Search for recipes with no categories 
  */
 recipeRouter.get("/", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
