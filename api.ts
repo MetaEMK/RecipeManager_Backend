@@ -31,7 +31,7 @@ apiRouter.use(express.json());
 apiRouter.use(setJsonHeader);
 
 // Routes
-apiRouter.use("/branches", branchRouter);   // TODO
+apiRouter.use("/branches", branchRouter);
 apiRouter.use("/branches/:branchId/schedule", scheduleRouter);  // TODO
 apiRouter.use("/categories", categoryRouter);   // TODO
 apiRouter.use("/conversion_types", conversionTypeRouter);   // TODO

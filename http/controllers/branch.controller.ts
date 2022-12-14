@@ -1,12 +1,13 @@
 import express, { Request, Response, NextFunction } from "express";
 import { AppDataSource } from "../../config/datasource.js";
-import { decodeURISpaces, deleteResponse, generateSlug, getResponse, patchResponse, postResponse } from "../../utils/controller.util.js";
+import { decodeURISpaces, deleteResponse, generateSlug, getResponse, patchResponse, postResponse, prepareForSqlInParams } from "../../utils/controller.util.js";
 import { HttpNotFoundException } from "../../exceptions/HttpException.js";
 import { createLogger, LOG_ENDPOINT } from "../../utils/logger.js";
 import { Branch } from "../../data/entities/branch.entity.js";
 import { Category } from "../../data/entities/category.entity.js";
 import { BranchValidator } from "../validators/branch.validator.js";
 import { ValidationException } from "../../exceptions/ValidationException.js";
+import { Brackets } from "typeorm";
 
 // Router instance
 export const branchRouter = express.Router();
@@ -16,16 +17,25 @@ const logger = createLogger();
 
 /**
  * Get all branches.
- * Able to filter the branch name, slug and search for a specific recipe id.
+ * 
+ * Filter params
+ * - name: Search for similar name
+ * - slug: Search for exact same slug
+ * - recipe: Search for (multiple) recipe ids
+ * - recipeExclude: Exclude (multiple) recipe ids from search
+ * - recipeNone: Search for branches with no recipes
  */
 branchRouter.get("/", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
-    const filterByName: string|undefined = decodeURISpaces(req.query?.name as string);
-    const filterBySlug: string|undefined = decodeURISpaces(req.query?.slug as string);
-    const filterByRecipeId: number = Number(req.query?.recipe);
+    const filterByName: string = <string>req.query.name;
+    const filterBySlug: string = <string>req.query.slug;
+
+    let filterByRecipeIds: string|string[] = <string>req.query.recipe;
+    let filterByRecipeExcludeIds: string|string[] = <string>req.query.recipeExclude;
+    const filterByRecipeNone: string = <string>req.query.recipeNone;
 
     // Validator instance
-    const validator: BranchValidator = new BranchValidator();
+    const validator = new BranchValidator();
 
     // ORM query
     try {
@@ -33,16 +43,44 @@ branchRouter.get("/", async function (req: Request, res: Response, next: NextFun
             .getRepository(Branch)
             .createQueryBuilder("branch");
 
-        // Validation and sanitization for filter parameters
+        // Validate/Sanitize parameters and build where clause
         if(validator.isValidBranchName(filterByName))
-            query.andWhere("branch.name LIKE :branchName", { branchName: `%${ filterByName }%` });
+            query.andWhere("branch.name LIKE :branchName", { branchName: `%${ decodeURISpaces(filterByName) }%` });
 
         if(filterBySlug)
             query.andWhere("branch.slug = :branchSlug", { branchSlug: generateSlug(filterBySlug) });
 
-        if(filterByRecipeId) {
-            query.leftJoin("branch.recipes", "recipe")
-                .andWhere("recipe.id = :recipeId", { recipeId: filterByRecipeId });
+        if (filterByRecipeIds || filterByRecipeExcludeIds || filterByRecipeNone) {
+            query.leftJoin("branch.recipes", "recipe");
+
+            if(filterByRecipeIds || filterByRecipeNone) {
+                query.andWhere(
+                    new Brackets((qb) => {
+                        if(filterByRecipeIds) {
+                            filterByRecipeIds = prepareForSqlInParams(filterByRecipeIds);
+    
+                            if(validator.isValidIdArray(filterByRecipeIds))
+                                qb.orWhere("recipe.id IN (:...recipeIds)", { recipeIds: filterByRecipeIds });
+                        }
+
+                        if(filterByRecipeNone === "true")
+                            qb.orWhere("recipe.id IS NULL");
+                    })
+                );
+            }
+
+            if (filterByRecipeExcludeIds) {
+                filterByRecipeExcludeIds = prepareForSqlInParams(filterByRecipeExcludeIds);
+    
+                if(validator.isValidIdArray(filterByRecipeExcludeIds)) {
+                    query.andWhere(
+                        new Brackets((qb) => {
+                            qb.orWhere("recipe.id NOT IN (:...recipeExcludeIds)", { recipeExcludeIds: filterByRecipeExcludeIds });
+                            qb.orWhere("recipe.id IS NULL");
+                        })
+                    );
+                }
+            }
         }
 
         const branches = await query.getMany();
@@ -66,14 +104,13 @@ branchRouter.get("/slug/:slug", getOneBranch);
 /**
  * Get specific branch callback.
  * 
- * Loads addtional data
+ * Loads additional data
  * - Recipe Categories: Distinct categories based on recipe relation
  */
-async function getOneBranch(req: Request, res: Response, next: NextFunction)
-{
+async function getOneBranch(req: Request, res: Response, next: NextFunction) {
     // Parameters
-    const reqId: number = Number(req.params?.id);
-    const reqSlug: string = req.params?.slug;
+    const reqId: number = Number(req.params.id);
+    const reqSlug: string = req.params.slug;
 
     // Branch instance
     let branch: Branch|null = null;
@@ -126,15 +163,15 @@ async function getOneBranch(req: Request, res: Response, next: NextFunction)
  */
 branchRouter.post("/", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
-    const reqName: string = req.body?.name;
+    const reqName: string = req.body.name;
 
     // Branch instance
-    const branch: Branch = new Branch();
+    const branch = new Branch();
 
     // Validator instance
-    const validator: BranchValidator = new BranchValidator();
+    const validator = new BranchValidator();
 
-    // Validation
+    // Validation/Sanitization
     if(validator.isValidBranchName(reqName)) {
         branch.name = reqName;
         branch.slug = generateSlug(reqName);
@@ -160,20 +197,22 @@ branchRouter.post("/", async function (req: Request, res: Response, next: NextFu
 
 /**
  * (Partially) Update a branch.
+ * 
  * Able to add and remove recipes.
  */
 branchRouter.patch("/:id", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
-    const reqId: number = Number(req.params?.id);
-    const reqName: string = req.body?.name;
-    const reqRecipesAdd: Array<number> = req.body?.recipe_ids?.add;
-    const reqRecipesRmv: Array<number> = req.body?.recipe_ids?.rmv;
+    const reqId: number = Number(req.params.id);
+    const reqName: string = req.body.name;
+
+    const reqRecipesAdd: Array<number> = req.body.recipe_ids?.add;
+    const reqRecipesRmv: Array<number> = req.body.recipe_ids?.rmv;
 
     // Branch instance
     let branch: Branch|null = null;
 
     // Validator instance
-    const validator: BranchValidator = new BranchValidator();
+    const validator = new BranchValidator();
 
     // Validated parameters
     let validatedName: string|undefined = undefined;
@@ -222,15 +261,6 @@ branchRouter.patch("/:id", async function (req: Request, res: Response, next: Ne
                             .of(branch)
                             .addAndRemove(validatedRecipesAdd, validatedRecipesRmv);
 
-                        // Refresh entity
-                        branch = await transactionalEntityManager
-                            .getRepository(Branch)
-                            .findOne({
-                                where: {
-                                    id: reqId
-                                }
-                            });
-
                         logger.info("Branch " + branch!.id + " updated.", LOG_ENDPOINT.DATABASE);
                     });
                 }
@@ -254,7 +284,7 @@ branchRouter.patch("/:id", async function (req: Request, res: Response, next: Ne
  */
 branchRouter.delete("/:id", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
-    const reqId = Number(req.params.id);
+    const reqId: number = Number(req.params.id);
 
     // Repository instance
     const repository = AppDataSource.getRepository(Branch);
