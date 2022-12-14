@@ -3,7 +3,7 @@ import * as fs from "node:fs";
 import path from "path";
 import { AppDataSource } from "../../config/datasource.js";
 import { Brackets } from "typeorm";
-import { decodeURISpaces, deleteResponse, generatePublicURI, generateSlug, getResponse, patchResponse, postResponse } from "../../utils/controller.util.js";
+import { decodeURISpaces, deleteResponse, generatePublicURI, generateSlug, getResponse, patchResponse, postResponse, prepareForSqlInParams } from "../../utils/controller.util.js";
 import { HttpNotFoundException } from "../../exceptions/HttpException.js";
 import { createLogger, LOG_ENDPOINT } from "../../utils/logger.js";
 import { Recipe } from "../../data/entities/recipe.entity.js";
@@ -19,20 +19,33 @@ const logger = createLogger();
 
 /**
  * Get all recipes.
- * Able to filter the recipe name, slug and search for branch ids, category ids,
- * recipes with no branches and recipes with no categories.
+ * 
+ * Filter params:
+ * - name
+ * - slug
+ * - branch
+ * - category 
+ * - branchExclude
+ * - categoryExclude
+ * - branchNone
+ * - categoryNone 
  */
 recipeRouter.get("/", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
-    const filterByName: string|undefined = decodeURISpaces(req.query?.name as string);
-    const filterBySlug: string|undefined = decodeURISpaces(req.query?.slug as string);
-    let filterByBranchIds: string|string[] = req.query?.branch as string;
-    let filterByCategoryIds: string|string[] = req.query?.category as string;
-    const filterByHavingNoBranches: boolean = (req.query?.havingNoBranches === "true") ? true : false;
-    const filterByHavingNoCategories: boolean = (req.query?.havingNoCategories === "true") ? true : false;
+    const filterByName: string = <string>req.query.name;
+    const filterBySlug: string = <string>req.query.slug;
+
+    let filterByBranchIds: string|string[] = <string>req.query.branch;
+    let filterByCategoryIds: string|string[] = <string>req.query.category;
+
+    let filterByBranchExcludeIds: string|string[] = <string>req.query.branchExclude;
+    let filterByCategoryExcludeIds: string|string[] = <string>req.query.categoryExclude;
+
+    const filterByBranchNone:string = <string>req.query.branchNone;
+    const filterByCategoryNone:string = <string>req.query.categoryNone;
 
     // Validation instance
-    const validator: RecipeValidator = new RecipeValidator();
+    const validator = new RecipeValidator();
 
     // ORM query
     try {
@@ -40,51 +53,65 @@ recipeRouter.get("/", async function (req: Request, res: Response, next: NextFun
             .getRepository(Recipe)
             .createQueryBuilder("recipe");
 
-        // Filter parameters validatation and sanitziation to build the where clause
+        // Validate/Sanitize parameters and build where clause
         if(validator.isValidRecipeName(filterByName))
-            query.andWhere("recipe.name LIKE :recipeName", { recipeName: `%${ filterByName }%` });
+            query.andWhere("recipe.name LIKE :recipeName", { recipeName: `%${ decodeURISpaces(filterByName!) }%` });
 
         if(filterBySlug)
             query.andWhere("recipe.slug = :recipeSlug", { recipeSlug: generateSlug(filterBySlug) });
 
-        if(filterByBranchIds || filterByHavingNoBranches) {
+        if(filterByBranchIds || filterByBranchExcludeIds || filterByBranchNone) {
             query.leftJoin("recipe.branches", "branch");
 
-            query.andWhere(
-                new Brackets ((qb) => {
-                    if(filterByBranchIds) {
-                        filterByBranchIds = Array.isArray(filterByBranchIds) ? filterByBranchIds : [filterByBranchIds];
-            
-                        if(validator.isValidIdArray(filterByBranchIds)) {
-                            qb.orWhere("branch.id IN (:...branchIds)", { branchIds: filterByBranchIds });
+            if(filterByBranchIds || filterByBranchNone) {
+                query.andWhere(
+                    new Brackets((qb) => {
+                        if(filterByBranchIds) {
+                            filterByBranchIds = prepareForSqlInParams(filterByBranchIds);
+                
+                            if(validator.isValidIdArray(filterByBranchIds))
+                                qb.orWhere("branch.id IN (:...branchIds)", { branchIds: filterByBranchIds });
                         }
-                    }
-                    
-                    if(filterByHavingNoBranches) {
-                        qb.orWhere("branch.id IS NULL");
-                    }
-                })
-            );
+                        
+                        if(filterByBranchNone === "true")
+                            qb.orWhere("branch.id IS NULL");
+                    })
+                );
+            }
+
+            if(filterByBranchExcludeIds) {
+                filterByBranchExcludeIds = prepareForSqlInParams(filterByBranchExcludeIds);
+    
+                if(validator.isValidIdArray(filterByBranchExcludeIds))
+                    query.andWhere("branch.id NOT IN (:...branchExcludeIds)", { branchExcludeIds: filterByBranchExcludeIds });
+            }
         }
 
-        if(filterByCategoryIds || filterByHavingNoCategories) {
+        if(filterByCategoryIds || filterByCategoryExcludeIds || filterByCategoryNone) {
             query.leftJoin("recipe.categories", "category");
 
-            query.andWhere(
-                new Brackets((qb) => {
-                    if(filterByCategoryIds) {
-                        filterByCategoryIds = Array.isArray(filterByCategoryIds) ? filterByCategoryIds : [filterByCategoryIds];
-            
-                        if (validator.isValidIdArray(filterByCategoryIds)) {
-                            qb.orWhere("category.id IN (:...categoryIds)", { categoryIds: filterByCategoryIds });   
+            if (filterByCategoryIds || filterByCategoryNone) {
+                query.andWhere(
+                    new Brackets((qb) => {
+                        if(filterByCategoryIds) {
+                            filterByCategoryIds = prepareForSqlInParams(filterByCategoryIds);
+                
+                            if (validator.isValidIdArray(filterByCategoryIds))
+                                qb.orWhere("category.id IN (:...categoryIds)", { categoryIds: filterByCategoryIds });
                         }
-                    }
+    
+                        if(filterByCategoryNone === "true")
+                            qb.orWhere("category.id IS NULL");
+                    })
+                );
+            }
 
-                    if(filterByHavingNoCategories) {
-                        qb.orWhere("category.id IS NULL");
-                    }
-                })
-            );
+            if(filterByCategoryExcludeIds) {
+                filterByCategoryExcludeIds = prepareForSqlInParams(filterByCategoryExcludeIds);
+
+                if(validator.isValidIdArray(filterByCategoryExcludeIds))
+                    query.andWhere("category.id NOT IN (:...categoryExcludeIds)", { categoryExcludeIds: filterByCategoryExcludeIds});
+            }
         }
 
         const recipes = await query.getMany();
@@ -113,17 +140,11 @@ recipeRouter.get("/:id", getOneRecipe);
 
 /**
  * Get specific recipe callback.
- * 
- * Loads additional data
- * - Branch relation
- * - Category relation
- * - Variant relation
  */
-async function getOneRecipe(req: Request, res: Response, next: NextFunction)
-{
+async function getOneRecipe(req: Request, res: Response, next: NextFunction) {
     // Parameters
-    const reqId: number = Number(req.params?.id);
-    const reqSlug: string = req.params?.slug;
+    const reqId:number = Number(req.params.id);
+    const reqSlug:string = <string> req.params.slug;
 
     // Recipe instance
     let recipe: Recipe|null = null;
@@ -147,12 +168,7 @@ async function getOneRecipe(req: Request, res: Response, next: NextFunction)
             recipe = await AppDataSource
                 .getRepository(Recipe)
                 .findOne({
-                    where: whereClause,
-                    relations: {
-                        branches: true,
-                        categories: true,
-                        variants: true
-                    }
+                    where: whereClause
                 });
         }
 
@@ -174,17 +190,18 @@ async function getOneRecipe(req: Request, res: Response, next: NextFunction)
  */
 recipeRouter.post("/", upload.single("image"), async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
-    const reqName: string = req.body?.name;
-    const reqDesc: string = req.body?.description;
+    const reqName: string = req.body.name;
+    const reqDesc: string = req.body.description;
+
     const reqFilePath: string = req.file?.path || "";
 
     // Recipe instance
-    const recipe: Recipe = new Recipe();
+    const recipe = new Recipe();
 
     // Validator instance
-    const validator: RecipeValidator = new RecipeValidator();
+    const validator = new RecipeValidator();
 
-    // Validation and sanitization
+    // Validation/Sanitization
     if(validator.isValidRecipeName(reqName)) {
         recipe.name = reqName;
         recipe.slug = generateSlug(reqName);
@@ -218,9 +235,8 @@ recipeRouter.post("/", upload.single("image"), async function (req: Request, res
         }
     } catch (err) {
         // Delete uploaded image
-        if(fs.existsSync(reqFilePath)) {
+        if(fs.existsSync(reqFilePath))
             fs.rmSync(reqFilePath);
-        }
 
         next(err);
     }
@@ -228,24 +244,27 @@ recipeRouter.post("/", upload.single("image"), async function (req: Request, res
 
 /**
  * (Partially) Update a recipe.
+ * 
  * Able to add and remove branches.
  * Able to add and remove categories.
  */
 recipeRouter.patch("/:id", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
-    const reqId: number = Number(req.params?.id);
-    const reqName: string = req.body?.name;
-    const reqDesc: string = req.body?.description;
-    const reqBranchesAdd: Array<number> = req.body?.branch_ids?.add;
-    const reqBranchesRmv: Array<number> = req.body?.branch_ids?.rmv;
-    const reqCategoriesAdd: Array<number> = req.body?.category_ids?.add;
-    const reqCategoriesRmv: Array<number> = req.body?.category_ids?.rmv;
+    const reqId: number = Number(req.params.id);
+    const reqName: string = req.body.name;
+    const reqDesc: string = req.body.description;
+
+    const reqBranchesAdd: Array<number> = req.body.branch_ids?.add;
+    const reqBranchesRmv: Array<number> = req.body.branch_ids?.rmv;
+
+    const reqCategoriesAdd: Array<number> = req.body.category_ids?.add;
+    const reqCategoriesRmv: Array<number> = req.body.category_ids?.rmv;
 
     // Recipe instance
     let recipe: Recipe|null = null;
 
     // Validator instance
-    const validator: RecipeValidator = new RecipeValidator();
+    const validator = new RecipeValidator();
 
     // Validated parameters
     let validatedName: string|undefined = undefined;
@@ -318,22 +337,11 @@ recipeRouter.patch("/:id", async function (req: Request, res: Response, next: Ne
                             .of(recipe)
                             .addAndRemove(validatedCategoriesAdd, validatedCategoriesRmv);
 
-                        // Refresh entity
-                        recipe = await transactionalEntityManager
-                            .getRepository(Recipe)
-                            .findOne({
-                                where: {
-                                    id: reqId
-                                },
-                                relations: {
-                                    branches: true,
-                                    categories: true,
-                                    variants: true
-                                }
-                            });
-
                         logger.info("Recipe " + recipe!.id + " updated.", LOG_ENDPOINT.DATABASE);
                     });
+
+                    if(recipe.imagePath)
+                        recipe.imagePath = generatePublicURI(recipe.imagePath, req);
                 }
             }
 
@@ -355,7 +363,7 @@ recipeRouter.patch("/:id", async function (req: Request, res: Response, next: Ne
  */
 recipeRouter.delete("/:id", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
-    const reqId = Number(req.params.id);
+    const reqId:number = Number(req.params.id);
 
     // Repository instance
     const repository = AppDataSource.getRepository(Recipe);
@@ -375,13 +383,12 @@ recipeRouter.delete("/:id", async function (req: Request, res: Response, next: N
         }
 
         if (recipe) {
-            // Delete corresponding image afterwards
             const imagePath = recipe.imagePath;
             await repository.remove(recipe);
 
-            if(fs.existsSync(imagePath)) {
+            // Delete corresponding image
+            if(fs.existsSync(imagePath))
                 fs.rmSync(imagePath);
-            }
 
             deleteResponse(res);
 
