@@ -38,7 +38,7 @@ sizeRouter.get("/", async function (req: Request, res: Response, next: NextFunct
             .innerJoin("size.conversionType", "conversionType")
             .where("conversionType.id = :conversionTypeId", { conversionTypeId: reqConversionTypeId});
 
-        // Validate
+        // Validate/Sanitize parameters and build where clause
         if (validator.isValidSizeName(filteryByName))
             query.andWhere("size.name LIKE :sizeName", { sizeName: `%${ decodeURISpaces(filteryByName) }%` });
 
