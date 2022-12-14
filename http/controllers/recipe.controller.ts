@@ -82,8 +82,14 @@ recipeRouter.get("/", async function (req: Request, res: Response, next: NextFun
             if(filterByBranchExcludeIds) {
                 filterByBranchExcludeIds = prepareForSqlInParams(filterByBranchExcludeIds);
     
-                if(validator.isValidIdArray(filterByBranchExcludeIds))
-                    query.andWhere("branch.id NOT IN (:...branchExcludeIds)", { branchExcludeIds: filterByBranchExcludeIds });
+                if(validator.isValidIdArray(filterByBranchExcludeIds)) {
+                    query.andWhere(
+                        new Brackets((qb) => {
+                            qb.orWhere("branch.id NOT IN (:...branchExcludeIds)", { branchExcludeIds: filterByBranchExcludeIds });
+                            qb.orWhere("branch.id IS NULL");
+                        })
+                    );
+                }
             }
         }
 
@@ -110,7 +116,12 @@ recipeRouter.get("/", async function (req: Request, res: Response, next: NextFun
                 filterByCategoryExcludeIds = prepareForSqlInParams(filterByCategoryExcludeIds);
 
                 if(validator.isValidIdArray(filterByCategoryExcludeIds))
-                    query.andWhere("category.id NOT IN (:...categoryExcludeIds)", { categoryExcludeIds: filterByCategoryExcludeIds});
+                    query.andWhere(
+                        new Brackets((qb) => {
+                            qb.orWhere("category.id NOT IN (:...categoryExcludeIds)", { categoryExcludeIds: filterByCategoryExcludeIds});
+                            qb.orWhere("category.id IS NULL");
+                        })
+                    );
             }
         }
 
