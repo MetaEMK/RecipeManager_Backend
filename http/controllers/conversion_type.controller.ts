@@ -15,14 +15,16 @@ const logger = createLogger();
 
 /**
  * Get all conversion types.
- * Able to filter the category type name.
+ * 
+ * Filter params
+ * - name: Search for similar name
  */
 conversionTypeRouter.get("/", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
-    const filterByName: string|undefined = decodeURISpaces(req.query?.name as string);
+    const filterByName: string = <string>req.query.name;
 
     // Validator instance
-    const validator: ConversionTypeValidator = new ConversionTypeValidator();
+    const validator = new ConversionTypeValidator();
 
     // ORM query
     try {
@@ -30,9 +32,9 @@ conversionTypeRouter.get("/", async function (req: Request, res: Response, next:
             .getRepository(ConversionType)
             .createQueryBuilder("conversionType");
 
-        // Validation for filter parameter
+        // Validate/Sanitize parameters and build where clause
         if(validator.isValidName(filterByName))
-            query.andWhere("conversionType.name LIKE :conversionTypeName", { conversionTypeName: `%${ filterByName }%` });
+            query.andWhere("conversionType.name LIKE :conversionTypeName", { conversionTypeName: `%${ decodeURISpaces(filterByName) }%` });
 
         const conversionTypes = await query.getMany();
 
@@ -47,13 +49,13 @@ conversionTypeRouter.get("/", async function (req: Request, res: Response, next:
  */
 conversionTypeRouter.post("/", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
-    const reqName: string = req.body?.name;
+    const reqName: string = req.body.name;
 
     // Conversion type instance
-    const conversionType: ConversionType = new ConversionType();
+    const conversionType = new ConversionType();
 
     // Validator instance
-    const validator: ConversionTypeValidator = new ConversionTypeValidator();
+    const validator = new ConversionTypeValidator();
 
     // Validation
     if(validator.isValidName(reqName))
