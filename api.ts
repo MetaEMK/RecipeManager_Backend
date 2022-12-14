@@ -2,7 +2,6 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import { AppDataSource } from "./config/datasource.js";
 import { setJsonHeader } from "./http/middleware/headers.middleware.js";
-import { errorHandler } from "./http/middleware/errors.middleware.js";
 import { HttpNotFoundException } from "./exceptions/HttpException.js";
 import { branchRouter } from "./http/controllers/branch.controller.js";
 import { categoryRouter } from "./http/controllers/category.controller.js";
@@ -46,6 +45,3 @@ apiRouter.use("/recipes/:recipeId/variants", variantRouter);    // TODO
 apiRouter.use((req: Request, res: Response) => {
     throw new HttpNotFoundException();
 });
-
-// Error handler
-apiRouter.use(errorHandler);

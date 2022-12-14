@@ -1,7 +1,9 @@
 import express, { Request, Response } from "express";
 import dotenv from "dotenv";
-import { apiRouter } from "./api.js";
 import { setupPublicDir } from "./utils/directories.util.js";
+import { apiRouter } from "./api.js";
+import { errorHandler } from "./http/middleware/errors.middleware.js";
+import { HttpNotFoundException } from "./exceptions/HttpException.js";
 
 dotenv.config({ path: "./config/app.env"});
 
@@ -17,9 +19,11 @@ app.use(express.static("public"));
 
 // Default route if not exists
 app.use((req: Request, res: Response) => {
-    res.status(404);
-    res.send();
+    throw new HttpNotFoundException();
 });
+
+// Error handler
+app.use(errorHandler);
 
 // Port
 app.listen(process.env.NODE_PORT, () => {
