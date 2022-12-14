@@ -16,7 +16,7 @@ export class Variant {
         type: "text",
         nullable: true
     })
-    description!: string
+    description!: string|null
 
     @ManyToOne(() => Recipe, (recipe) => recipe.variants, {
         nullable: false,

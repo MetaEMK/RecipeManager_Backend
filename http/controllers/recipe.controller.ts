@@ -276,7 +276,7 @@ recipeRouter.patch("/:id", async function (req: Request, res: Response, next: Ne
 
     // Validated parameters
     let validatedName: string|undefined = undefined;
-    let validatedDesc: string|undefined = undefined;
+    let validatedDesc: string|null = null;
     let validatedBranchesAdd: Array<number> = [];
     let validatedBranchesRmv: Array<number> = [];
     let validatedCategoriesAdd: Array<number> = [];
@@ -287,7 +287,7 @@ recipeRouter.patch("/:id", async function (req: Request, res: Response, next: Ne
         if(validator.isValidRecipeName(reqName))
             validatedName = reqName;
 
-    if(reqDesc)
+    if(reqDesc || reqDesc === null)
         if(validator.isValidRecipeDescription(reqDesc))
             validatedDesc = reqDesc;
 
@@ -327,7 +327,7 @@ recipeRouter.patch("/:id", async function (req: Request, res: Response, next: Ne
                             recipe!.slug = generateSlug(validatedName);
                         }
 
-                        if(validatedDesc)
+                        if(validatedDesc || validatedDesc === null)
                             recipe!.description = validatedDesc;
 
                         await transactionalEntityManager.save(recipe);
@@ -395,8 +395,9 @@ recipeRouter.delete("/:id", async function (req: Request, res: Response, next: N
             await repository.remove(recipe);
 
             // Delete corresponding image
-            if(fs.existsSync(imagePath))
-                fs.rmSync(imagePath);
+            if(imagePath)
+                if(fs.existsSync(imagePath))
+                    fs.rmSync(imagePath);
 
             deleteResponse(res);
 

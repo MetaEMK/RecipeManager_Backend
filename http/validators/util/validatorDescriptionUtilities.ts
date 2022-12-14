@@ -6,7 +6,7 @@ export class ValidatorDescriptionUtilities extends Validator
 {
     public isValidDescription(validator: string, description?: any): boolean
     {
-        if(!description)
+        if(!description && description !== null)
         {
             let err = new ValidationError(GeneralValidationErrorCodes.DESCRIPTION_MISSING);
             this.logError(validator, err.toString());
@@ -14,12 +14,14 @@ export class ValidatorDescriptionUtilities extends Validator
             return false;
         }
 
-        if(! (typeof description === "string"))
+        if(!(typeof description === "string"))
         {
-            let err = new ValidationError(GeneralValidationErrorCodes.DESCRIPTION_INVALID);
-            this.logError(validator, err.toString(), description);
-            this.errors.push(err);
-            return false;
+            if(description !== null) {
+                let err = new ValidationError(GeneralValidationErrorCodes.DESCRIPTION_INVALID);
+                this.logError(validator, err.toString(), description);
+                this.errors.push(err);
+                return false;
+            }
         }
 
         return true;

@@ -25,7 +25,7 @@ export class RecipeValidator extends Validator
 
     /**
      * 
-     * @param descriptionToValidate description to validate. can be null or undefined. If you pass null or undefined or an Object, the method will return false
+     * @param descriptionToValidate description to validate. can be null or undefined. If you pass undefined or an Object, the method will return false. Null is an allowed value
      * @returns true if the description is valid for a recipe description and false otherwise
      */
     public isValidRecipeDescription(descriptionToValidate?: any): boolean

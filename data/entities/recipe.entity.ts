@@ -20,14 +20,14 @@ export class Recipe {
         type: "text",
         nullable: true
     })
-    description!: string
+    description!: string|null
 
     @Column({
         name: "image_path",
         type: "text",
         nullable: true
     })
-    imagePath!: string
+    imagePath!: string|null
 
     @Column({
         type: "nvarchar",
