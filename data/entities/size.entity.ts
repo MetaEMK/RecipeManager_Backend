@@ -5,6 +5,7 @@ import { ScheduledItem } from "./scheduled_item.entity.js";
 import { Variant } from "./variant.entity.js";
 
 @Entity()
+@Unique(["name", "conversionType.id"])
 export class Size {
     @PrimaryGeneratedColumn()
     id!: number;

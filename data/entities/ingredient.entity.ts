@@ -1,7 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, Relation, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, Relation, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn, Unique } from "typeorm";
 import { Variant } from "./variant.entity.js";
 
 @Entity()
+@Unique(["name", "variant.id"])
 export class Ingredient {
     @PrimaryGeneratedColumn()
     id!: number;

@@ -3,6 +3,7 @@ import { ConversionType } from "./conversion_type.entity.js";
 import { Size } from "./size.entity.js";
 
 @Entity()
+@Unique(["conversionType.id", "fromSize.id", "toSize.id"])
 export class Conversion {
     @PrimaryGeneratedColumn()
     id!: number;
