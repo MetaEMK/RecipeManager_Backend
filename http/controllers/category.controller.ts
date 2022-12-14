@@ -1,12 +1,13 @@
 import express, { NextFunction, Request, Response } from "express";
 import { AppDataSource } from "../../config/datasource.js";
-import { decodeURISpaces, deleteResponse, generateSlug, getResponse, patchResponse, postResponse } from "../../utils/controller.util.js";
+import { decodeURISpaces, deleteResponse, generateSlug, getResponse, patchResponse, postResponse, prepareForSqlInParams } from "../../utils/controller.util.js";
 import { HttpNotFoundException } from "../../exceptions/HttpException.js";
 import { createLogger, LOG_ENDPOINT } from "../../utils/logger.js";
 import { Branch } from "../../data/entities/branch.entity.js";
 import { Category } from "../../data/entities/category.entity.js";
 import { CategoryValidator } from "../validators/category.validator.js";
 import { ValidationException } from "../../exceptions/ValidationException.js";
+import { Brackets } from "typeorm";
 
 // Router instance
 export const categoryRouter = express.Router();
@@ -16,16 +17,25 @@ const logger = createLogger();
 
 /**
  * Get all categories.
- * Able to filter the category name, slug and search for a specific recipe id.
+ * 
+ * Filter params
+ * - name: Search for similar name
+ * - slug: Search for exaxt same slug
+ * - recipe: Search for (multiple) recipe ids
+ * - recipeExclude: Exclude (multiple) recipe ids from search - Takes precedence over include
+ * - recipeNone: Search for branches with no recipes
  */
 categoryRouter.get("/", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
-    const filterByName: string|undefined = decodeURISpaces(req.query?.name as string);
-    const filterBySlug: string|undefined = decodeURISpaces(req.query?.slug as string);
-    const filterByRecipeId: number = Number(req.query?.recipe);
+    const filterByName: string = <string>req.query.name;
+    const filterBySlug: string = <string>req.query.slug;
+
+    let filterByRecipeIds: string|string[] = <string>req.query.recipe;
+    let filterByRecipeExcludeIds: string|string[] = <string>req.query.recipeExclude;
+    const filterByRecipeNone: string = <string>req.query.recipeNone;
 
     // Validator instance
-    const validator: CategoryValidator = new CategoryValidator();
+    const validator = new CategoryValidator();
 
     // ORM query
     try {
@@ -33,16 +43,44 @@ categoryRouter.get("/", async function (req: Request, res: Response, next: NextF
             .getRepository(Category)
             .createQueryBuilder("category");
 
-        // Validation and sanitization for filter parameters
+        // Validate/Sanitize parameters and build where clause
         if(validator.isValidCategoryName(filterByName))
-            query.andWhere("category.name LIKE :categoryName", { categoryName: `%${ filterByName }%` });
+            query.andWhere("category.name LIKE :categoryName", { categoryName: `%${ decodeURISpaces(filterByName) }%` });
         
         if(filterBySlug)
             query.andWhere("category.slug = :categorySlug", { categorySlug: generateSlug(filterBySlug) });
 
-        if(filterByRecipeId) {
-            query.leftJoin("category.recipes", "recipe")
-                .andWhere("recipe.id = :recipeId", { recipeId: filterByRecipeId });
+        if(filterByRecipeIds || filterByRecipeExcludeIds || filterByRecipeNone) {
+            query.leftJoin("category.recipes", "recipe");
+
+            if((filterByRecipeIds || filterByRecipeNone) && !filterByRecipeExcludeIds) {
+                query.andWhere(
+                    new Brackets((qb) => {
+                        if(filterByRecipeIds) {
+                            filterByRecipeIds = prepareForSqlInParams(filterByRecipeIds);
+    
+                            if(validator.isValidIdArray(filterByRecipeIds))
+                                qb.orWhere("recipe.id IN (:...recipeIds)", { recipeIds: filterByRecipeIds });
+                        }
+
+                        if(filterByRecipeNone === "true")
+                            qb.orWhere("recipe.id IS NULL");
+                    })
+                );
+            }
+
+            if (filterByRecipeExcludeIds) {
+                filterByRecipeExcludeIds = prepareForSqlInParams(filterByRecipeExcludeIds);
+    
+                if(validator.isValidIdArray(filterByRecipeExcludeIds)) {
+                    query.andWhere(
+                        new Brackets((qb) => {
+                            qb.orWhere("recipe.id NOT IN (:...recipeExcludeIds)", { recipeExcludeIds: filterByRecipeExcludeIds });
+                            qb.orWhere("recipe.id IS NULL");
+                        })
+                    );
+                }
+            }
         }
 
         const categories = await query.getMany();
@@ -69,11 +107,10 @@ categoryRouter.get("/slug/:slug", getOneCategory);
  * Loads additional data
  * - Recipe Branches: Distinct branches based on recipe relation
  */
-async function getOneCategory(req: Request, res: Response, next: NextFunction)
-{
+async function getOneCategory(req: Request, res: Response, next: NextFunction) {
     // Parameters
-    const reqId: number = Number(req.params?.id);
-    const reqSlug: string = req.params?.slug;
+    const reqId: number = Number(req.params.id);
+    const reqSlug: string = req.params.slug;
 
     // Category instance
     let category: Category|null = null;
@@ -126,15 +163,15 @@ async function getOneCategory(req: Request, res: Response, next: NextFunction)
  */
 categoryRouter.post("/", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
-    const reqName: string = req.body?.name;
+    const reqName: string = req.body.name;
 
     // Category instance
-    const category: Category = new Category();
+    const category = new Category();
 
     // Validator instance
-    const validator: CategoryValidator = new CategoryValidator();
+    const validator = new CategoryValidator();
 
-    // Validation
+    // Validation/Sanitization
     if(validator.isValidCategoryName(reqName)) {
         category.name = reqName;
         category.slug = generateSlug(reqName);
@@ -160,20 +197,22 @@ categoryRouter.post("/", async function (req: Request, res: Response, next: Next
 
 /**
  * (Partially) Update category.
+ * 
  * Able to add and remove recipes.
  */
 categoryRouter.patch("/:id", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
-    const reqId: number = Number(req.params?.id);
-    const reqName: string = req.body?.name;
-    const reqRecipesAdd: Array<number> = req.body?.recipe_ids?.add;
-    const reqRecipesRmv: Array<number> = req.body?.recipe_ids?.rmv;
+    const reqId: number = Number(req.params.id);
+    const reqName: string = req.body.name;
+
+    const reqRecipesAdd: Array<number> = req.body.recipe_ids?.add;
+    const reqRecipesRmv: Array<number> = req.body.recipe_ids?.rmv;
 
     // Category instance
     let category: Category|null = null;
 
     // Validator instance
-    const validator: CategoryValidator = new CategoryValidator();
+    const validator = new CategoryValidator();
 
     // Validated parameters
     let validatedName: string|undefined = undefined;
@@ -222,15 +261,6 @@ categoryRouter.patch("/:id", async function (req: Request, res: Response, next: 
                             .of(category)
                             .addAndRemove(validatedRecipesAdd, validatedRecipesRmv);
                         
-                        // Refresh entity
-                        category = await transactionalEntityManager
-                            .getRepository(Category)
-                            .findOne({
-                                where: {
-                                    id: reqId
-                                }
-                            });
-                        
                         logger.info("Category " + category!.id + " updated.", LOG_ENDPOINT.DATABASE);
                     });
                 }
@@ -254,7 +284,7 @@ categoryRouter.patch("/:id", async function (req: Request, res: Response, next: 
  */
 categoryRouter.delete("/:id", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
-    const reqId = Number(req.params.id);
+    const reqId: number = Number(req.params.id);
 
     // Repository instance
     const repository = AppDataSource.getRepository(Category);
