@@ -74,6 +74,20 @@ export function deleteResponse(res: Response): void
 }
 
 /**
+ * Prepares parameters to be used in a SQL IN clause.
+ * 
+ * @param params Parameters to be used in a SQL IN clause
+ * @returns Prepared parameters for a SQL IN clause or undefined
+ */
+export function prepareForSqlInParams(params: string|string[]): string|string[] 
+{        
+    if(Array.isArray(params))
+        return params;
+
+    return [params];
+}
+
+/**
  * Decodes URI characters %20 and + to a space character.
  * 
  * @param uriComponent URI component to decode
@@ -160,17 +174,4 @@ export function generateRecipeImageURI(recipeId: string|number, req: Request): s
     const imageUri = protocol + host + recipeRoot + "/" + recipeId + "/image";
 
     return imageUri;
-}
-
-/**
- * Prepares parameters to be used in a SQL IN clause.
- * 
- * @param params Parameters to be used in a SQL IN clause
- * @returns Prepared parameters for a SQL IN clause or undefined
- */
-export function prepareForSqlInParams(params: string|string[]): string|string[] {        
-    if(Array.isArray(params))
-        return params;
-
-    return [params];
 }
