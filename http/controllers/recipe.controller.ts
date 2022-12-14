@@ -347,13 +347,13 @@ recipeRouter.patch("/:id", async function (req: Request, res: Response, next: Ne
 
                         logger.info("Recipe " + recipe!.id + " updated.", LOG_ENDPOINT.DATABASE);
                     });
-
-                    if(recipe.imagePath)
-                        recipe.imagePath = generatePublicURI(recipe.imagePath, req);
                 }
             }
 
             if(recipe) {
+                if(recipe.imagePath)
+                    recipe.imagePath = generatePublicURI(recipe.imagePath, req);
+
                 patchResponse(recipe, res);
             } else {
                 throw new HttpNotFoundException();
