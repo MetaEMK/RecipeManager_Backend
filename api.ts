@@ -38,7 +38,7 @@ apiRouter.use("/conversion_types", conversionTypeRouter);   // TODO
 apiRouter.use("/conversion_types/:conversionTypeId/conversions", conversionRouter); // TODO
 apiRouter.use("/conversion_types/:conversionTypeId/sizes", sizeRouter); // TODO
 apiRouter.use("/recipes", recipeRouter);
-apiRouter.use("/recipes/:recipeId/image", recipeImageRouter);   // TODO
+apiRouter.use("/recipes/:recipeId/image", recipeImageRouter);
 apiRouter.use("/recipes/:recipeId/variants", variantRouter);    // TODO
 
 // Default route if not exists

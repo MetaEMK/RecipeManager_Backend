@@ -1,9 +1,8 @@
 import express, { NextFunction, Request, Response } from "express";
 import * as fs from "node:fs";
-import path from "path";
 import { AppDataSource } from "../../config/datasource.js";
 import { Brackets } from "typeorm";
-import { decodeURISpaces, deleteResponse, generatePublicURI, generateSlug, getResponse, normalizeURI, patchResponse, postResponse, prepareForSqlInParams } from "../../utils/controller.util.js";
+import { decodeURISpaces, deleteResponse, generateRecipeImageURI, generateSlug, getResponse, normalizeURI, patchResponse, postResponse, prepareForSqlInParams } from "../../utils/controller.util.js";
 import { HttpNotFoundException } from "../../exceptions/HttpException.js";
 import { createLogger, LOG_ENDPOINT } from "../../utils/logger.js";
 import { Recipe } from "../../data/entities/recipe.entity.js";
@@ -130,7 +129,7 @@ recipeRouter.get("/", async function (req: Request, res: Response, next: NextFun
         // Generate public image uri
         recipes.forEach((recipe) => {
             if(recipe.imagePath)
-                recipe.imagePath = generatePublicURI(recipe.imagePath, req);
+                recipe.imagePath = generateRecipeImageURI(recipe.id, req);
         });
 
         getResponse(recipes, res);
@@ -185,7 +184,7 @@ async function getOneRecipe(req: Request, res: Response, next: NextFunction) {
 
         if (recipe) {
             if(recipe.imagePath)
-                recipe.imagePath = generatePublicURI(recipe.imagePath, req);
+                recipe.imagePath = generateRecipeImageURI(recipe.id, req);
             
             getResponse(recipe, res);
         } else {
@@ -233,7 +232,7 @@ recipeRouter.post("/", upload.single("image"), async function (req: Request, res
                 .save(recipe);
 
             if(recipe.imagePath)
-                recipe.imagePath = generatePublicURI(recipe.imagePath, req);
+                recipe.imagePath = generateRecipeImageURI(recipe.id, req);
 
             postResponse(recipe, req, res);
 
@@ -352,7 +351,7 @@ recipeRouter.patch("/:id", async function (req: Request, res: Response, next: Ne
 
             if(recipe) {
                 if(recipe.imagePath)
-                    recipe.imagePath = generatePublicURI(recipe.imagePath, req);
+                    recipe.imagePath = generateRecipeImageURI(recipe.id, req);
 
                 patchResponse(recipe, res);
             } else {

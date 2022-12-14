@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import path from "path";
+import { fileURLToPath } from "url";
 
 /**
  * Sends a response for getting one or multiple resources.
@@ -109,36 +110,56 @@ export function generateSlug(string: string): string
 }
 
 /**
- * Normlizes a given path.
+ * Normlizes a given path component.
  * 
- * @param urlPath Base path
- * @returns Normalized path
+ * @param pathComponent Part of a path
+ * @returns Normalized URI
  */
-export function normalizeURI(urlPath: string): string
+export function normalizeURI(pathComponent: string): string
 {
     return path
-        .normalize(urlPath)
+        .normalize(pathComponent)
         .split(path.sep)
         .join("/");
 }
 
 /**
- * Normalizes and generates a public URI for a given path.
+ * Generates file system path based on the root directory.
  * 
- * @param urlPath Base path
- * @param req HTTP request object  
- * @returns Public URI
+ * @param pathComponent Parth of a path
+ * @returns File URI
  */
-export function generatePublicURI(urlPath: string, req: Request): string
+export function generateFileURI(pathComponent: string): string
 {
-    urlPath = normalizeURI(urlPath);   
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    const __root = __dirname + "/../..";
 
+    const test = normalizeURI(path.join(__root, pathComponent));
+
+    return test;
+}
+
+/**
+ * Generates a recipe image URI.
+ * 
+ * @param recipeId Id of the recipe entity
+ * @param req HTTP request object
+ * @returns Image URI of the given recipe id
+ */
+export function generateRecipeImageURI(recipeId: string|number, req: Request): string
+{  
     const protocol = req.protocol + "://";
-    const host = req.get("host") + "/";
-    const publicPath = urlPath.replace("public/", "");
-    const resultPath = protocol + host + publicPath;
+    const host = req.get("host");
+    const recipeRoot = path
+        .normalize(req.originalUrl)
+        .split(path.sep)
+        .slice(0,4)
+        .join("/");
 
-    return resultPath;
+    const imageUri = protocol + host + recipeRoot + "/" + recipeId + "/image";
+
+    return imageUri;
 }
 
 /**

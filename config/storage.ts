@@ -17,7 +17,7 @@ const maxImageSize = Number.isInteger(envMaxImageSize) ? envMaxImageSize : 10000
 export const uploadRecipeImages = multer({
     storage: multer.diskStorage({
         destination: function (req, file, cb) {
-            const dir = process.env.DIR_RECIPES ?? "public/images/recipes";
+            const dir = process.env.DIR_RECIPES ?? "uploads/images/recipes";
 
             cb(null, dir);
         },

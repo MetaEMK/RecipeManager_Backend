@@ -1,15 +1,15 @@
 import * as fs from "node:fs";
 
 /**
- * Setups public directory structure.
+ * Setup upload directory structure.
  */
-export function setupPublicDir(): void
+export function setupUploadDir(): void
 {
-    const dir = process.env.DIR_RECIPES ?? "public/images/recipes";
+    const dir = process.env.DIR_RECIPES ?? "uploads/images/recipes";
 
     if(!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
     }
 
-    console.log("Successfully prepared all public directories.");    
+    console.log("Successfully prepared all upload directories.");    
 }
