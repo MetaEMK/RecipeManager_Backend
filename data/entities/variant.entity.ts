@@ -5,6 +5,7 @@ import { Size } from "./size.entity.js";
 import { Ingredient } from "./ingredient.entity.js";
 
 @Entity()
+@Unique(["name", "recipe.id"])
 export class Variant {
     @PrimaryGeneratedColumn()
     id!: number;
@@ -38,7 +39,9 @@ export class Variant {
     @OneToMany(() => ScheduledItem, (scheduledItem) => scheduledItem.variant)
     scheduledItems!: Relation<ScheduledItem>[];
 
-    @OneToMany(() => Ingredient, (ingredient) => ingredient.variant)
+    @OneToMany(() => Ingredient, (ingredient) => ingredient.variant, {
+        cascade: true
+    })
     ingredients!: Relation<Ingredient>[];
 
     @CreateDateColumn({
