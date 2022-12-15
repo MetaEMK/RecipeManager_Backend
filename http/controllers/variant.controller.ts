@@ -1,12 +1,12 @@
 import express, { NextFunction, Request, Response } from "express";
 import { AppDataSource } from "../../config/datasource.js";
-import { decodeURISpaces, generateSlug, getResponse, postResponse, prepareForSqlInParams } from "../../utils/controller.util.js";
+import { decodeURISpaces, generateRecipeImageURI, getResponse, patchResponse, postResponse, prepareForSqlInParams } from "../../utils/controller.util.js";
 import { HttpNotFoundException } from "../../exceptions/HttpException.js";
 import { createLogger, LOG_ENDPOINT } from "../../utils/logger.js";
 import { Recipe } from "../../data/entities/recipe.entity.js";
 import { Variant } from "../../data/entities/variant.entity.js";
 import { Ingredient } from "../../data/entities/ingredient.entity.js";
-import { Ingredient as IngredientRequest, isIngredient as isIngredientRequest } from "../../interfaces/ingredient.interface.js";
+import { Ingredient as IngredientRequest } from "../../interfaces/ingredient.interface.js";
 import { VariantValidator } from "../validators/variant.validator.js";
 import { ValidationException } from "../../exceptions/ValidationException.js";
 import { Size } from "../../data/entities/size.entity.js";
@@ -45,8 +45,7 @@ variantRouter.get("/", async function (req: Request, res: Response, next: NextFu
         const query = AppDataSource
             .getRepository(Variant)
             .createQueryBuilder("variant")
-            .innerJoin("variant.recipe", "recipe")
-            .where("recipe.id = :recipeId", { recipeId: reqRecipeId });
+            .where("variant.recipe_id = :recipeId", { recipeId: reqRecipeId });
 
         // Validate/Sanitize parameters and build where clause
         if (validator.isValidVariantName(filterByName))
@@ -100,6 +99,9 @@ variantRouter.get("/:id", async function (req: Request, res: Response, next: Nex
         }
 
         if (variant) {
+            if (variant.recipe.imagePath)
+                variant.recipe.imagePath = generateRecipeImageURI(variant.recipe.id, variant.recipe.imagePath, req);
+
             getResponse(variant, res);    
         } else {
             throw new HttpNotFoundException();
@@ -170,24 +172,14 @@ variantRouter.post("/", async function (req: Request, res: Response, next: NextF
         variant.size = size;
 
         if (validator.getErrors().length === 0) {
-            // Create all variant ingredients
-            const ingredients = [];
-
-            for (const data of reqIngredients) {
-                const ingredient = new Ingredient();
-                ingredient.name = data.name;
-                ingredient.quantity = data.quantity;
-                ingredient.unit = data.unit;
-                ingredient.section = data.section;
-                ingredient.order = data.order;
-                
-                ingredients.push(ingredient);
-            }
-            variant.ingredients = ingredients;
+            variant.ingredients = prepareIngredients(reqIngredients);
 
             await AppDataSource
                 .getRepository(Variant)
                 .save(variant);
+
+            if (variant.recipe.imagePath)
+                variant.recipe.imagePath = generateRecipeImageURI(variant.recipe.id, variant.recipe.imagePath, req);
 
             postResponse(variant, req, res);
 
@@ -202,9 +194,127 @@ variantRouter.post("/", async function (req: Request, res: Response, next: NextF
 
 /**
  * (Partially) Update a recipe variant.
+ * 
+ * Able to add and remove recipes.
  */
 variantRouter.patch("/:id", async function (req: Request, res: Response, next: NextFunction) {
+    // Parameters
+    const reqRecipeId: number = Number(req.params.recipeId);
+    const reqId: number = Number(req.params.id);
 
+    const reqName: string = req.body.name;
+    const reqDesc: string = req.body.description;
+    const reqSizeId: number = Number(req.body.size);
+
+    const reqIngredientsAdd: Array<IngredientRequest> = req.body.ingredients?.add;
+    const reqIngredientsRmv: Array<number> = req.body.ingredients?.rmv;
+
+    // Variant instance
+    let variant: Variant|null = null;
+
+    // Validator instance
+    const validator = new VariantValidator();
+
+    // Validated parameters
+    let validatedName: string|undefined = undefined;
+    let validatedDesc: string|null|undefined = undefined;
+    let validatedSizeId: number|undefined = undefined;
+    let validatedIngredientsAdd: Array<IngredientRequest>|undefined = undefined;
+    let validatedIngredientsRmv: Array<number>|undefined = undefined;
+
+    // Validation
+    if (reqName)
+        if (validator.isValidVariantName(reqName))
+            validatedName = reqName;
+
+    if (reqDesc || reqDesc === null)
+        if(validator.isValidVariantDescription(reqDesc))
+            validatedDesc = reqDesc;
+
+    if(reqSizeId)
+        validatedSizeId = reqSizeId;
+
+    if(validator.isValidIngredientsArray(reqIngredientsAdd))
+        validatedIngredientsAdd = reqIngredientsAdd;
+
+    if(validator.isValidIdArray(reqIngredientsRmv))
+        validatedIngredientsRmv = reqIngredientsRmv;
+
+    // ORM query
+    try {
+        if (validator.getErrors().length === 0) {
+            if (reqRecipeId && reqId) {
+                variant = await AppDataSource
+                    .getRepository(Variant)
+                    .createQueryBuilder("variant")
+                    .innerJoinAndSelect("variant.ingredients", "ingredients")
+                    .innerJoinAndSelect("variant.size", "size")
+                    .where("variant.recipe_id = :recipeId", { recipeId: reqRecipeId })
+                    .andWhere("variant.id = :id", { id: reqId })
+                    .getOne();
+                
+                if (variant) {
+                    await AppDataSource.transaction(async (transactionalEntityManager) => {
+                        // Update attributes
+                        if (validatedName)
+                            variant!.name = validatedName;
+
+                        if (validatedDesc || validatedDesc === null)
+                            variant!.description = validatedDesc;
+
+                        if (validatedSizeId) {
+                            const size = await transactionalEntityManager
+                                .getRepository(Size)
+                                .findOne({
+                                    where: {
+                                        id: validatedSizeId
+                                    }
+                                });
+
+                            if(!size)
+                                throw new SQLiteForeignKeyException("variant", "size");
+
+                            variant!.size = size;
+                        }
+
+                        if (validatedIngredientsAdd) {
+                            variant!.ingredients = [...variant!.ingredients, ...prepareIngredients(validatedIngredientsAdd)];
+                        }
+
+                        await transactionalEntityManager.save(variant);
+
+                        if (validatedIngredientsRmv) {
+                            await transactionalEntityManager
+                                .getRepository(Ingredient)
+                                .delete(validatedIngredientsRmv);
+                        }
+
+                        // Refresh entity
+                        variant = await AppDataSource
+                            .getRepository(Variant)
+                            .createQueryBuilder("variant")
+                            .innerJoinAndSelect("variant.ingredients", "ingredients")
+                            .innerJoinAndSelect("variant.size", "size")
+                            .where("variant.recipe_id = :recipeId", { recipeId: reqRecipeId })
+                            .andWhere("variant.id = :id", { id: reqId })
+                            .getOne();
+
+                        logger.info("Variant " + variant!.id + " updated.", LOG_ENDPOINT.DATABASE);
+                    });
+                }
+            }
+
+            if (variant) {
+                patchResponse(variant, res);
+            } else {
+                throw new HttpNotFoundException()
+            }
+        } else {
+            throw new ValidationException(validator.getErrors());
+        }
+    } catch (err) {
+        next(err);
+    }
 });
 
 /**
@@ -213,3 +323,27 @@ variantRouter.patch("/:id", async function (req: Request, res: Response, next: N
 variantRouter.delete("/:id", async function (req: Request, res: Response, next: NextFunction) {
 
 });
+
+/**
+ * Helper function to prepare ingredient entities.
+ * 
+ * @param reqIngredients Valid IngredientRequest array
+ * @returns Array with Ingredient entities
+ */
+function prepareIngredients(reqIngredients: Array<IngredientRequest>): Array<Ingredient>
+{
+    const ingredients: Array<Ingredient> = [];
+
+    for (const data of reqIngredients) {
+        const ingredient = new Ingredient();
+        ingredient.name = data.name;
+        ingredient.quantity = data.quantity;
+        ingredient.unit = data.unit;
+        ingredient.section = data.section;
+        ingredient.order = data.order;
+        
+        ingredients.push(ingredient);
+    }
+
+    return ingredients;
+}
