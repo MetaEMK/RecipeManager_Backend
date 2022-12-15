@@ -3,6 +3,7 @@ import multer from "multer";
 import { QueryFailedError } from "typeorm";
 import { HttpNotFoundException } from "../../exceptions/HttpException.js";
 import { NotSupportedMediaTypeException } from "../../exceptions/NotSupportedMediaTypeException.js";
+import { SQLiteForeignKeyException } from "../../exceptions/SQLiteForeignKeyException.js";
 import { ValidationException } from "../../exceptions/ValidationException.js";
 import { createLogger, LOG_ENDPOINT, LOG_LEVEL } from "../../utils/logger.js";
 
@@ -39,7 +40,10 @@ export function errorHandler(err: unknown, req: Request, res: Response, next: Ne
             jsonError(err as SyntaxError, res, logger);
             break;
         case err instanceof QueryFailedError:
-            sqliteError(err as QueryFailedError, res, logger);
+            sqliteQueryError(err as QueryFailedError, res, logger);
+            break;
+        case err instanceof SQLiteForeignKeyException:
+            sqliteForeignKeyError(err as SQLiteForeignKeyException, res, logger);
             break;
         case err instanceof ValidationException:
             validationError(err as ValidationException, res);
@@ -152,13 +156,13 @@ function jsonError(err: SyntaxError, res: Response, logger: any): void
 }
 
 /**
- * SQLite error.
+ * SQLite query error.
  * 
  * @param err Thrown error
  * @param res HTTP response object
  * @param logger Logger instance
  */
-function sqliteError(err: QueryFailedError, res: Response, logger: any): void
+function sqliteQueryError(err: QueryFailedError, res: Response, logger: any): void
 {
     // Error parameters
     const code = err.driverError.code;
@@ -194,6 +198,32 @@ function sqliteError(err: QueryFailedError, res: Response, logger: any): void
     } else {
         logger.error(err.message, LOG_ENDPOINT.DATABASE);
     }
+}
+
+/**
+ * SQLITE foreign key error.
+ * 
+ * @param err Thrown error
+ * @param res HTTP response object
+ * @param logger Logger instance 
+ */
+function sqliteForeignKeyError(err: SQLiteForeignKeyException, res: Response, logger: any): void
+{
+    // Error resoponse
+    const errorResponse: ErrorResponse = {
+        error: {
+            code: err.code,
+            type: err.type,
+            message: err.message
+        }
+    };
+
+    // Response
+    res.status(409);
+    res.json(errorResponse);
+
+    // Log
+    logger.warn(err.message, LOG_ENDPOINT.DATABASE);
 }
 
 /**
