@@ -38,8 +38,7 @@ sizeRouter.get("/", async function (req: Request, res: Response, next: NextFunct
         const query = AppDataSource
             .getRepository(Size)
             .createQueryBuilder("size")
-            .innerJoin("size.conversionType", "conversionType")
-            .where("conversionType.id = :conversionTypeId", { conversionTypeId: reqConversionTypeId});
+            .where("size.conversion_type_id = :conversionTypeId", { conversionTypeId: reqConversionTypeId});
 
         // Validate/Sanitize parameters and build where clause
         if (validator.isValidSizeName(filteryByName))
@@ -126,9 +125,8 @@ sizeRouter.delete("/:id", async function (req: Request, res: Response, next: Nex
         if(reqConversionTypeId && reqId) {
             size = await repository
                 .createQueryBuilder("size")
-                .innerJoin("size.conversionType", "conversionType")
                 .where("size.id = :id", { id: reqId })
-                .andWhere("conversionType.id = :conversionTypeId", { conversionTypeId: reqConversionTypeId })
+                .andWhere("size.conversion_type_id = :conversionTypeId", { conversionTypeId: reqConversionTypeId })
                 .getOne();
         }
 
