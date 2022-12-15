@@ -19,9 +19,10 @@ const logger = createLogger();
 /**
  * Get a recipe image
  */
-recipeImageRouter.get("/", async function(req: Request, res: Response, next: NextFunction) {
+recipeImageRouter.get("/:filename", async function(req: Request, res: Response, next: NextFunction) {
     // Parameters
     const reqRecipeId: number = Number(req.params.recipeId);
+    const reqFileName: string = req.params.filename;
 
     // Recipe instance
     let recipe: Recipe|null = null;
@@ -44,10 +45,11 @@ recipeImageRouter.get("/", async function(req: Request, res: Response, next: Nex
         if (!recipe.imagePath)
             throw new HttpNotFoundException();
 
+        const baseFile = path.basename(recipe.imagePath);
+        if (baseFile !== reqFileName)
+            throw new HttpNotFoundException();
+
         res.contentType(path.basename(recipe.imagePath));
-        res.header({
-            "Cache-Control": "no-cache"
-        });
         res.sendFile(generateFileURI(recipe.imagePath));
     } catch (err) {
         next(err);
@@ -96,11 +98,8 @@ recipeImageRouter.put("/", upload.single("image"), async function(req: Request, 
 
         if (recipe) {
             if (recipe.imagePath)
-                recipe.imagePath = generateRecipeImageURI(recipe.id, req);
-
-            res.header({
-                "Cache-Control": "no-cache"
-            });    
+                recipe.imagePath = generateRecipeImageURI(recipe.id, recipe.imagePath, req);
+   
             putResponse(recipe, res);
         } else {
             throw new HttpNotFoundException();

@@ -129,7 +129,7 @@ recipeRouter.get("/", async function (req: Request, res: Response, next: NextFun
         // Generate public image uri
         recipes.forEach((recipe) => {
             if(recipe.imagePath)
-                recipe.imagePath = generateRecipeImageURI(recipe.id, req);
+                recipe.imagePath = generateRecipeImageURI(recipe.id, recipe.imagePath, req);
         });
 
         getResponse(recipes, res);
@@ -184,7 +184,7 @@ async function getOneRecipe(req: Request, res: Response, next: NextFunction) {
 
         if (recipe) {
             if(recipe.imagePath)
-                recipe.imagePath = generateRecipeImageURI(recipe.id, req);
+                recipe.imagePath = generateRecipeImageURI(recipe.id, recipe.imagePath, req);
             
             getResponse(recipe, res);
         } else {
@@ -232,7 +232,7 @@ recipeRouter.post("/", upload.single("image"), async function (req: Request, res
                 .save(recipe);
 
             if(recipe.imagePath)
-                recipe.imagePath = generateRecipeImageURI(recipe.id, req);
+                recipe.imagePath = generateRecipeImageURI(recipe.id, recipe.imagePath, req);
 
             postResponse(recipe, req, res);
 
@@ -351,7 +351,7 @@ recipeRouter.patch("/:id", async function (req: Request, res: Response, next: Ne
 
             if(recipe) {
                 if(recipe.imagePath)
-                    recipe.imagePath = generateRecipeImageURI(recipe.id, req);
+                    recipe.imagePath = generateRecipeImageURI(recipe.id, recipe.imagePath, req);
 
                 patchResponse(recipe, res);
             } else {

@@ -161,17 +161,18 @@ export function generateFileURI(pathComponent: string): string
  * @param req HTTP request object
  * @returns Image URI of the given recipe id
  */
-export function generateRecipeImageURI(recipeId: string|number, req: Request): string
+export function generateRecipeImageURI(recipeId: string|number, imagePath: string, req: Request): string
 {  
     const protocol = req.protocol + "://";
     const host = req.get("host");
     const recipeRoot = path
-        .normalize(req.originalUrl)
+        .normalize(req.baseUrl)
         .split(path.sep)
         .slice(0,4)
         .join("/");
+    const fileName = path.basename(imagePath);
 
-    const imageUri = protocol + host + recipeRoot + "/" + recipeId + "/image";
+    const imageUri = protocol + host + recipeRoot + "/" + recipeId + "/image/" + fileName;
 
     return imageUri;
 }
