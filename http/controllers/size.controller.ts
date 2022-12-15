@@ -88,7 +88,7 @@ sizeRouter.post("/", async function (req: Request, res: Response, next: NextFunc
         if(validator.isValidSizeName(reqName))
             size.name = reqName;
 
-        // Set foreign key
+        // Set parent
         size.conversionType = conversionType;
 
         if(validator.getErrors().length === 0) {
