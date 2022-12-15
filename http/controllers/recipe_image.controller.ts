@@ -45,6 +45,9 @@ recipeImageRouter.get("/", async function(req: Request, res: Response, next: Nex
             throw new HttpNotFoundException();
 
         res.contentType(path.basename(recipe.imagePath));
+        res.header({
+            "Cache-Control": "no-cache"
+        });
         res.sendFile(generateFileURI(recipe.imagePath));
     } catch (err) {
         next(err);
