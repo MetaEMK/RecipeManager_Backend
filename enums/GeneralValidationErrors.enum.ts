@@ -5,6 +5,7 @@ export enum GeneralValidationErrorCodes {
 
     //STRUCTURE
     ARRAY_INVALID = "The array is invalid",
+    ARRAY_INVALID_ELEMENT = "The array element is invalid",
 
     //NAME
     NAME_MISSING = "NAME_MISSING",

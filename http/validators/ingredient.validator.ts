@@ -28,24 +28,6 @@ export class IngredientValidator extends Validator
 
     /**
      * 
-     * @param idToValidate id to validate. can be null or undefined. If you pass null or undefined or an Object, the method will return false
-     * @returns true if the id is valid for a variant id and false otherwise
-     */
-    public isValidVariantId(idToValidate?: any): boolean
-    {
-        let val = new ValidatorIdUtilities();
-        if(!val.isValidId("IngredientValidator" ,idToValidate))
-        {
-            this.errors = this.errors.concat(val.getErrors());
-            return false;
-        }
-
-        this.logSuccess("IngredientValidator", "variant_id is valid", idToValidate);
-        return true;
-    }
-
-    /**
-     * 
      * @param quantityToValidate quantity to validate. can be null or undefined. If you pass null or undefined or an Object, the method will return false
      * @returns true if the quantity is valid for a ingredient quantity and false otherwise
      */

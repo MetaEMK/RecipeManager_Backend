@@ -2,10 +2,19 @@ import { ValidatorNameUtilities } from "./util/validatorNameUtilities.js";
 import { ValidatorDescriptionUtilities } from "./util/validatorDescriptionUtilities.js";
 import { Validator } from "./MainValidator.js";
 import { ValidatorIdUtilities } from "./util/validatorIdUtilities.js";
+import { ValidatorStructualUtilities } from "./util/validatorStructualUtilities.js";
+import { ValidationError } from "./validationError.js";
+import { GeneralValidationErrorCodes } from "../../enums/GeneralValidationErrors.enum.js";
+import { getIngredientPropertyNames, isIngredient } from "../../interfaces/ingredient.interface.js";
+import { IngredientValidator } from "./ingredient.validator.js";
 
 export class VariantValidator extends Validator
 {
-
+    /**
+     * 
+     * @param idToValidate id to validate. can be null or undefined. If you pass null or undefined or an Object, the method will return false 
+     * @returns true if the id is valid and false otherwise
+     */
     public isValidVariantId(idToValidate?: any): boolean
     {
         let val = new ValidatorIdUtilities();
@@ -88,6 +97,75 @@ export class VariantValidator extends Validator
         }
 
         this.logSuccess("VariantValidator", "size_id is valid", idToValidate);
+        return true;
+    }
+
+    /**
+     * 
+     * @param idsToValidate an array of numbers. If you pass null or undefined or any other Object than number[], the method will return false
+     * @returns true if the ids are valid for a size id and false otherwise. It will also return true if the array is empty
+     */
+    public isValidIdArray(idsToValidate?: any): boolean
+    {
+        if(!idsToValidate) return false;
+
+        let val = new ValidatorStructualUtilities();
+        if(!val.isValidNumberArray("VariantValidator", idsToValidate))
+        {
+            this.errors = this.errors.concat(val.getErrors());
+            return false;
+        }
+
+        this.logSuccess("VariantValidator", "id_array is valid", idsToValidate);
+        return true;
+    }
+
+    /**
+     * 
+     * @param ingredientArrayToValidate an array. will return false if array elements arent ingredients
+     * @returns true if the array is a valid array of ingredients and false otherwise
+     */
+    public isValidIngredientsArray(ingredientArrayToValidate?: any): boolean
+    {
+        if(!ingredientArrayToValidate) return false;
+        
+        const val = new ValidatorStructualUtilities();
+        if(!val.isValidArray("VariantValidator", ingredientArrayToValidate))
+        {
+            this.errors = this.errors.concat(val.getErrors());
+            return false;
+        }
+
+        const valIngredient = new IngredientValidator();
+
+        for (let i = 0; i < ingredientArrayToValidate.length; i++) {
+            const ingredient = ingredientArrayToValidate[i];
+
+            if(!isIngredient(ingredient))
+            {
+                let err = new ValidationError(GeneralValidationErrorCodes.ARRAY_INVALID_ELEMENT, 
+                    `Element at index ${ i } is no valid ingredient. An ingredient has following properties: ${ getIngredientPropertyNames() }`);
+                this.errors.push(err);
+                this.logError("VariantValidator", err.toString());
+                return false;
+            }
+
+            valIngredient.isValidIngredientName(ingredient.name);
+            valIngredient.isValidQuantity(ingredient.quantity);
+            valIngredient.isValidUnit(ingredient.unit);
+            valIngredient.isValidSectionId(ingredient.section);
+            valIngredient.isValidOrder_No(ingredient.order);
+
+            if(valIngredient.getErrors().length !== 0)
+            {
+                let err = valIngredient.getErrors()[0];
+                err.message = `Invalid ingredient at index ${i}: ` + err.message;
+                this.errors.push(err);
+                this.logError("VariantValidator", err.toString());
+                return false;
+            }
+        }
+
         return true;
     }
 }

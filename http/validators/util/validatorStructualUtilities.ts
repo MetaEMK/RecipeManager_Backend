@@ -5,8 +5,21 @@ import { ValidationError } from "../validationError.js";
 
 export class ValidatorStructualUtilities extends Validator
 {
-    
-    // "add": [1,2,3,4,5],
+    public isValidArray(validator: string, body: any): boolean
+    {
+        if(!body) return false;
+
+        if(!Array.isArray(body)) 
+        {
+            let err = new ValidationError(GeneralValidationErrorCodes.ARRAY_INVALID, "The content could not be interpreted as an array");
+            this.errors.push(err);
+            this.logError(validator, err.toString());
+            return false;
+        }
+
+        return true;
+    }
+
     public isValidNumberArray(validator: string, body: any): boolean
     {
         if(!body)
