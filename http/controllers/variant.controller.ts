@@ -74,6 +74,7 @@ variantRouter.get("/", async function (req: Request, res: Response, next: NextFu
  * Loads relation:
  * - Recipe
  * - Size
+ * - Conversion Type of Size
  * - Ingredients
  */
 variantRouter.get("/:id", async function (req: Request, res: Response, next: NextFunction) {
@@ -93,6 +94,7 @@ variantRouter.get("/:id", async function (req: Request, res: Response, next: Nex
                 .innerJoinAndSelect("variant.ingredients", "ingredient")
                 .innerJoinAndSelect("variant.recipe", "recipe")
                 .innerJoinAndSelect("variant.size", "size")
+                .innerJoinAndSelect("size.conversionType", "conversionType")
                 .where("variant.id = :id", { id: reqId })
                 .andWhere("recipe.id = :recipeId", { recipeId: reqRecipeId })
                 .getOne();
