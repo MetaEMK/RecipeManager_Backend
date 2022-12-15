@@ -98,6 +98,9 @@ recipeImageRouter.put("/", upload.single("image"), async function(req: Request, 
             if (recipe.imagePath)
                 recipe.imagePath = generateRecipeImageURI(recipe.id, req);
 
+            res.header({
+                "Cache-Control": "no-cache"
+            });    
             putResponse(recipe, res);
         } else {
             throw new HttpNotFoundException();
