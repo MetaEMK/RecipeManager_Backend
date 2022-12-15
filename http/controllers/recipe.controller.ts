@@ -275,7 +275,7 @@ recipeRouter.patch("/:id", async function (req: Request, res: Response, next: Ne
 
     // Validated parameters
     let validatedName: string|undefined = undefined;
-    let validatedDesc: string|null = null;
+    let validatedDesc: string|null|undefined = undefined;
     let validatedBranchesAdd: Array<number> = [];
     let validatedBranchesRmv: Array<number> = [];
     let validatedCategoriesAdd: Array<number> = [];
