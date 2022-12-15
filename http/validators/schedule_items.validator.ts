@@ -2,6 +2,7 @@ import { GeneralValidationErrorCodes } from "../../enums/GeneralValidationErrors
 import { Validator } from "./MainValidator.js";
 import { ValidatorIdUtilities } from "./util/validatorIdUtilities.js";
 import { ValidatorQuanitiyUtilities } from "./util/validatorQuantityUtilities.js";
+import { ValidatorStructualUtilities } from "./util/validatorStructualUtilities.js";
 import { ValidationError } from "./validationError.js";
 
 
@@ -139,6 +140,25 @@ export class ScheduleItemsValidator extends Validator
 
         this.logSuccess("ScheduleItemsValidator", "day is valid", dayToValidate);
         return true;
+    }
+
+    public isValidDayArray(daysToValidate: any): boolean
+    {
+        if(!daysToValidate) return false;
+
+        const val = new ValidatorStructualUtilities();
+        if(!val.isValidArray("ScheduledItemsValidator", daysToValidate))
+        {
+            this.errors = this.errors.concat(val.getErrors());
+            return false;
+        }
+
+        for (const day of daysToValidate) {
+            if (!this.isValidDay(day))
+                return false;
+        }
+
+        return true
     }
 
     /**
