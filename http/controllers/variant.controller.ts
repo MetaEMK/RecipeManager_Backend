@@ -1,6 +1,6 @@
 import express, { NextFunction, Request, Response } from "express";
 import { AppDataSource } from "../../config/datasource.js";
-import { decodeURISpaces, generateRecipeImageURI, getResponse, patchResponse, postResponse, prepareForSqlInParams } from "../../utils/controller.util.js";
+import { decodeURISpaces, deleteResponse, generateRecipeImageURI, getResponse, patchResponse, postResponse, prepareForSqlInParams } from "../../utils/controller.util.js";
 import { HttpNotFoundException } from "../../exceptions/HttpException.js";
 import { createLogger, LOG_ENDPOINT } from "../../utils/logger.js";
 import { Recipe } from "../../data/entities/recipe.entity.js";
@@ -321,7 +321,38 @@ variantRouter.patch("/:id", async function (req: Request, res: Response, next: N
  * Delete a recipe variant.
  */
 variantRouter.delete("/:id", async function (req: Request, res: Response, next: NextFunction) {
+    // Parameters
+    const reqRecipeId: number = Number(req.params.recipeId);
+    const reqId: number = Number(req.params.id);
 
+    // Repository instance
+    const repository = AppDataSource.getRepository(Variant);
+
+    // Variant instance
+    let variant: Variant|null = null;
+
+    // ORM query
+    try {
+        if(reqRecipeId && reqId) {
+            variant = await repository
+                .createQueryBuilder("variant")
+                .where("variant.id = :id", { id: reqId })
+                .andWhere("variant.recipe_id = :recipeId", { recipeId: reqRecipeId })
+                .getOne();
+        }
+
+        if (variant) {
+            await repository.remove(variant);
+
+            deleteResponse(res);
+
+            logger.info("Variant with ID " + reqId + " deleted.", LOG_ENDPOINT.DATABASE);
+        } else {
+            throw new HttpNotFoundException();
+        }
+    } catch (err) {
+        next(err);
+    }
 });
 
 /**

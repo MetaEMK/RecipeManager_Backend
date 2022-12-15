@@ -39,7 +39,7 @@ apiRouter.use("/conversion_types/:conversionTypeId/conversions", conversionRoute
 apiRouter.use("/conversion_types/:conversionTypeId/sizes", sizeRouter);
 apiRouter.use("/recipes", recipeRouter);
 apiRouter.use("/recipes/:recipeId/image", recipeImageRouter);
-apiRouter.use("/recipes/:recipeId/variants", variantRouter);    // TODO
+apiRouter.use("/recipes/:recipeId/variants", variantRouter);
 
 // Default route if not exists
 apiRouter.use((req: Request, res: Response) => {
