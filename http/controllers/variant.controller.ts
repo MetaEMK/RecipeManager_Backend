@@ -45,6 +45,8 @@ variantRouter.get("/", async function (req: Request, res: Response, next: NextFu
         const query = AppDataSource
             .getRepository(Variant)
             .createQueryBuilder("variant")
+            .innerJoinAndSelect("variant.size", "size")
+            .innerJoinAndSelect("size.conversionType", "conversionType")
             .where("variant.recipe_id = :recipeId", { recipeId: reqRecipeId });
 
         // Validate/Sanitize parameters and build where clause
