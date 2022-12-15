@@ -151,6 +151,9 @@ variantRouter.post("/", async function (req: Request, res: Response, next: NextF
             throw new HttpNotFoundException();
 
         // Foreign keys
+        if(!reqSizeId)
+            throw new SQLiteForeignKeyException("variant", "size");
+    
         const size = await AppDataSource
             .getRepository(Size)
             .findOne({
