@@ -3,6 +3,7 @@ import { Variant } from "./variant.entity.js";
 
 @Entity()
 @Unique(["name", "variant.id"])
+@Unique(["variant.id", "section", "order"])
 export class Ingredient {
     @PrimaryGeneratedColumn()
     id!: number;
