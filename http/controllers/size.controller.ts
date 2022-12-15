@@ -32,6 +32,9 @@ sizeRouter.get("/", async function (req: Request, res: Response, next: NextFunct
 
     // ORM query
     try {
+        if(!reqConversionTypeId)
+            throw new HttpNotFoundException();
+
         const query = AppDataSource
             .getRepository(Size)
             .createQueryBuilder("size")
@@ -120,7 +123,7 @@ sizeRouter.delete("/:id", async function (req: Request, res: Response, next: Nex
 
     // ORM query
     try {
-        if(reqId) {
+        if(reqConversionTypeId && reqId) {
             size = await repository
                 .createQueryBuilder("size")
                 .innerJoin("size.conversionType", "conversionType")
