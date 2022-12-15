@@ -24,8 +24,8 @@ const logger = createLogger();
  * Get all recipe variants.
  * 
  * Filter params
- * - name
- * - size
+ * - name: Search for similar name
+ * - size: Search for (multiple) size ids
  */
 variantRouter.get("/", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
