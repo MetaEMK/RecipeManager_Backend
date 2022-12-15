@@ -1,6 +1,5 @@
 import { GeneralValidationErrorCodes } from "../../enums/GeneralValidationErrors.enum.js";
 import { Validator } from "./MainValidator.js";
-import { ValidatorIdUtilities } from "./util/validatorIdUtilities.js";
 import { ValidatorNameUtilities } from "./util/validatorNameUtilities.js";
 import { ValidatorQuanitiyUtilities } from "./util/validatorQuantityUtilities.js";
 import { ValidationError } from "./validationError.js";
@@ -16,7 +15,7 @@ export class IngredientValidator extends Validator
      public isValidIngredientName(nameToValidate?: any): boolean
      {
          let val = new ValidatorNameUtilities();
-         if(!val.isValidAlpha("IngredientValidator", nameToValidate, {min: 3, max: 100}))
+         if(!val.isValidAlphanummeric("IngredientValidator", nameToValidate, {min: 3, max: 100}))
          {
              this.errors = this.errors.concat(val.getErrors());
              return false;
