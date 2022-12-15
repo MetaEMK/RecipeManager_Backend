@@ -150,7 +150,6 @@ export class VariantValidator extends Validator
                 return false;
             }
 
-            valIngredient.isValidIngredientName(ingredient.name);
             valIngredient.isValidQuantity(ingredient.quantity);
             valIngredient.isValidUnit(ingredient.unit);
             valIngredient.isValidSectionId(ingredient.section);
