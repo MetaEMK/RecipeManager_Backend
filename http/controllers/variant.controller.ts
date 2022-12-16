@@ -309,7 +309,7 @@ variantRouter.patch("/:id", async function (req: Request, res: Response, next: N
                             const size = await transactionalEntityManager
                                 .getRepository(Size)
                                 .createQueryBuilder("size")
-                                .where("size.conversion_type_id = :conversionTypeId", { conversionTypeId: variant!.conversionType.id })
+                                .where("size.conversion_type_id = :conversionTypeId", { conversionTypeId: variant!.conversionType?.id })
                                 .andWhere("size.id = :sizeId", { sizeId: validatedSizeId })
                                 .getOne();
 
@@ -372,7 +372,6 @@ variantRouter.delete("/:id", async function (req: Request, res: Response, next: 
             if (!(await getRecipe(reqRecipeId)))
                 throw new HttpNotFoundException();
 
-            // Delete
             variant = await repository
                 .createQueryBuilder("variant")
                 .where("variant.id = :id", { id: reqId })
