@@ -119,7 +119,7 @@ export class IngredientValidator extends Validator
      */
     public isValidOrder_No(orderNoToValidate?: any): boolean
     {
-        if(!orderNoToValidate)
+        if(orderNoToValidate === undefined || orderNoToValidate === null)
         {
             let err = new ValidationError(GeneralValidationErrorCodes.ORDER_NO_MISSING);
             this.logError("IngredientValidator", err.toString(), orderNoToValidate);
