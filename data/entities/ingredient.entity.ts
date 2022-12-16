@@ -3,7 +3,7 @@ import { Variant } from "./variant.entity.js";
 
 @Entity()
 @Unique(["variant_id", "section", "order"])
-@Unique(["varient_id", "name", "section"])
+@Unique(["variant_id", "name", "section"])
 export class Ingredient {
     @PrimaryColumn({
         type: "nvarchar"
