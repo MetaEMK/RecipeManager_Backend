@@ -3,6 +3,7 @@ import { Variant } from "./variant.entity.js";
 
 @Entity()
 @Unique(["variant_id", "section", "order"])
+@Unique(["varient_id", "name", "section"])
 export class Ingredient {
     @PrimaryColumn({
         type: "nvarchar"
@@ -18,12 +19,12 @@ export class Ingredient {
     })
     unit!: string;
 
-    @Column({
+    @PrimaryColumn({
         type: "tinyint"
     })
     section!: number;
 
-    @Column({
+    @PrimaryColumn({
         name: "order",
         type: "smallint"
     })
