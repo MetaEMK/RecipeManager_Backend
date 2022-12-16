@@ -179,7 +179,8 @@ variantRouter.post("/", async function (req: Request, res: Response, next: NextF
         variant.size = size;
 
         if (validator.getErrors().length === 0) {
-            variant.ingredients = prepareIngredients(reqIngredients);
+            if(reqIngredients)
+                variant.ingredients = prepareIngredients(reqIngredients);
 
             await AppDataSource
                 .getRepository(Variant)
