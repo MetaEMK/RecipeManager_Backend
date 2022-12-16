@@ -22,14 +22,14 @@ export const uploadRecipeImages = multer({
             cb(null, dir);
         },
         filename: function(req, file, cb) {
-            const ext = path.extname(file.originalname);
+            const ext = path.extname(file.originalname).toLowerCase();
             const uniqueName = "recipe-" + Date.now() + "-" + Math.round(Math.random() * 1E9);
 
             cb(null, uniqueName + ext);
         }
     }),
     fileFilter: function(req, file, cb) {
-        const ext = path.extname(file.originalname);
+        const ext = path.extname(file.originalname).toLocaleLowerCase();
 
         if(!allowedFileExtensions.includes(ext)) {
             return cb(new NotSupportedMediaTypeException());
