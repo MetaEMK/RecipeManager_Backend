@@ -11,6 +11,7 @@ import { VariantValidator } from "../validators/variant.validator.js";
 import { ValidationException } from "../../exceptions/ValidationException.js";
 import { Size } from "../../data/entities/size.entity.js";
 import { SQLiteForeignKeyException } from "../../exceptions/SQLiteForeignKeyException.js";
+import { ConversionType } from "../../data/entities/conversion_type.entity.js";
 
 // Router instance
 export const variantRouter = express.Router({
@@ -25,6 +26,7 @@ const logger = createLogger();
  * 
  * Filter params
  * - name: Search for similar name
+ * - conversionType: Search for (multiple) conversion type ids
  * - size: Search for (multiple) size ids
  */
 variantRouter.get("/", async function (req: Request, res: Response, next: NextFunction) {
@@ -32,6 +34,7 @@ variantRouter.get("/", async function (req: Request, res: Response, next: NextFu
     const reqRecipeId: number = Number(req.params.recipeId);
     const filterByName: string = <string>req.query.name;
 
+    let filterByConversionTypeIds: string|string[] = <string>req.query.conversionType;
     let filterBySizeIds: string|string[] = <string>req.query.size;
 
     // Validator instance
@@ -46,19 +49,26 @@ variantRouter.get("/", async function (req: Request, res: Response, next: NextFu
             .getRepository(Variant)
             .createQueryBuilder("variant")
             .innerJoinAndSelect("variant.size", "size")
-            .innerJoinAndSelect("size.conversionType", "conversionType")
+            .innerJoinAndSelect("variant.conversionType", "conversionType")
             .where("variant.recipe_id = :recipeId", { recipeId: reqRecipeId });
 
         // Validate/Sanitize parameters and build where clause
         if (validator.isValidVariantName(filterByName))
             query.andWhere("variant.name LIKE :variantName", { variantName: `%${ decodeURISpaces(filterByName) }%` });
 
+        if (filterByConversionTypeIds) {
+            filterByConversionTypeIds = prepareForSqlInParams(filterByConversionTypeIds);
+
+            if (validator.isValidIdArray(filterByConversionTypeIds)) {
+                query.andWhere("variant.conversion_type_id IN (:...conversionTypeIds)", { conversionTypeIds: filterByConversionTypeIds });
+            }
+        }
+
         if (filterBySizeIds) {
             filterBySizeIds = prepareForSqlInParams(filterBySizeIds);
 
-            if(validator.isValidIdArray(filterBySizeIds)) {
-                query.innerJoin("variant.size", "size")
-                    .andWhere("size.id IN (:...sizeIds)", { sizeIds: filterBySizeIds });
+            if (validator.isValidIdArray(filterBySizeIds)) {
+                query.andWhere("variant.size_id IN (:...sizeIds)", { sizeIds: filterBySizeIds });
             }
         }
 
@@ -75,8 +85,8 @@ variantRouter.get("/", async function (req: Request, res: Response, next: NextFu
  * 
  * Loads relation:
  * - Recipe
+ * - Conversion Type 
  * - Size
- * - Conversion Type of Size
  * - Ingredients
  */
 variantRouter.get("/:id", async function (req: Request, res: Response, next: NextFunction) {
@@ -93,19 +103,15 @@ variantRouter.get("/:id", async function (req: Request, res: Response, next: Nex
             variant = await AppDataSource
                 .getRepository(Variant)
                 .createQueryBuilder("variant")
-                .leftJoinAndSelect("variant.ingredients", "ingredient")
-                .innerJoinAndSelect("variant.recipe", "recipe")
+                .innerJoinAndSelect("variant.conversionType", "conversionType")
                 .innerJoinAndSelect("variant.size", "size")
-                .innerJoinAndSelect("size.conversionType", "conversionType")
+                .leftJoinAndSelect("variant.ingredients", "ingredient")
                 .where("variant.id = :id", { id: reqId })
-                .andWhere("recipe.id = :recipeId", { recipeId: reqRecipeId })
+                .andWhere("variant.recipe_id = :recipeId", { recipeId: reqRecipeId })
                 .getOne();
         }
 
         if (variant) {
-            if (variant.recipe.imagePath)
-                variant.recipe.imagePath = generateRecipeImageURI(variant.recipe.id, variant.recipe.imagePath, req);
-
             getResponse(variant, res);    
         } else {
             throw new HttpNotFoundException();
@@ -124,6 +130,7 @@ variantRouter.post("/", async function (req: Request, res: Response, next: NextF
 
     const reqName: string = req.body.name;
     const reqDesc: string = req.body.description;
+    const reqConversionTypeId: number = Number(req.body.conversionType);
     const reqSizeId: number = Number(req.body.size);
     const reqIngredients: Array<IngredientRequest> = req.body.ingredients;
 
@@ -136,7 +143,7 @@ variantRouter.post("/", async function (req: Request, res: Response, next: NextF
     // ORM query
     try {
         // Check first if parent resource exists
-        if(!reqRecipeId)
+        if (!reqRecipeId)
             throw new HttpNotFoundException();
 
         const recipe = await AppDataSource
@@ -147,23 +154,40 @@ variantRouter.post("/", async function (req: Request, res: Response, next: NextF
                 }
             });
 
-        if(!recipe)
+        if (!recipe)
             throw new HttpNotFoundException();
 
         // Foreign keys
-        if(!reqSizeId)
+        if (!reqConversionTypeId) {
+            throw new SQLiteForeignKeyException("variant", "conversionType");
+        }
+        const conversionType = await AppDataSource
+            .getRepository(ConversionType)
+            .findOne({
+                where: {
+                    id: reqConversionTypeId
+                }
+            });
+        if (!conversionType) {
+            throw new SQLiteForeignKeyException("variant", "conversionType");
+        }
+
+        if(!reqSizeId) {
             throw new SQLiteForeignKeyException("variant", "size");
-    
+        }
         const size = await AppDataSource
             .getRepository(Size)
             .findOne({
                 where: {
-                    id: reqSizeId
+                    id: reqSizeId,
+                    conversionType: {
+                        id: reqConversionTypeId
+                    }
                 }
             });
-
-        if(!size)
+        if(!size) {
             throw new SQLiteForeignKeyException("variant", "size");
+        }
 
         // Validatation
         if(validator.isValidVariantName(reqName))
@@ -176,6 +200,7 @@ variantRouter.post("/", async function (req: Request, res: Response, next: NextF
 
         // Set parent and foreign key
         variant.recipe = recipe;
+        variant.conversionType = conversionType;
         variant.size = size;
 
         if (validator.getErrors().length === 0) {
@@ -203,6 +228,7 @@ variantRouter.post("/", async function (req: Request, res: Response, next: NextF
 /**
  * (Partially) Update a recipe variant.
  * 
+ * Not able to change the conversion type.
  * Able to replace ingredients.
  */
 variantRouter.patch("/:id", async function (req: Request, res: Response, next: NextFunction) {
@@ -251,6 +277,7 @@ variantRouter.patch("/:id", async function (req: Request, res: Response, next: N
                     .getRepository(Variant)
                     .createQueryBuilder("variant")
                     .leftJoinAndSelect("variant.ingredients", "ingredients")
+                    .innerJoinAndSelect("variant.conversionType", "conversionType")
                     .innerJoinAndSelect("variant.size", "size")
                     .where("variant.recipe_id = :recipeId", { recipeId: reqRecipeId })
                     .andWhere("variant.id = :id", { id: reqId })
@@ -266,13 +293,15 @@ variantRouter.patch("/:id", async function (req: Request, res: Response, next: N
                             variant!.description = validatedDesc;
 
                         if (validatedSizeId) {
+                            if(!variant!.conversionType?.id)
+                                throw new SQLiteForeignKeyException("variant", "conversionType");
+
                             const size = await transactionalEntityManager
                                 .getRepository(Size)
-                                .findOne({
-                                    where: {
-                                        id: validatedSizeId
-                                    }
-                                });
+                                .createQueryBuilder("size")
+                                .where("size.conversion_type_id = :conversionTypeId", { conversionTypeId: variant!.conversionType.id })
+                                .andWhere("size.id = :sizeId", { sizeId: validatedSizeId })
+                                .getOne();
 
                             if(!size)
                                 throw new SQLiteForeignKeyException("variant", "size");

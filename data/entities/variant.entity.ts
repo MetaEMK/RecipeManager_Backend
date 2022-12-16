@@ -3,6 +3,7 @@ import { Recipe } from "./recipe.entity.js";
 import { ScheduledItem } from "./scheduled_item.entity.js";
 import { Size } from "./size.entity.js";
 import { Ingredient } from "./ingredient.entity.js";
+import { ConversionType } from "./conversion_type.entity.js";
 
 @Entity()
 @Unique(["name", "recipe.id"])
@@ -27,6 +28,14 @@ export class Variant {
         name: "recipe_id"
     })
     recipe!: Relation<Recipe>;
+
+    @ManyToOne(() => ConversionType, (conversionType) => conversionType.variants, {
+        nullable: false
+    })
+    @JoinColumn({
+        name: "conversion_type_id"
+    })
+    conversionType!: Relation<ConversionType>;
 
     @ManyToOne(() => Size, (size) => size.variants, {
         nullable: false
