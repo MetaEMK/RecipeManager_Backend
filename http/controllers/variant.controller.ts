@@ -203,7 +203,7 @@ variantRouter.post("/", async function (req: Request, res: Response, next: NextF
 /**
  * (Partially) Update a recipe variant.
  * 
- * Able to add and remove recipes.
+ * Able to replace ingredients.
  */
 variantRouter.patch("/:id", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
@@ -214,8 +214,7 @@ variantRouter.patch("/:id", async function (req: Request, res: Response, next: N
     const reqDesc: string = req.body.description;
     const reqSizeId: number = Number(req.body.size);
 
-    const reqIngredientsAdd: Array<IngredientRequest> = req.body.ingredients?.add;
-    const reqIngredientsRmv: Array<number> = req.body.ingredients?.rmv;
+    const reqIngredients: Array<IngredientRequest> = req.body.ingredients;
 
     // Variant instance
     let variant: Variant|null = null;
@@ -227,8 +226,7 @@ variantRouter.patch("/:id", async function (req: Request, res: Response, next: N
     let validatedName: string|undefined = undefined;
     let validatedDesc: string|null|undefined = undefined;
     let validatedSizeId: number|undefined = undefined;
-    let validatedIngredientsAdd: Array<IngredientRequest>|undefined = undefined;
-    let validatedIngredientsRmv: Array<number>|undefined = undefined;
+    let validatedIngredients: Array<IngredientRequest>|undefined = undefined;
 
     // Validation
     if (reqName)
@@ -242,11 +240,8 @@ variantRouter.patch("/:id", async function (req: Request, res: Response, next: N
     if(reqSizeId)
         validatedSizeId = reqSizeId;
 
-    if(validator.isValidIngredientsArray(reqIngredientsAdd))
-        validatedIngredientsAdd = reqIngredientsAdd;
-
-    if(validator.isValidIdArray(reqIngredientsRmv) && reqIngredientsRmv.length > 0)
-        validatedIngredientsRmv = reqIngredientsRmv;
+    if(validator.isValidIngredientsArray(reqIngredients))
+        validatedIngredients = reqIngredients;
 
     // ORM query
     try {
@@ -255,29 +250,14 @@ variantRouter.patch("/:id", async function (req: Request, res: Response, next: N
                 variant = await AppDataSource
                     .getRepository(Variant)
                     .createQueryBuilder("variant")
+                    .leftJoinAndSelect("variant.ingredients", "ingredients")
+                    .innerJoinAndSelect("variant.size", "size")
                     .where("variant.recipe_id = :recipeId", { recipeId: reqRecipeId })
                     .andWhere("variant.id = :id", { id: reqId })
                     .getOne();
                 
                 if (variant) {
                     await AppDataSource.transaction(async (transactionalEntityManager) => {
-                        // Delete ingredients first so that ingredients can be created again with same composite unique key
-                        if (validatedIngredientsRmv) {
-                            await transactionalEntityManager
-                                .getRepository(Ingredient)
-                                .delete(validatedIngredientsRmv);
-                        }
-
-                        // Refresh entity
-                        variant = await AppDataSource
-                            .getRepository(Variant)
-                            .createQueryBuilder("variant")
-                            .leftJoinAndSelect("variant.ingredients", "ingredients")
-                            .innerJoinAndSelect("variant.size", "size")
-                            .where("variant.recipe_id = :recipeId", { recipeId: reqRecipeId })
-                            .andWhere("variant.id = :id", { id: reqId })
-                            .getOne();
-
                         // Update attributes
                         if (validatedName)
                             variant!.name = validatedName;
@@ -300,8 +280,16 @@ variantRouter.patch("/:id", async function (req: Request, res: Response, next: N
                             variant!.size = size;
                         }
 
-                        if (validatedIngredientsAdd) {
-                            variant!.ingredients = [...variant!.ingredients, ...prepareIngredients(validatedIngredientsAdd)];
+                        // Replace ingredients
+                        if (validatedIngredients) {
+                            await transactionalEntityManager
+                                .getRepository(Ingredient)
+                                .createQueryBuilder("ingredient")
+                                .delete()
+                                .where("ingredient.variant_id = :variantId", { variantId: reqId })
+                                .execute();
+
+                            variant!.ingredients = prepareIngredients(validatedIngredients);
                         }
 
                         await transactionalEntityManager.save(variant);

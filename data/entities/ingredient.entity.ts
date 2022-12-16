@@ -1,14 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, Relation, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn, Unique } from "typeorm";
+import { Entity, Column, Relation, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn, Unique, PrimaryColumn } from "typeorm";
 import { Variant } from "./variant.entity.js";
 
 @Entity()
-@Unique(["name", "variant.id"])
-@Unique(["variant.id", "section", "order"])
+@Unique(["variant_id", "section", "order"])
 export class Ingredient {
-    @PrimaryGeneratedColumn()
-    id!: number;
-
-    @Column({
+    @PrimaryColumn({
         type: "nvarchar"
     })
     name!: string
@@ -32,6 +28,9 @@ export class Ingredient {
         type: "smallint"
     })
     order!: number;
+
+    @PrimaryColumn()
+    variant_id!: number;
 
     @ManyToOne(() => Variant, (variant) => variant.ingredients, {
         nullable: false,
