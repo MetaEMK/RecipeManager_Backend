@@ -32,7 +32,7 @@ apiRouter.use(setJsonHeader);
 
 // Routes
 apiRouter.use("/branches", branchRouter);
-apiRouter.use("/branches/:branchId/schedule", scheduleRouter);  // TODO
+apiRouter.use("/branches/:branchId/schedule", scheduleRouter);
 apiRouter.use("/categories", categoryRouter);
 apiRouter.use("/conversion_types", conversionTypeRouter);
 apiRouter.use("/conversion_types/:conversionTypeId/conversions", conversionRouter);
