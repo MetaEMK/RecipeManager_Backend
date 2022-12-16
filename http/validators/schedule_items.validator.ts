@@ -118,9 +118,7 @@ export class ScheduleItemsValidator extends Validator
             return false;
         }
 
-        let val = new ValidatorIdUtilities();
-
-        let day = val.convertToNumber("ScheduleItemsValidator", dayToValidate);
+        let day = Number(dayToValidate);
 
         if(!day)
         {
@@ -142,6 +140,11 @@ export class ScheduleItemsValidator extends Validator
         return true;
     }
 
+    /**
+     * 
+     * @param daysToValidate array to validate. checks if all elements are valid days
+     * @returns true if all elements are valid days, false otherwise
+     */
     public isValidDayArray(daysToValidate: any): boolean
     {
         if(!daysToValidate) return false;
