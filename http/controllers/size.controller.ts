@@ -32,9 +32,14 @@ sizeRouter.get("/", async function (req: Request, res: Response, next: NextFunct
 
     // ORM query
     try {
-        if(!reqConversionTypeId)
+        // Check first if parent resource exists
+        if (!reqConversionTypeId)
             throw new HttpNotFoundException();
 
+        if (!(await getConversionType(reqConversionTypeId)))
+            throw new HttpNotFoundException();
+
+        // Get sizes
         const query = AppDataSource
             .getRepository(Size)
             .createQueryBuilder("size")
@@ -72,13 +77,7 @@ sizeRouter.post("/", async function (req: Request, res: Response, next: NextFunc
         if (!reqConversionTypeId)
             throw new HttpNotFoundException();
 
-        const conversionType = await AppDataSource
-            .getRepository(ConversionType)
-            .findOne({
-                where: {
-                    id: reqConversionTypeId
-                }
-            });
+        const conversionType = await getConversionType(reqConversionTypeId);
 
         if (!conversionType)
             throw new HttpNotFoundException();
@@ -123,6 +122,11 @@ sizeRouter.delete("/:id", async function (req: Request, res: Response, next: Nex
     // ORM query
     try {
         if(reqConversionTypeId && reqId) {
+            // Check first if parent resource exists
+            if (!(await getConversionType(reqConversionTypeId)))
+                throw new HttpNotFoundException();
+
+            // Delete
             size = await repository
                 .createQueryBuilder("size")
                 .where("size.id = :id", { id: reqId })
@@ -143,3 +147,30 @@ sizeRouter.delete("/:id", async function (req: Request, res: Response, next: Nex
         next(err);
     }
 });
+
+/**
+ * Get conversion type by id.
+ * 
+ * @param conversionTypeId 
+ * @returns ConversionType on success else null
+ */
+async function getConversionType (conversionTypeId: any): Promise<ConversionType | null>
+{
+    conversionTypeId = Number(conversionTypeId);
+
+    if (!conversionTypeId)
+        return null;
+
+    const conversionType = AppDataSource
+        .getRepository(ConversionType)
+        .findOne({
+            where: {
+                id: conversionTypeId
+            }
+        });
+
+    if (!conversionType)
+        return null;
+
+    return conversionType;
+}

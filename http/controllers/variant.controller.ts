@@ -42,9 +42,14 @@ variantRouter.get("/", async function (req: Request, res: Response, next: NextFu
 
     // ORM query
     try {
-        if(!reqRecipeId)
+        // Check first if parent resource exists
+        if (!reqRecipeId)
             throw new HttpNotFoundException();
 
+        if (!(await getRecipe(reqRecipeId)))
+            throw new HttpNotFoundException();
+
+        // Get variants
         const query = AppDataSource
             .getRepository(Variant)
             .createQueryBuilder("variant")
@@ -100,6 +105,11 @@ variantRouter.get("/:id", async function (req: Request, res: Response, next: Nex
     // ORM query
     try {
         if (reqRecipeId && reqId) {
+            // Check first if parent resource exists
+            if (!(await getRecipe(reqRecipeId)))
+                throw new HttpNotFoundException();
+
+            // Get variant
             variant = await AppDataSource
                 .getRepository(Variant)
                 .createQueryBuilder("variant")
@@ -146,13 +156,7 @@ variantRouter.post("/", async function (req: Request, res: Response, next: NextF
         if (!reqRecipeId)
             throw new HttpNotFoundException();
 
-        const recipe = await AppDataSource
-            .getRepository(Recipe)
-            .findOne({
-                where: {
-                    id: reqRecipeId
-                }
-            });
+        const recipe = await getRecipe(reqRecipeId);
 
         if (!recipe)
             throw new HttpNotFoundException();
@@ -274,6 +278,11 @@ variantRouter.patch("/:id", async function (req: Request, res: Response, next: N
     try {
         if (validator.getErrors().length === 0) {
             if (reqRecipeId && reqId) {
+                // Check first if parent resource exists
+                if (!(await getRecipe(reqRecipeId)))
+                    throw new HttpNotFoundException();
+
+                // Update
                 variant = await AppDataSource
                     .getRepository(Variant)
                     .createQueryBuilder("variant")
@@ -359,6 +368,11 @@ variantRouter.delete("/:id", async function (req: Request, res: Response, next: 
     // ORM query
     try {
         if(reqRecipeId && reqId) {
+            // Check first if parent resource exists
+            if (!(await getRecipe(reqRecipeId)))
+                throw new HttpNotFoundException();
+
+            // Delete
             variant = await repository
                 .createQueryBuilder("variant")
                 .where("variant.id = :id", { id: reqId })
@@ -379,6 +393,33 @@ variantRouter.delete("/:id", async function (req: Request, res: Response, next: 
         next(err);
     }
 });
+
+/**
+ * Get recipe by id.
+ * 
+ * @param recipeId 
+ * @returns Recipe on success else null 
+ */
+async function getRecipe (recipeId: any): Promise<Recipe | null>
+{
+    recipeId = Number(recipeId);
+
+    if (!recipeId)
+        return null;
+
+    const recipe = await AppDataSource
+        .getRepository(Recipe)
+        .findOne({
+            where: {
+                id: recipeId
+            }
+        });
+
+    if (!recipe)
+        return null;
+
+    return recipe;
+}
 
 /**
  * Helper function to prepare ingredient entities.
