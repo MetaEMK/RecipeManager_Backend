@@ -105,6 +105,7 @@ conversionRouter.post("/", async function (req: Request, res: Response, next: Ne
         if(reqFromSizeId === reqToSizeId)
             throw new SQLiteForeignKeyException("conversion", "size", "FromSize and ToSize can't be the same size.");
 
+        // Both sizes have to belong to the same conversion type        
         const fromSize = await AppDataSource
             .getRepository(Size)
             .createQueryBuilder("size")
