@@ -85,7 +85,7 @@ export class IngredientValidator extends Validator
      */
     public isValidSectionId(sectionIdToValidate?: any): boolean
     {
-        if(!sectionIdToValidate)
+        if(sectionIdToValidate === undefined || sectionIdToValidate === null)
         {
             let err = new ValidationError(GeneralValidationErrorCodes.SECTION_ID_MISSING);
             this.logError("IngredientValidator", err.toString(), sectionIdToValidate);
