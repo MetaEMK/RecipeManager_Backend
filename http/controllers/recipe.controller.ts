@@ -217,8 +217,9 @@ recipeRouter.post("/", upload.single("image"), async function (req: Request, res
         recipe.slug = generateSlug(reqName);
     }
 
-    if(validator.isValidRecipeDescription(reqDesc))
-        recipe.description = reqDesc;
+    if (reqDesc || reqDesc === null)
+        if (validator.isValidRecipeDescription(reqDesc))
+            recipe.description = reqDesc;
 
     if(reqFilePath) {
         recipe.imagePath = normalizeURI(reqFilePath);
@@ -226,12 +227,12 @@ recipeRouter.post("/", upload.single("image"), async function (req: Request, res
 
     // ORM query
     try {
-        if(validator.getErrors().length === 0) {
+        if (validator.getErrors().length === 0) {
             await AppDataSource
                 .getRepository(Recipe)
                 .save(recipe);
 
-            if(recipe.imagePath)
+            if (recipe.imagePath)
                 recipe.imagePath = generateRecipeImageURI(recipe.id, recipe.imagePath, req);
 
             postResponse(recipe, req, res);

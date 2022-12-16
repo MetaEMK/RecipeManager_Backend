@@ -172,7 +172,7 @@ variantRouter.post("/", async function (req: Request, res: Response, next: NextF
             throw new SQLiteForeignKeyException("variant", "conversionType");
         }
 
-        if(!reqSizeId) {
+        if (!reqSizeId) {
             throw new SQLiteForeignKeyException("variant", "size");
         }
         const size = await AppDataSource
@@ -185,16 +185,17 @@ variantRouter.post("/", async function (req: Request, res: Response, next: NextF
                     }
                 }
             });
-        if(!size) {
+        if (!size) {
             throw new SQLiteForeignKeyException("variant", "size");
         }
 
         // Validatation
-        if(validator.isValidVariantName(reqName))
+        if (validator.isValidVariantName(reqName))
             variant.name = reqName;
 
-        if(validator.isValidVariantDescription(reqDesc))
-            variant.description = reqDesc;
+        if (reqDesc || reqDesc === null)
+            if (validator.isValidVariantDescription(reqDesc))
+                variant.description = reqDesc;
 
         validator.isValidIngredientsArray(reqIngredients);
 
