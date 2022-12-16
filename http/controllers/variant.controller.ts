@@ -93,7 +93,7 @@ variantRouter.get("/:id", async function (req: Request, res: Response, next: Nex
             variant = await AppDataSource
                 .getRepository(Variant)
                 .createQueryBuilder("variant")
-                .innerJoinAndSelect("variant.ingredients", "ingredient")
+                .leftJoinAndSelect("variant.ingredients", "ingredient")
                 .innerJoinAndSelect("variant.recipe", "recipe")
                 .innerJoinAndSelect("variant.size", "size")
                 .innerJoinAndSelect("size.conversionType", "conversionType")
@@ -245,7 +245,7 @@ variantRouter.patch("/:id", async function (req: Request, res: Response, next: N
     if(validator.isValidIngredientsArray(reqIngredientsAdd))
         validatedIngredientsAdd = reqIngredientsAdd;
 
-    if(validator.isValidIdArray(reqIngredientsRmv))
+    if(validator.isValidIdArray(reqIngredientsRmv) && reqIngredientsRmv.length > 0)
         validatedIngredientsRmv = reqIngredientsRmv;
 
     // ORM query
@@ -255,14 +255,29 @@ variantRouter.patch("/:id", async function (req: Request, res: Response, next: N
                 variant = await AppDataSource
                     .getRepository(Variant)
                     .createQueryBuilder("variant")
-                    .innerJoinAndSelect("variant.ingredients", "ingredients")
-                    .innerJoinAndSelect("variant.size", "size")
                     .where("variant.recipe_id = :recipeId", { recipeId: reqRecipeId })
                     .andWhere("variant.id = :id", { id: reqId })
                     .getOne();
                 
                 if (variant) {
                     await AppDataSource.transaction(async (transactionalEntityManager) => {
+                        // Delete ingredients first so that ingredients can be created again with same composite unique key
+                        if (validatedIngredientsRmv) {
+                            await transactionalEntityManager
+                                .getRepository(Ingredient)
+                                .delete(validatedIngredientsRmv);
+                        }
+
+                        // Refresh entity
+                        variant = await AppDataSource
+                            .getRepository(Variant)
+                            .createQueryBuilder("variant")
+                            .leftJoinAndSelect("variant.ingredients", "ingredients")
+                            .innerJoinAndSelect("variant.size", "size")
+                            .where("variant.recipe_id = :recipeId", { recipeId: reqRecipeId })
+                            .andWhere("variant.id = :id", { id: reqId })
+                            .getOne();
+
                         // Update attributes
                         if (validatedName)
                             variant!.name = validatedName;
@@ -290,22 +305,6 @@ variantRouter.patch("/:id", async function (req: Request, res: Response, next: N
                         }
 
                         await transactionalEntityManager.save(variant);
-
-                        if (validatedIngredientsRmv) {
-                            await transactionalEntityManager
-                                .getRepository(Ingredient)
-                                .delete(validatedIngredientsRmv);
-                        }
-
-                        // Refresh entity
-                        variant = await AppDataSource
-                            .getRepository(Variant)
-                            .createQueryBuilder("variant")
-                            .innerJoinAndSelect("variant.ingredients", "ingredients")
-                            .innerJoinAndSelect("variant.size", "size")
-                            .where("variant.recipe_id = :recipeId", { recipeId: reqRecipeId })
-                            .andWhere("variant.id = :id", { id: reqId })
-                            .getOne();
 
                         logger.info("Variant " + variant!.id + " updated.", LOG_ENDPOINT.DATABASE);
                     });
