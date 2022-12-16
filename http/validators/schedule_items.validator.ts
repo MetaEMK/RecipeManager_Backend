@@ -180,7 +180,7 @@ export class ScheduleItemsValidator extends Validator
         }
 
         let val = new ValidatorQuanitiyUtilities();
-        if(!val.isQuantityValid(quantityToValidate))
+        if(!val.isQuantityValid("ScheduleItemsValidator", quantityToValidate))
         {
             this.errors = this.errors.concat(val.getErrors());
             return false;
