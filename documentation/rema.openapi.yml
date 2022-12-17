@@ -18,10 +18,6 @@ tags:
   - name: Branches
     description: |
       ToDo
-
-      Branch entity
-
-      Branches have unique names
   - name: Schedule (Branch)
     description: |
       ToDo
