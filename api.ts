@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
 import { AppDataSource } from "./config/datasource.js";
+import { seedHandler } from "./data/seeder/main.seeder.js";
 import { setJsonHeader } from "./http/middleware/headers.middleware.js";
 import { HttpNotFoundException } from "./exceptions/HttpException.js";
 import { branchRouter } from "./http/controllers/branch.controller.js";
@@ -18,6 +19,8 @@ AppDataSource
     .initialize()
     .then(() => {
         console.log("Data Source has been initialized.");
+
+        seedHandler();
     })
     .catch((err) => {
         console.error("Error during Data Source initialization:", err);
