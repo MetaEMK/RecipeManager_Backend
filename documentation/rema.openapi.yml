@@ -1,35 +1,98 @@
-# TODOS
-# - FILL SCHEDULE ITEMS IN BRANCH GET SPECIFIC
-
 openapi: '3.0.2'
 info:
   title: ReMa API
   version: '1.0'
-  description: API for ReMa a simple recipe manager.
+  description: |
+    ## **A simple recipe manager for small businesses.**
+    *Note: All API calls return application/json*  
+    
+    ### Features
+    + Managing recipes and their corresponding variants
+
+    + Categorizing recipes
+
+    + Managing branches with corresponding work schedules
+
+    + Conversions of recipes to other possible sizes
+tags:
+  - name: Branches
+    description: |
+      ToDo
+
+      Branch entity
+
+      Branches have unique names
+  - name: Schedule (Branch)
+    description: |
+      ToDo
+  - name: Categories
+    description: |
+      ToDo
+  - name: Conversion Types
+    description: |
+      ToDo
+  - name: Sizes (Conversion Type)
+    description: |
+      ToDo
+  - name: Conversions (Conversion Type)
+    description: |
+      ToDo
+  - name: Recipes
+    description: |
+      ToDo
+  - name: Recipe Image
+    description: |
+      ToDo
+  - name: Variants (Recipe)
+    description: |
+      ToDo
 servers:
   - url: http://localhost:3000/api/v1
 paths:
-
-  #########
-  # Branch
-  #########
+  # BRANCHES
   /branches:
     get:
-      description: Get all branches
+      description: Get all branches.
       tags:
-        - Branch
+        - Branches
       parameters:
-        - name: name
-          in: query
-          description: Search branches for a specific name
+        - in: query
+          name: name
           schema:
             type: string
-            minLength: 0
-            maxLength: 100
+          description: Search branches with a simliar name
+        - in: query
+          name: slug
+          schema:
+            type: string
+          description: Search branch with specified slug
+        - in: query
+          name: recipe
+          schema:
+            type: array
+            items:
+              type: number
+          explode: true
+          description: Search branches with specified recipe ids
+        - in: query
+          name: recipeExclude
+          schema:
+            type: array
+            items:
+              type: number
+          explode: true
+          description: Search branches without the specified recipe ids (Takes precedence over including branches)
+        - in: query
+          name: recipeNone
+          schema:
+            type: boolean
+            default: false
+          description: Search for branches without recipe ids
+        - $ref: "#/components/parameters/limitParam"
+        - $ref: "#/components/parameters/offsetParam"
       responses:
-        '200':
-          description: OK
-          content: 
+        "200":
+          content:
             application/json:
               schema:
                 type: object
@@ -37,48 +100,14 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Branch'
-        '500':
-          description: Internal Server Error
-          content: 
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InternalServerError'
-  /branches/{id}:
-    get:
-      description: Get a specific branch
-      tags:
-        - Branch
-      parameters:
-        - name: id
-          in: path
-          required: true
-          description: Branch ID
-          schema:
-            type: integer
-      responses:
-        '200':
+                      $ref: "#/components/schemas/Branch"
           description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    $ref: '#/components/schemas/BranchFull'
-        '404':
-          description: Not Found Error
-        '500':
-          description: Internal Server Error
-          content: 
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InternalServerError'
+        "500":
+          $ref: "#/components/responses/InternalServerError"
     post:
-      description: Create a branch
+      description: Create a branch.
       tags:
-        - Branch
+        - Branches
       requestBody:
         content:
           application/json:
@@ -87,105 +116,1461 @@ paths:
               properties:
                 name:
                   type: string
-              required:
-                - type
+        required: true
       responses:
         "201":
-          description: CREATED
-      
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Branch"
+          description: Created
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "409":
+          $ref: "#/components/responses/SQLiteConstraintError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /branches/{branchId}:
+    get:
+      description: Get a specific branch.
+      tags:
+        - Branches
+      parameters:
+        - $ref: "#/components/parameters/branchId"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/BranchDetails"
+          description: OK
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    patch:
+      description: (Partially) Updated a branch.
+      tags:
+        - Branches
+      parameters:
+        - $ref: "#/components/parameters/branchId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                recipe_ids:
+                  type: object
+                  properties:
+                    add:
+                      type: array
+                      items:
+                        type: number
+                    rmv:
+                      type: array
+                      items:
+                        type: number
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Branch"
+          description: OK
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "409":
+          $ref: "#/components/responses/SQLiteConstraintError"  
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    delete:
+      description: Delete a branch
+      tags:
+        - Branches
+      parameters:
+        - $ref: "#/components/parameters/branchId"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /branches/slug/{branchSlug}:
+    get:
+      description: Get a specific branch by slug.
+      tags:
+        - Branches
+      parameters:
+        - $ref: "#/components/parameters/branchSlug"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/BranchDetails"
+          description: OK
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  
+  # SCHEDULE (BRANCH)
+  /branches/{branchId}/schedule:
+    get:
+      description: Get a branch schedule.
+      tags:
+        - Schedule (Branch)
+      parameters:
+        - $ref: "#/components/parameters/branchId"
+        - in: query
+          name: day
+          schema:
+            type: array
+            items:
+              type: number
+          explode: true
+          description: Search schedule items with specified days (1-7)
+        - in: query
+          name: variant
+          schema:
+            type: number
+          description: Search schedule items of a specified variant id
+        - in: query
+          name: size
+          schema:
+            type: number
+          description: Search schedule items of a specified size id
+        - $ref: "#/components/parameters/limitParam"
+        - $ref: "#/components/parameters/offsetParam"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ScheduledItem"
+          description: OK
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      description: Create a scheduled item for the specific branch.
+      tags:
+        - Schedule (Branch)
+      parameters:
+        - $ref: "#/components/parameters/branchId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                day:
+                  type: number
+                variant: 
+                  type: number
+                size:
+                  type: number
+                quantity:
+                  type: number
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/ScheduledItemDetails"
+          description: OK
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "409":
+          $ref: "#/components/responses/SQLiteConstraintError"  
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /branches/{branchId}/schedule/{itemId}:
+    delete:
+      description: Delete a branch schedule item.
+      tags:
+        - Schedule (Branch)
+      parameters:
+        - $ref: "#/components/parameters/branchId"
+        - $ref: "#/components/parameters/scheduledItemId"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 
-#############
-# Components
-#############
+  # CATEGORIES
+  /categories:
+    get:
+      description: Get all categories.
+      tags:
+        - Categories
+      parameters:
+        - in: query
+          name: name
+          schema:
+            type: string
+          description: Search categories with a simliar name
+        - in: query
+          name: slug
+          schema:
+            type: string
+          description: Search categories with specified slug
+        - in: query
+          name: recipe
+          schema:
+            type: array
+            items:
+              type: number
+          explode: true
+          description: Search categories with specified recipe ids
+        - in: query
+          name: recipeExclude
+          schema:
+            type: array
+            items:
+              type: number
+          explode: true
+          description: Search categories without the specified recipe ids (Takes precedence over including categories)
+        - in: query
+          name: recipeNone
+          schema:
+            type: boolean
+            default: false
+          description: Search for categories without recipe ids
+        - $ref: "#/components/parameters/limitParam"
+        - $ref: "#/components/parameters/offsetParam"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Category"
+          description: OK
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      description: Create a category.
+      tags:
+        - Categories
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Category"
+          description: Created
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "409":
+          $ref: "#/components/responses/SQLiteConstraintError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /categories/{categoryId}:
+    get:
+      description: Get a specific category.
+      tags:
+        - Categories
+      parameters:
+        - $ref: "#/components/parameters/categoryId"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/CategoryDetails"
+          description: OK
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    patch:
+      description: (Partially) Updated a category.
+      tags:
+        - Categories
+      parameters:
+        - $ref: "#/components/parameters/categoryId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                recipe_ids:
+                  type: object
+                  properties:
+                    add:
+                      type: array
+                      items:
+                        type: number
+                    rmv:
+                      type: array
+                      items:
+                        type: number
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Category"
+          description: OK
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "409":
+          $ref: "#/components/responses/SQLiteConstraintError"  
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    delete:
+      description: Delete a category.
+      tags:
+        - Categories
+      parameters:
+        - $ref: "#/components/parameters/categoryId"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /categories/slug/{categorySlug}:
+    get:
+      description: Get a specific category by slug.
+      tags:
+        - Categories
+      parameters:
+        - $ref: "#/components/parameters/categorySlug"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/CategoryDetails"
+          description: OK
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  # CONVERSION TYPES
+  /conversion_types:
+    get:
+      description: Get all conversion types.
+      tags:
+        - Conversion Types
+      parameters:
+        - in: query
+          name: name
+          schema:
+            type: string
+          description: Search conversion types with a simliar name
+        - $ref: "#/components/parameters/limitParam"
+        - $ref: "#/components/parameters/offsetParam"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ConversionType"
+          description: OK
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      description: Create a conversion type.
+      tags:
+        - Conversion Types
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/ConversionType"
+          description: Created
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "409":
+          $ref: "#/components/responses/SQLiteConstraintError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /conversion_types/{conversionTypeId}:
+    delete:
+      description: Delete a conversion type.
+      tags:
+        - Conversion Types
+      parameters:
+        - $ref: "#/components/parameters/conversionTypeId"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  # SIZE (CONVERSION TYPES)
+  /conversion_types/{conversionTypeId}/sizes:
+    get:
+      description: Get all sizes of a conversion type.
+      tags:
+        - Sizes (Conversion Type)
+      parameters:
+        - $ref: "#/components/parameters/conversionTypeId"
+        - in: query
+          name: name
+          schema:
+            type: string
+          description: Search sizes with a simliar name
+        - $ref: "#/components/parameters/limitParam"
+        - $ref: "#/components/parameters/offsetParam"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Size"
+          description: OK
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      description: Create a size for the specific conversion type.
+      tags:
+        - Sizes (Conversion Type)
+      parameters:
+        - $ref: "#/components/parameters/conversionTypeId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/SizeDetails"
+          description: OK
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "409":
+          $ref: "#/components/responses/SQLiteConstraintError"  
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /conversion_types/{conversionTypeId}/sizes/{sizeId}:
+    delete:
+      description: Delete a size of a conversion type.
+      tags:
+        - Sizes (Conversion Type)
+      parameters:
+        - $ref: "#/components/parameters/conversionTypeId"
+        - $ref: "#/components/parameters/sizeId"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  # CONVERSIONS
+  /conversion_types/{conversionTypeId}/conversions:
+    get:
+      description: Get all conversions of a conversion type.
+      tags:
+        - Conversions (Conversion Type)
+      parameters:
+        - $ref: "#/components/parameters/conversionTypeId"
+        - in: query
+          name: fromSize
+          schema:
+            type: number
+          description: Search for conversions for a size id
+        - in: query
+          name: toSize
+          schema:
+            type: number
+          description: Search for conversions which converts to a size id
+        - $ref: "#/components/parameters/limitParam"
+        - $ref: "#/components/parameters/offsetParam"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Conversion"
+          description: OK
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      description: Create a conversion for the specific conversion type.
+      tags:
+        - Conversions (Conversion Type)
+      parameters:
+        - $ref: "#/components/parameters/conversionTypeId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fromSize:
+                  type: number
+                toSoze:
+                  type: number
+                multiplicator:
+                  type: number
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/ConversionDetails"
+          description: OK
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "409":
+          $ref: "#/components/responses/SQLiteConstraintError"  
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /conversion_types/{conversionTypeId}/conversions/{conversionId}:
+    delete:
+      description: Delete a conversion of a conversion type.
+      tags:
+        - Conversions (Conversion Type)
+      parameters:
+        - $ref: "#/components/parameters/conversionTypeId"
+        - $ref: "#/components/parameters/conversionId"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  # RECIPE
+  /recipes:
+    get:
+      description: Get all recipes.
+      tags:
+        - Recipes
+      parameters:
+        - in: query
+          name: name
+          schema:
+            type: string
+          description: Search recipes with a simliar name
+        - in: query
+          name: slug
+          schema:
+            type: string
+          description: Search recipe with specified slug
+        - in: query
+          name: branch
+          schema:
+            type: array
+            items:
+              type: number
+          explode: true
+          description: Search recipes with specified branch ids
+        - in: query
+          name: category
+          schema:
+            type: array
+            items:
+              type: number
+          explode: true
+          description: Search recipes with specified category ids
+        - in: query
+          name: branchExclude
+          schema:
+            type: array
+            items:
+              type: number
+          explode: true
+          description: Search recipes without the specified branch ids (Takes precedence over including branches)
+        - in: query
+          name: categoryExclude
+          schema:
+            type: array
+            items:
+              type: number
+          explode: true
+          description: Search recipes without the specified category ids (Takes precedence over including categories)
+        - in: query
+          name: branchNone
+          schema:
+            type: boolean
+            default: false
+          description: Search for recipes without branch ids
+        - in: query
+          name: categoryNone
+          schema:
+            type: boolean
+            default: false
+          description: Search for recipes without category ids
+        - $ref: "#/components/parameters/limitParam"
+        - $ref: "#/components/parameters/offsetParam"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Recipe"
+          description: OK
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      description: Create a recipe.
+      tags:
+        - Recipes
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                image:
+                  type: string
+                  format: binary
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Recipe"
+          description: Created
+        "400":
+          $ref: "#/components/responses/MultiPartFormError"
+        "409":
+          $ref: "#/components/responses/SQLiteConstraintError"
+        "415":
+          $ref: "#/components/responses/NotSupportedMediaTypeError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /recipes/{recipeId}:
+    get:
+      description: Get a specific recipe.
+      tags:
+        - Recipes
+      parameters:
+        - $ref: "#/components/parameters/recipeId"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Recipe"
+          description: OK
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    patch:
+      description: (Partially) Updated a recipe.
+      tags:
+        - Recipes
+      parameters:
+        - $ref: "#/components/parameters/recipeId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                branch_ids:
+                  type: object
+                  properties:
+                    add:
+                      type: array
+                      items:
+                        type: number
+                    rmv:
+                      type: array
+                      items:
+                        type: number
+                category_ids:
+                  type: object
+                  properties:
+                    add:
+                      type: array
+                      items:
+                        type: number
+                    rmv:
+                      type: array
+                      items:
+                        type: number
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Recipe"
+          description: OK
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "409":
+          $ref: "#/components/responses/SQLiteConstraintError"  
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    delete:
+      description: Delete a recipe.
+      tags:
+        - Recipes
+      parameters:
+        - $ref: "#/components/parameters/recipeId"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /recipes/slug/{recipeSlug}:
+    get:
+      description: Get a specific recipe by slug.
+      tags:
+        - Recipes
+      parameters:
+        - $ref: "#/components/parameters/recipeSlug"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Recipe"
+          description: OK
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  # RECIPE IMAGE
+  /recipes/{recipeId}/image/{filename}:
+    get:
+      description: Get the recipe image.
+      tags:
+        - Recipe Image
+      parameters:
+        - $ref: "#/components/parameters/recipeId"
+        - in: path
+          name: filename
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+          description: OK
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /recipes/{recipeId}/image:
+    put:
+      description: Upload a recipe image.
+      tags:
+        - Recipe Image
+      parameters:
+        - $ref: "#/components/parameters/recipeId"
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Recipe"
+          description: OK
+        "400":
+          $ref: "#/components/responses/MultiPartFormError"
+        "415":
+          $ref: "#/components/responses/NotSupportedMediaTypeError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    delete:
+      description: Delete the recipe image.
+      tags:
+        - Recipe Image
+      parameters:
+        - $ref: "#/components/parameters/recipeId"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  # VARIANTS (RECIPE)
+  /recipes/{recipeId}/variants:
+    get:
+      description: Get all recipe variants.
+      tags:
+        - Variants (Recipe)
+      parameters:
+        - $ref: "#/components/parameters/recipeId"
+        - in: query
+          name: name
+          schema:
+            type: string
+          description: Search sizes with a simliar name
+        - in: query
+          name: conversionType
+          schema:
+            type: array
+            items:
+              type: number
+          explode: true
+          description: Search variants with specified conversion type ids
+        - in: query
+          name: size
+          schema:
+            type: array
+            items:
+              type: number
+          explode: true
+          description: Search variants with specified size ids
+        - $ref: "#/components/parameters/limitParam"
+        - $ref: "#/components/parameters/offsetParam"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/VariantConversionDetails"
+          description: OK
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      description: Create a variant for the specific recipe.
+      tags:
+        - Variants (Recipe)
+      parameters:
+        - $ref: "#/components/parameters/recipeId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                conversionType:
+                  type: number
+                size:
+                  type: number
+                ingredients:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Ingredient"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/VariantFullDetails"
+          description: OK
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "409":
+          $ref: "#/components/responses/SQLiteConstraintError"  
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /recipes/{recipeId}/variants/{variantId}:
+    get:
+      description: Get a recipe variant.
+      tags:
+        - Variants (Recipe)
+      parameters:
+        - $ref: "#/components/parameters/recipeId"
+        - $ref: "#/components/parameters/variantId"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/VariantDetails"
+          description: OK
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    patch:
+      description: (Partially) Update a recipe variant.
+      tags:
+        - Variants (Recipe)
+      parameters:
+        - $ref: "#/components/parameters/recipeId"
+        - $ref: "#/components/parameters/variantId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                size:
+                  type: number
+                ingredients:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Ingredient"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/VariantDetails"
+          description: OK
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "409":
+          $ref: "#/components/responses/SQLiteConstraintError"  
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    delete:
+      description: Delete a recipe variant.
+      tags:
+        - Variants (Recipe)
+      parameters:
+        - $ref: "#/components/parameters/recipeId"
+        - $ref: "#/components/parameters/variantId"
+      responses:
+        "204":
+          $ref: "#/components/responses/NoContent"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+# COMPONENTS
 components:
+  # RESPONSES
+  responses:
+    # SUCCESS
+    NoContent:
+      description: No Content - Resource deleted
+    # ERRORS
+    InternalServerError:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+      description: Internal Server Error
+    MultiPartFormError:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+      description: Bad Request    
+    NotFoundError:
+      description: Not Found
+    NotSupportedMediaTypeError:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+      description: Uploaded media type is not supported
+    SQLiteConstraintError:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+      description: SQLite constraint failed
+    ValidationError:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+      description: Validation failed
+
+  # SCHEMAS
   schemas:
-    ###########
-    # Entities
-    ###########
-    
-    #Branch
-    BranchBase:
+    # BRANCHES
+    Branch:
       type: object
       properties:
         id:
-          type: integer
+          type: number
         name:
           type: string
         slug:
           type: string
-      example:
-        id: 1
-        name: Abteilung A
-        slug: abteilung_a
-    BranchAdd:
-      type: object
-      properties:
-        recipeCategories:
-          type: array
-          items:
-            type: object
-        recipes:
-          type: array
-          items:
-            type: object
-        scheduledItems:
-          type: array
-          items:
-            type: object
-      example:
-        recipeCategories: [
-          {
-            id: 1,
-            name: Kategorie A,
-            createdAt: 2022-01-01T00:00:00.000Z,
-            updatedAt: 2022-01-01T00:00:00.000Z
-          }
-        ]
-        recipes: [
-          {
-            id: 1,
-            name: Rezept A,
-            description: null,
-            imagePath: null,
-            categories: [
-              {
-                id: 1,
-                name: Kategorie A,
-                createdAt: 2022-01-01T00:00:00.000Z,
-                updatedAt: 2022-01-01T00:00:00.000Z
-              }
-            ],
-            createdAt: 2022-01-01T00:00:00.000Z,
-            updatedAt: 2022-01-01T00:00:00.000Z
-          }
-        ]
-        scheduledItems: []  # TODO FILL SCHEDULE ITEMS
-    Branch:
-      allOf:
-        - $ref: '#/components/schemas/BranchBase'
-        - $ref: '#/components/schemas/Timestamps'
-    BranchFull:
-      allOf:
-        - $ref: '#/components/schemas/BranchBase'
-        - $ref: '#/components/schemas/BranchAdd'
-        - $ref: '#/components/schemas/Timestamps'
-        
-    #Timestamps
-    Timestamps:
-      type: object
-      properties:
         createdAt:
           type: string
         updatedAt:
           type: string
-      example:
-        createdAt: 2022-01-01T00:00:00.000Z
-        updatedAt: 2022-01-01T00:00:00.000Z
+    BranchDetails:
+      type: object
+      properties:
+        id:
+          type: number
+        name: 
+          type: string
+        slug:
+          type: string
+        recipeCategories:
+          type: array
+          items:
+            $ref: "#/components/schemas/Category"
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
 
-    ################
-    # Error Objects
-    ################
-    InternalServerError:
+    # CATEGORIES
+    Category:
+      type: object
+      properties:
+        id:
+          type: number
+        name:
+          type: string
+        slug:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+    CategoryDetails:
+      type: object
+      properties:
+        id:
+          type: number
+        name: 
+          type: string
+        slug:
+          type: string
+        recipeBranches:
+          type: array
+          items:
+            $ref: "#/components/schemas/Branch"
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    # CONVERSION
+    Conversion:
+      type: object
+      properties:
+        id:
+          type: number
+        fromSize:
+            $ref: "#/components/schemas/Size"
+        toSize:
+            $ref: "#/components/schemas/Size"
+        multiplicator:
+          type: number
+        createdAt:
+          type: string
+        updatedAt:
+          type: string    
+    ConversionDetails:
+      type: object
+      properties:
+        id:
+          type: number
+        conversionType:
+          $ref: "#/components/schemas/ConversionType"
+        fromSize:
+            $ref: "#/components/schemas/Size"
+        toSize:
+            $ref: "#/components/schemas/Size"
+        multiplicator:
+          type: number
+        createdAt:
+          type: string
+        updatedAt:
+          type: string 
+
+    # CONVERSION TYPE
+    ConversionType:
+      type: object
+      properties:
+        id:
+          type: number
+        name:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+    
+    # INGREDIENT
+    Ingredient:
+      type: object
+      properties:
+        name:
+          type: string
+        quantity:
+          type: number
+        unit:
+          type: string
+        section:
+          type: number
+        order:
+          type: number
+
+    # RECIPE
+    Recipe:
+      type: object
+      properties:
+        id:
+          type: number
+        name:
+          type: string
+        description:
+          type: string
+        imagePath:
+          type: string
+        slug:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+    
+    # SCHEDULED ITEM
+    ScheduledItem:
+      type: object
+      properties:
+        id:
+          type: number
+        day:
+          type: number
+        variant:
+          $ref: "#/components/schemas/Variant"
+        size:
+          $ref: "#/components/schemas/Size"
+        quantity:
+          type: number
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+    ScheduledItemDetails:
+      type: object
+      properties:
+        id:
+          type: number
+        day:
+          type: number
+        Branch:
+          $ref: "#/components/schemas/Branch"
+        variant:
+          $ref: "#/components/schemas/VariantConversion"
+        size:
+          $ref: "#/components/schemas/Size"
+        quantity:
+          type: number
+        createdAt:
+          type: string
+        updatedAt:
+          type: string          
+
+    # SIZE
+    Size:
+      type: object
+      properties:
+        id:
+          type: number
+        name:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+    SizeDetails:
+      type: object
+      properties:
+        id:
+          type: number
+        name:
+          type: string
+        conversionType:
+          $ref: "#/components/schemas/ConversionType"
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        
+    # VARIANTS
+    Variant:
+      type: object
+      properties:
+        id:
+          type: number
+        name:
+          type: string
+        description:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+    VariantConversion:
+      type: object
+      properties:
+        id:
+          type: number
+        name:
+          type: string
+        description:
+          type: string
+        conversionType:
+          $ref: "#/components/schemas/ConversionType"
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+    VariantConversionDetails:
+      type: object
+      properties:
+        id:
+          type: number
+        name:
+          type: string
+        description:
+          type: string
+        conversionType:
+          $ref: "#/components/schemas/ConversionType"
+        size:
+          $ref: "#/components/schemas/Size"
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+    VariantFullDetails:
+      type: object
+      properties:
+        id:
+          type: number
+        name:
+          type: string
+        description:
+          type: string
+        recipe:
+          $ref: "#/components/schemas/Recipe"
+        conversionType:
+          $ref: "#/components/schemas/ConversionType"
+        size:
+          $ref: "#/components/schemas/Size"
+        ingredients:
+          type: array
+          items:
+            $ref: "#/components/schemas/Ingredient"
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+    VariantDetails:
+      type: object
+      properties:
+        id:
+          type: number
+        name:
+          type: string
+        description:
+          type: string
+        conversionType:
+          $ref: "#/components/schemas/ConversionType"
+        size:
+          $ref: "#/components/schemas/Size"
+        ingredients:
+          type: array
+          items:
+            $ref: "#/components/schemas/Ingredient"
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    # ERRORS
+    Error:
       type: object
       properties:
         error:
@@ -197,8 +1582,95 @@ components:
               type: string
             message:
               type: string
-      example:
-        error:
-          code: UNCAUGHT_EXCEPTION
-          type: UNCAUGHT_EXCEPTION_ERROR
-          message: An uncaught exception occurred.
+  
+  # PARAMETERS
+  parameters:
+    branchId:
+      in: path
+      name: branchId
+      schema:
+        type: number
+      required: true
+      description: The branch ID
+    branchSlug:
+      in: path
+      name: branchSlug
+      schema:
+        type: string
+      required: true
+      description: The branch slug
+    categoryId:
+      in: path
+      name: categoryId
+      schema:
+        type: number
+      required: true
+      description: The category ID
+    categorySlug:
+      in: path
+      name: categorySlug
+      schema:
+        type: string
+      required: true
+      description: The category slug
+    conversionId:
+      in: path
+      name: conversionId
+      schema:
+        type: number
+      required: true
+      description: The conversion ID
+    conversionTypeId:
+      in: path
+      name: conversionTypeId
+      schema:
+        type: number
+      required: true
+      description: The conversion type ID
+    recipeId:
+      in: path
+      name: recipeId
+      schema:
+        type: number
+      required: true
+      description: The recipe ID
+    recipeSlug:
+      in: path
+      name: recipeSlug
+      schema:
+        type: string
+      required: true
+      description: The recipe slug
+    scheduledItemId:
+      in: path
+      name: branchId
+      schema:
+        type: number
+      required: true
+      description: The scheduled item ID
+    sizeId:
+      in: path
+      name: sizeId
+      schema:
+        type: number
+      required: true
+      description: The size ID
+    variantId:
+      in: path
+      name: variantId
+      schema:
+        type: number
+      required: true
+      description: The variant ID
+    limitParam:
+      in: query
+      name: limit
+      schema:
+        type: number
+      description: Limit returned rows
+    offsetParam:
+      in: query
+      name: offset
+      schema:
+        type: number
+      description: Set starting index of the returned rows
