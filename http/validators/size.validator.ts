@@ -31,7 +31,7 @@ export class SizeValidator extends Validator
     {
         let val = new ValidatorNameUtilities();
         
-        if(!val.isValidAlphanummeric("SizeValidator", nameToValidate, {min: 3, max: 100}))
+        if(!val.isValidAlphanummeric("SizeValidator", nameToValidate, {min: 1, max: 100}))
         {
             this.errors = this.errors.concat(val.getErrors());
             return false;

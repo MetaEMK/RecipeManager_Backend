@@ -15,7 +15,7 @@ export class IngredientValidator extends Validator
      public isValidIngredientName(nameToValidate?: any): boolean
      {
          let val = new ValidatorNameUtilities();
-         if(!val.isValidAlphanummeric("IngredientValidator", nameToValidate, {min: 3, max: 100}))
+         if(!val.isValidAlphanummeric("IngredientValidator", nameToValidate, {min: 1, max: 100}))
          {
              this.errors = this.errors.concat(val.getErrors());
              return false;
