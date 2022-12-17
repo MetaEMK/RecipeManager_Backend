@@ -21,11 +21,16 @@ const logger = createLogger();
  *
  * Filter params
  * - name: Search for similar name
+ * - limit: Limit returned rows
+ * - offset: Set starting index of returned rows
  */
 sizeRouter.get("/", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
     const reqConversionTypeId: number = Number(req.params.conversionTypeId);
     const filteryByName: string = <string>req.query.name;
+
+    const limit: number = Number(req.query.limit);
+    const offset: number = Number(req.query.offset);
 
     // Validator instance
     const validator = new SizeValidator();
@@ -48,6 +53,12 @@ sizeRouter.get("/", async function (req: Request, res: Response, next: NextFunct
         // Validate/Sanitize parameters and build where clause
         if (validator.isValidSizeName(filteryByName))
             query.andWhere("size.name LIKE :sizeName", { sizeName: `%${ decodeURISpaces(filteryByName) }%` });
+
+        // Pagination
+        if (offset)
+            query.skip(offset);
+        if (limit)
+            query.take(limit);
 
         const sizes = await query.getMany();
 

@@ -28,6 +28,8 @@ const logger = createLogger();
  * - name: Search for similar name
  * - conversionType: Search for (multiple) conversion type ids
  * - size: Search for (multiple) size ids
+ * - limit: Limit returned rows
+ * - offset: Set starting index of returned rows
  */
 variantRouter.get("/", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
@@ -36,6 +38,9 @@ variantRouter.get("/", async function (req: Request, res: Response, next: NextFu
 
     let filterByConversionTypeIds: string|string[] = <string>req.query.conversionType;
     let filterBySizeIds: string|string[] = <string>req.query.size;
+
+    const limit: number = Number(req.query.limit);
+    const offset: number = Number(req.query.offset);
 
     // Validator instance
     const validator = new VariantValidator();
@@ -76,6 +81,12 @@ variantRouter.get("/", async function (req: Request, res: Response, next: NextFu
                 query.andWhere("variant.size_id IN (:...sizeIds)", { sizeIds: filterBySizeIds });
             }
         }
+
+        // Pagination
+        if (offset)
+            query.skip(offset);
+        if (limit)
+            query.take(limit);
 
         const variants = await query.getMany();
 

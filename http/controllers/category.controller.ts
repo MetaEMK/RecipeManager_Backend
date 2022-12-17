@@ -24,6 +24,8 @@ const logger = createLogger();
  * - recipe: Search for (multiple) recipe ids
  * - recipeExclude: Exclude (multiple) recipe ids from search - Takes precedence over include
  * - recipeNone: Search for branches with no recipes
+ * - limit: Limit returned rows
+ * - offset: Set starting index of returned rows
  */
 categoryRouter.get("/", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
@@ -33,6 +35,9 @@ categoryRouter.get("/", async function (req: Request, res: Response, next: NextF
     let filterByRecipeIds: string|string[] = <string>req.query.recipe;
     let filterByRecipeExcludeIds: string|string[] = <string>req.query.recipeExclude;
     const filterByRecipeNone: string = <string>req.query.recipeNone;
+
+    const limit: number = Number(req.query.limit);
+    const offset: number = Number(req.query.offset);
 
     // Validator instance
     const validator = new CategoryValidator();
@@ -82,6 +87,12 @@ categoryRouter.get("/", async function (req: Request, res: Response, next: NextF
                 }
             }
         }
+
+        // Pagination
+        if (offset)
+            query.skip(offset);
+        if (limit)
+            query.take(limit);        
 
         const categories = await query.getMany();
 

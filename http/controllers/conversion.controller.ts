@@ -24,12 +24,17 @@ const logger = createLogger();
  * Filter params:
  * - fromSize: Search for a specific from size
  * - toSize: Search for a specific to size
+ * - limit: Limit returned rows
+ * - offset: Set starting index of returned rows
  */
 conversionRouter.get("/", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
     const reqConversionTypeId: number = Number(req.params.conversionTypeId);
     const filterByFromSizeId: number = Number(req.query.fromSize);
     const filterByToSizeId: number = Number(req.query.toSize);
+
+    const limit: number = Number(req.query.limit);
+    const offset: number = Number(req.query.offset);
 
     // Validator instance
     const validator = new ConversionToSizeValidator();
@@ -58,6 +63,12 @@ conversionRouter.get("/", async function (req: Request, res: Response, next: Nex
         if (validator.isValidSizeId(filterByToSizeId))
             query.andWhere("conversion.to_size_id = :toSizeId", { toSizeId: filterByToSizeId });
         
+        // Pagination
+        if (offset)
+            query.skip(offset);
+        if (limit)
+            query.take(limit);
+
         const conversions = await query.getMany();
 
         getResponse(conversions, res);

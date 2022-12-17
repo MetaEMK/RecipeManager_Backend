@@ -18,10 +18,15 @@ const logger = createLogger();
  * 
  * Filter params
  * - name: Search for similar name
+ * - limit: Limit returned rows
+ * - offset: Set starting index of returned rows
  */
 conversionTypeRouter.get("/", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
     const filterByName: string = <string>req.query.name;
+
+    const limit: number = Number(req.query.limit);
+    const offset: number = Number(req.query.offset);    
 
     // Validator instance
     const validator = new ConversionTypeValidator();
@@ -35,6 +40,12 @@ conversionTypeRouter.get("/", async function (req: Request, res: Response, next:
         // Validate/Sanitize parameters and build where clause
         if(validator.isValidName(filterByName))
             query.andWhere("conversionType.name LIKE :conversionTypeName", { conversionTypeName: `%${ decodeURISpaces(filterByName) }%` });
+
+        // Pagination
+        if (offset)
+            query.skip(offset);
+        if (limit)
+            query.take(limit);        
 
         const conversionTypes = await query.getMany();
 

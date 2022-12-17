@@ -27,6 +27,8 @@ const logger = createLogger();
  * - day: Search (multiple) days
  * - variant: Search a variant id
  * - size: Search a size id
+ * - limit: Limit returned rows
+ * - offset: Set starting index of returned rows
  */
 scheduleRouter.get("/", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
@@ -35,6 +37,9 @@ scheduleRouter.get("/", async function (req: Request, res: Response, next: NextF
     let filterByDays: string|string[] = <string>req.query.day;
     const filterByVariantId: number = Number(req.query.variant);
     const filterBySizeId: number = Number(req.query.size);
+
+    const limit: number = Number(req.query.limit);
+    const offset: number = Number(req.query.offset);
 
     // Validator instance
     const validator = new ScheduleItemsValidator();
@@ -70,6 +75,12 @@ scheduleRouter.get("/", async function (req: Request, res: Response, next: NextF
 
         if (filterBySizeId)
             query.andWhere("item.size_id = :sizeId", { sizeId: filterBySizeId });
+
+        // Pagination
+        if (offset)
+            query.skip(offset);
+        if (limit)
+            query.take(limit);
 
         const schedule = await query.getMany();
 
