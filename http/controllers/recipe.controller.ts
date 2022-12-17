@@ -23,11 +23,13 @@ const logger = createLogger();
  * - name: Search for similar name
  * - slug: Search for exact same slug
  * - branch: Search for (multiple) branch ids
- * - category: Search for (multiple) category ids 
+ * - category: Search for (multiple) category ids
  * - branchExclude: Exclude (multiple) branch ids from search - Takes precedence over include
  * - categoryExclude: Exclude (multiple) category ids from search - Takes precedence over include
  * - branchNone: Search for recipes with no branches
- * - categoryNone: Search for recipes with no categories 
+ * - categoryNone: Search for recipes with no categories
+ * - limit: Limit returned rows
+ * - offset: Set starting index of returned rows
  */
 recipeRouter.get("/", async function (req: Request, res: Response, next: NextFunction) {
     // Parameters
@@ -42,6 +44,9 @@ recipeRouter.get("/", async function (req: Request, res: Response, next: NextFun
 
     const filterByBranchNone: string = <string>req.query.branchNone;
     const filterByCategoryNone: string = <string>req.query.categoryNone;
+
+    const limit: number = Number(req.query.limit);
+    const offset: number = Number(req.query.offset);
 
     // Validation instance
     const validator = new RecipeValidator();
@@ -123,6 +128,12 @@ recipeRouter.get("/", async function (req: Request, res: Response, next: NextFun
                     );
             }
         }
+
+        // Pagination
+        if (offset)
+            query.skip(offset);
+        if (limit)
+            query.take(limit);
 
         const recipes = await query.getMany();
 
