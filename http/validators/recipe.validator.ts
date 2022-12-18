@@ -13,7 +13,7 @@ export class RecipeValidator extends Validator
     {
         let val = new ValidatorNameUtilities();
 
-        if(!val.isValidAlpha("RecipeValidator", nameToValidate, {min: 1, max: 255}))
+        if(!val.isValidAlpha("RecipeValidator", nameToValidate, {min: 1, max: 20}))
         {
             this.errors = this.errors.concat(val.getErrors());
             return false;

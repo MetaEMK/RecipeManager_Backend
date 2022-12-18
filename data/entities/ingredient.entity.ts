@@ -6,7 +6,8 @@ import { Variant } from "./variant.entity.js";
 @Unique(["variant_id", "name", "section"])
 export class Ingredient {
     @PrimaryColumn({
-        type: "nvarchar"
+        type: "nvarchar",
+        length: 30
     })
     name!: string
 
@@ -15,7 +16,7 @@ export class Ingredient {
 
     @Column({
         type: "nvarchar",
-        length: 10
+        length: 5
     })
     unit!: string;
 

@@ -11,7 +11,10 @@ export class Variant {
     @PrimaryGeneratedColumn()
     id!: number;
 
-    @Column()
+    @Column({
+        type: "nvarchar",
+        length: 30
+    })
     name!: string;
 
     @Column({

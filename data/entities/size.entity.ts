@@ -12,7 +12,7 @@ export class Size {
 
     @Column({
         type: "nvarchar",
-        length: 100
+        length: 20
     })
     name!: string;
 

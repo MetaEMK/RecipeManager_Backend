@@ -36,7 +36,7 @@ export class VariantValidator extends Validator
     public isValidVariantName(nameToValidate?: any): boolean
     {
         const val = new ValidatorNameUtilities();
-        if(!val.isValidAlpha("VariantValidator", nameToValidate, {min: 1, max: 255}))
+        if(!val.isValidAlpha("VariantValidator", nameToValidate, {min: 1, max: 30}))
         {
             this.errors = this.errors.concat(val.getErrors());
             return false;

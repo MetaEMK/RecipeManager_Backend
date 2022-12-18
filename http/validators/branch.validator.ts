@@ -12,7 +12,7 @@ export class BranchValidator extends Validator
     public isValidBranchName(nameToValidate?: any): boolean
     {
         let val = new ValidatorNameUtilities();
-        if(!val.isValidAlpha("BranchValidator", nameToValidate, {min: 1, max: 100}))
+        if(!val.isValidAlpha("BranchValidator", nameToValidate, {min: 1, max: 20}))
         {
             this.errors = this.errors.concat(val.getErrors());
             return false;

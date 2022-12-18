@@ -15,7 +15,7 @@ export class IngredientValidator extends Validator
      public isValidIngredientName(nameToValidate?: any): boolean
      {
          let val = new ValidatorNameUtilities();
-         if(!val.isValidAlphanummeric("IngredientValidator", nameToValidate, {min: 1, max: 100}))
+         if(!val.isValidAlphanummeric("IngredientValidator", nameToValidate, {min: 1, max: 30}))
          {
              this.errors = this.errors.concat(val.getErrors());
              return false;
@@ -66,9 +66,9 @@ export class IngredientValidator extends Validator
             return false;
         }
 
-        if(unitToValidate.length > 10)
+        if(unitToValidate.length > 5)
         {
-            let err = new ValidationError(GeneralValidationErrorCodes.UNIT_INVALID, "unit cannot be longer than 10 characters");
+            let err = new ValidationError(GeneralValidationErrorCodes.UNIT_INVALID, "unit cannot be longer than 5 characters");
             this.logError("IngredientValidator", err.toString(), unitToValidate);
             this.errors.push(err);
             return false;

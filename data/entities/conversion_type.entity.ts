@@ -11,7 +11,7 @@ export class ConversionType {
 
     @Column({
         type: "nvarchar",
-        length: 30
+        length: 20
     })
     name!: string;
 
