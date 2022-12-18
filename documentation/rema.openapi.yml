@@ -16,32 +16,14 @@ info:
     + Conversions of recipes to other possible sizes
 tags:
   - name: Branches
-    description: |
-      ToDo
   - name: Schedule (Branch)
-    description: |
-      ToDo
   - name: Categories
-    description: |
-      ToDo
   - name: Conversion Types
-    description: |
-      ToDo
   - name: Sizes (Conversion Type)
-    description: |
-      ToDo
   - name: Conversions (Conversion Type)
-    description: |
-      ToDo
   - name: Recipes
-    description: |
-      ToDo
   - name: Recipe Image
-    description: |
-      ToDo
   - name: Variants (Recipe)
-    description: |
-      ToDo
 servers:
   - url: http://localhost:3000/api/v1
 paths:
