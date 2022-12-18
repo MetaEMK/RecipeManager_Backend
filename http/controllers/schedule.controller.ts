@@ -58,6 +58,7 @@ scheduleRouter.get("/", async function (req: Request, res: Response, next: NextF
             .getRepository(ScheduledItem)
             .createQueryBuilder("item")
             .innerJoinAndSelect("item.variant", "variant")
+            .innerJoinAndSelect("variant.recipe", "recipe")
             .innerJoinAndSelect("item.size", "size")
             .where("item.branch_id = :branchId", { branchId: reqBranchId });
 
